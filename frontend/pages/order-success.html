@@ -22,36 +22,246 @@
     <!-- Header -->
     <div id="header-container"></div>
 
-    <main class="relative z-10 py-32 px-4 h-screen flex items-center justify-center">
-        <div class="shop-container text-center">
-            <div class="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
-                <i data-lucide="check" class="w-12 h-12 text-green-500"></i>
+    <main class="relative z-10 py-32 px-4 min-h-screen">
+        <div class="shop-container">
+            <!-- Success Header -->
+            <div class="text-center mb-20 reveal-hidden">
+                <div class="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                    <i data-lucide="check" class="w-12 h-12 text-green-500"></i>
+                </div>
+                <h1 class="text-6xl font-black uppercase text-white tracking-tighter mb-6">Order <span class="text-[#d2670e]">Confirmed</span></h1>
+                <p class="text-gray-400 text-lg tracking-[0.1em]">Your acquisition request has been processed successfully.</p>
             </div>
-            <h1 class="text-6xl font-black uppercase text-white tracking-tighter mb-6">Order <span class="text-[#d2670e]">Confirmed</span></h1>
-            <p class="text-gray-400 text-lg mb-10 tracking-[0.1em]">Your acquisition request has been processed successfully. <br>Order ID: <span id="order-id" class="text-white font-mono">Loading...</span></p>
-            
-            <a href="shopping.html" class="cta-btn magnetic-btn inline-flex">
-                <span>Return to Shop</span>
-            </a>
+
+            <!-- Order Details Section -->
+            <div id="order-loading" class="space-y-6 animate-pulse max-w-4xl mx-auto mb-20">
+                <div class="h-96 bg-white/5 rounded-[2rem]"></div>
+            </div>
+
+            <div id="order-details" class="hidden max-w-4xl mx-auto mb-20">
+                <!-- Order ID & Status -->
+                <div class="bg-white/5 border border-white/5 p-10 rounded-[40px] mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Order ID</p>
+                            <p id="order-id" class="text-white font-mono text-xl font-bold">Loading...</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Order Date</p>
+                            <p id="order-date" class="text-white font-bold text-lg">Loading...</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Status</p>
+                            <p id="order-status" class="text-green-400 font-bold text-lg">Confirmed</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Total Amount</p>
+                            <p id="order-total" class="text-[#d2670e] font-mono font-bold text-xl">₹0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="bg-white/5 border border-white/5 p-10 rounded-[40px] mb-8">
+                    <h3 class="text-xl font-black uppercase text-white mb-8 flex items-center gap-3">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-[#d2670e]"></i>
+                        Order Items
+                    </h3>
+                    <div id="order-items" class="space-y-4">
+                        <!-- Items loaded via JS -->
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="bg-white/5 border border-white/5 p-10 rounded-[40px] mb-8">
+                    <h3 class="text-xl font-black uppercase text-white mb-8 flex items-center gap-3">
+                        <i data-lucide="truck" class="w-5 h-5 text-[#d2670e]"></i>
+                        Shipping Address
+                    </h3>
+                    <div id="shipping-address" class="text-white/80 space-y-2">
+                        <!-- Address loaded via JS -->
+                    </div>
+                </div>
+
+                <!-- Important Information -->
+                <div class="bg-blue-500/10 border border-blue-500/30 p-10 rounded-[2rem]">
+                    <h4 class="text-lg font-black text-blue-400 mb-4 flex items-center gap-3">
+                        <i data-lucide="info" class="w-5 h-5"></i>
+                        What's Next?
+                    </h4>
+                    <ul class="space-y-3 text-white/70">
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>A confirmation email has been sent to your registered email address.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Your item(s) will be prepared and shipped within 24 hours.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>You can track your order from the Order History page in your account.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="order-error" class="hidden text-center py-20 max-w-md mx-auto">
+                <i data-lucide="alert-circle" class="w-16 h-16 text-red-500 mx-auto mb-4"></i>
+                <h2 class="text-2xl font-bold text-white mb-2">Unable to Load Order</h2>
+                <p class="text-gray-400 mb-8">We couldn't retrieve the order details. Please check your email or orders page.</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row gap-6 justify-center items-center mt-20 max-w-md mx-auto">
+                <a href="orders.html" class="cta-btn magnetic-btn flex-1 w-full justify-center">
+                    <span>View All Orders</span>
+                </a>
+                <a href="shopping.html" class="cta-btn magnetic-btn flex-1 w-full justify-center" style="background-color: rgba(255,255,255,0.1);">
+                    <span>Continue Shopping</span>
+                </a>
+            </div>
         </div>
     </main>
 
     <div id="footer-container"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        async function loadOrderDetails() {
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('id');
-            const orderIdEl = document.getElementById('order-id');
-            
-            if (orderId) {
-                orderIdEl.textContent = orderId;
-                // Optionally clear cart here if not done already
-                window.clearCart(); 
-            } else {
-                orderIdEl.textContent = 'N/A';
+
+            const loading = document.getElementById('order-loading');
+            const details = document.getElementById('order-details');
+            const error = document.getElementById('order-error');
+
+            if (!orderId) {
+                loading.classList.add('hidden');
+                error.classList.remove('hidden');
+                return;
             }
-        });
+
+            try {
+                // Wait for API_BASE_URL to be ready
+                const checkBaseUrl = setInterval(async () => {
+                    if (window.API_BASE_URL && window.getAuthToken) {
+                        clearInterval(checkBaseUrl);
+
+                        const token = window.getAuthToken?.();
+                        const response = await fetch(`${window.API_BASE_URL}/orders/${orderId}`, {
+                            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Order not found');
+                        }
+
+                        const order = await response.json();
+                        renderOrderDetails(order);
+                        loading.classList.add('hidden');
+                        details.classList.remove('hidden');
+
+                        if (window.lucide) lucide.createIcons();
+                    }
+                }, 100);
+
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    clearInterval(checkBaseUrl);
+                    if (!details.classList.contains('hidden')) return;
+                    loading.classList.add('hidden');
+                    error.classList.remove('hidden');
+                }, 5000);
+
+            } catch (err) {
+                console.error('Error loading order:', err);
+                loading.classList.add('hidden');
+                error.classList.remove('hidden');
+                if (window.showMessage) {
+                    window.showMessage('error', 'Failed to load order details');
+                }
+            }
+        }
+
+        function renderOrderDetails(order) {
+            // Order ID
+            document.getElementById('order-id').textContent = order._id?.substring(0, 12) || 'N/A';
+
+            // Order Date
+            const date = new Date(order.createdAt);
+            document.getElementById('order-date').textContent = date.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Order Status
+            const statusEl = document.getElementById('order-status');
+            statusEl.textContent = order.orderStatus || 'Confirmed';
+            const statusColorMap = {
+                pending: 'text-yellow-400',
+                processing: 'text-blue-400',
+                shipped: 'text-purple-400',
+                delivered: 'text-green-400'
+            };
+            statusEl.className = (statusColorMap[order.orderStatus?.toLowerCase()] || 'text-green-400') + ' font-bold text-lg';
+
+            // Order Total
+            document.getElementById('order-total').textContent = `₹${(order.totalPrice || 0).toFixed(2)}`;
+
+            // Order Items
+            const itemsContainer = document.getElementById('order-items');
+            const items = order.orderItems || [];
+            itemsContainer.innerHTML = (items.length > 0 ? items : []).map(item => `
+                <div class="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
+                    <div class="flex-grow">
+                        <p class="text-white font-semibold">${item.name || 'Unknown Item'}</p>
+                        <p class="text-gray-400 text-sm">Qty: ${item.qty || 1}</p>
+                    </div>
+                    <p class="text-[#d2670e] font-mono font-bold text-lg">₹${(item.price * (item.qty || 1)).toFixed(2)}</p>
+                </div>
+            `).join('');
+
+            if (items.length === 0) {
+                itemsContainer.innerHTML = '<p class="text-gray-400">No items in this order.</p>';
+            }
+
+            // Shipping Address
+            const addressContainer = document.getElementById('shipping-address');
+            const addr = order.shippingAddress || {};
+            addressContainer.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Recipient</p>
+                        <p class="text-white">${addr.name || `${addr.firstName || ''} ${addr.lastName || ''}`.trim() || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Phone</p>
+                        <p class="text-white">${addr.phone || 'N/A'}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Address</p>
+                        <p class="text-white">${addr.address || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">City</p>
+                        <p class="text-white">${addr.city || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">State</p>
+                        <p class="text-white">${addr.state || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Postal Code</p>
+                        <p class="text-white">${addr.postalCode || 'N/A'}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load order details when page is ready
+        document.addEventListener('DOMContentLoaded', loadOrderDetails);
     </script>
 </body>
 </html>

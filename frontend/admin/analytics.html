@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Turf - Admin Analytics</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="admin-layout.js" defer></script>
+    <script src="analytics.js" defer></script>
+</head>
+
+<body data-3d-enabled="true" class="text-white font-sans antialiased overflow-hidden">
+    <!-- 3D Background -->
+    <div id="three-container" class="fixed inset-0 -z-50"></div>
+
+    <div id="app-container" class="flex h-screen overflow-hidden relative z-10">
+        <aside id="sidebar-container" class="w-64 iphone-glass border-r border-white/5 hidden md:flex flex-col"></aside>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header id="topbar-container"
+                class="h-16 iphone-glass border-b border-white/5 flex items-center justify-between px-6"></header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <div class="mb-8">
+                    <h1 class="text-2xl font-black tracking-tight mb-2">Analytics & Reports</h1>
+                    <p class="text-gray-400 text-sm">Real-time platform insights and metrics</p>
+                </div>
+
+                <!-- Date Range Selector -->
+                <div class="mb-6 flex gap-4 items-center">
+                    <select id="date-range" onchange="updateAnalytics()"
+                        class="iphone-glass border border-white/10 rounded-xl px-4 py-2 text-sm bg-white/5 text-white">
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d">Last 30 Days</option>
+                        <option value="90d">Last 90 Days</option>
+                        <option value="1y">Last Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Revenue</h3>
+                            <div class="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-green-500"></i>
+                            </div>
+                        </div>
+                        <p id="total-revenue" class="text-3xl font-black tracking-tight">₹0.00</p>
+                        <p id="revenue-change" class="text-xs text-green-400 mt-2">+0% from last period</p>
+                    </div>
+
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Orders</h3>
+                            <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="shopping-cart" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                        </div>
+                        <p id="total-orders" class="text-3xl font-black tracking-tight">0</p>
+                        <p id="orders-change" class="text-xs text-blue-400 mt-2">+0% from last period</p>
+                    </div>
+
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest">Active Users</h3>
+                            <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="users" class="w-5 h-5 text-purple-500"></i>
+                            </div>
+                        </div>
+                        <p id="active-users" class="text-3xl font-black tracking-tight">0</p>
+                        <p id="users-change" class="text-xs text-purple-400 mt-2">+0% from last period</p>
+                    </div>
+
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest">Avg Order Value</h3>
+                            <div class="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="bar-chart-3" class="w-5 h-5 text-orange-500"></i>
+                            </div>
+                        </div>
+                        <p id="avg-order" class="text-3xl font-black tracking-tight">₹0.00</p>
+                        <p id="order-change" class="text-xs text-orange-400 mt-2">+0% from last period</p>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Revenue Chart -->
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <h3 class="text-lg font-black mb-6 flex items-center gap-2">
+                            <i data-lucide="line-chart" class="w-5 h-5"></i>
+                            Revenue Trend
+                        </h3>
+                        <div class="relative h-80">
+                            <canvas id="revenue-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Orders Chart -->
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <h3 class="text-lg font-black mb-6 flex items-center gap-2">
+                            <i data-lucide="bar-chart" class="w-5 h-5"></i>
+                            Orders by Status
+                        </h3>
+                        <div class="relative h-80">
+                            <canvas id="orders-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Top Products -->
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <h3 class="text-lg font-black mb-6 flex items-center gap-2">
+                            <i data-lucide="box" class="w-5 h-5"></i>
+                            Top Products
+                        </h3>
+                        <div id="top-products" class="space-y-4">
+                            <!-- Products loaded via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Customer Breakdown -->
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <h3 class="text-lg font-black mb-6 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                            Customer Segments
+                        </h3>
+                        <div class="relative h-64">
+                            <canvas id="segments-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="iphone-glass border border-white/5 rounded-[2rem] p-6">
+                        <h3 class="text-lg font-black mb-6 flex items-center gap-2">
+                            <i data-lucide="recent" class="w-5 h-5"></i>
+                            Recent Orders
+                        </h3>
+                        <div id="recent-orders" class="space-y-3 text-sm">
+                            <!-- Orders loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>
