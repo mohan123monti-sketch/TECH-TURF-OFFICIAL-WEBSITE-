@@ -212,112 +212,36 @@ function generateHeader() {
 }
 
 function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
-    const authLinks = isUserLoggedIn ?
-        `<a href="/pages/account.html" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm border border-transparent hover:border-white/10">
-               <i data-lucide="user" class="w-5 h-5 inline-block mr-1 align-sub"></i> Account
-           </a>
-           <button onclick="window.handleLogout()" class="magnetic-btn transition-link px-4 py-2 bg-red-600/70 text-white font-semibold rounded-lg hover:bg-red-500 transition-all text-sm">
-               Sign Out
-           </button>` :
-        `<a href="/pages/login.html" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm">Sign In</a>
-           <a href="/pages/register.html" class="magnetic-btn transition-link px-4 py-2 bg-orange-600/70 text-white font-semibold rounded-lg hover:bg-orange-500 transition-all text-sm">
-               Register
-           </a>`;
-
     let logoSrc = '/assets/logos/tech-turf.png';
     let brandName = 'Tech Turf';
-    let shortBrand = 'TT';
 
-    if (currentPageFile === 'click_sphere.html') {
-        logoSrc = '/assets/logos/click-sphere.png';
-        brandName = 'Click Sphere';
-        shortBrand = 'CS';
-    } else if (currentPageFile === 'quinta.html') {
-        logoSrc = '/assets/logos/quinta.png';
-        brandName = 'Quinta';
-        shortBrand = 'Q';
-    } else if (currentPageFile === 'trend_hive.html') {
-        logoSrc = '/assets/logos/trend-hive.png';
-        brandName = 'Trend Hive';
-        shortBrand = 'TH';
-    }
+    if (currentPageFile === 'click_sphere.html') logoSrc = '/assets/logos/click-sphere.png';
+    else if (currentPageFile === 'quinta.html') logoSrc = '/assets/logos/quinta.png';
+    else if (currentPageFile === 'trend_hive.html') logoSrc = '/assets/logos/trend-hive.png';
 
     const navHTML = `
-       <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl z-50 transition-all duration-500 liquid-glass" id="site-header">
-           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-               <div class="flex justify-between items-center h-16">
-                   <a href="/index.html" class="flex-shrink-0 flex items-center transition-link group">
-                       <img src="${logoSrc}" alt="${brandName} Logo" class="logo-nav mr-2">
-                       <span class="text-xl font-bold tracking-wider text-white hidden sm:block uppercase">${brandName}</span>
-                       <span class="text-xl font-bold tracking-wider text-white sm:hidden">${shortBrand}</span>
-                   </a>
-   
-                   <div class="hidden md:flex md:items-center space-x-1">
-                       ${divisions.map(d => `
-                           <a href="${d.href}" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm
-                           ${d.href.split('/').pop() === currentPageFile ? 'bg-orange-600/20 text-white' : ''}">
-                               ${d.name}
-                           </a>
-                       `).join('')}
-                   </div>
-                   
-
-                   <div class="hidden md:flex md:items-center space-x-3" id="desktop-auth-container">
-                        ${authLinks}
-                   </div>
-   
-                   <div class="md:hidden flex items-center gap-4">
-
-                       <button id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                           <i data-lucide="menu" class="w-6 h-6"></i>
-                       </button>
-                   </div>
-               </div>
-           </div>
+       <header id="site-header">
+           <a href="/index.html" class="logo-link">
+               <img src="${logoSrc}" alt="${brandName}" class="logo-nav">
+           </a>
            
-           <div class="md:hidden absolute w-full bg-[#05080f]/95 border-b border-white/5 shadow-2xl" id="mobile-menu" style="display: none;">
-               <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                   ${divisions.map(d => `
-                       <a href="${d.href}" class="transition-link block text-white/70 hover:text-white px-3 py-2 rounded-md font-medium
-                       ${d.href.split('/').pop() === currentPageFile ? 'bg-orange-600/20 text-white' : ''}">
-                           ${d.name}
-                       </a>
-                   `).join('')}
-                   <div class="pt-4 border-t border-white/10 space-y-2" id="mobile-auth-container">
-                       ${authLinks.replace(/magnetic-btn/g, 'magnetic-btn w-full justify-center').replace(/px-\d+ py-\d+/g, 'px-4 py-3 block text-center')}
-                   </div>
-               </div>
+           <div class="minimal-nav-links">
+               <a href="/index.html" class="transition-link">HOME</a>
+               <a href="/pages/shopping.html" class="transition-link">WORK</a>
+               <a href="/pages/about.html" class="transition-link">ABOUT</a>
+               <a href="/pages/contact.html" class="transition-link">CONTACT</a>
            </div>
-       </nav>
-       `;
+
+           <div class="bottom-pagination">
+               PREV 01 / 04 NEXT
+           </div>
+       </header>
+    `;
 
     const container = document.getElementById('header-container');
     if (container) {
         container.innerHTML = navHTML;
         if (window.lucide) lucide.createIcons();
-        window.updateCartDisplay();
-        if (window.updateWishlistDisplay) window.updateWishlistDisplay();
-
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if (mobileMenuBtn && mobileMenu) {
-            mobileMenuBtn.addEventListener('click', () => {
-                const isExpanded = mobileMenu.style.display === 'block';
-                mobileMenu.style.display = isExpanded ? 'none' : 'block';
-                mobileMenuBtn.querySelector('i').setAttribute('data-lucide', isExpanded ? 'menu' : 'x');
-
-                // Toggle rounded shape
-                const header = document.getElementById('site-header');
-                if (header) {
-                    if (!isExpanded) {
-                        header.classList.add('menu-open');
-                    } else {
-                        header.classList.remove('menu-open');
-                    }
-                }
-                if (window.lucide) lucide.createIcons();
-            });
-        }
     }
 }
 
