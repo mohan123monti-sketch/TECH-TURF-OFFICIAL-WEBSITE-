@@ -10,10 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('three-container');
     if (!container) return;
 
-    // Create Liquid Cursor
-    const cursor = document.createElement('div');
-    cursor.className = 'liquid-cursor';
-    document.body.appendChild(cursor);
+    container.innerHTML = '';
 
     container.innerHTML = '';
 
@@ -102,20 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.position.z = -10;
     scene.add(grid);
 
-    // --- MOUSE PARALLAX ---
-    let mouseX = 0, mouseY = 0;
-    let targetX = 0, targetY = 0;
-
-    window.addEventListener('mousemove', (e) => {
-        targetX = (e.clientX - window.innerWidth / 2) / 200;
-        targetY = (e.clientY - window.innerHeight / 2) / 200;
-
-        cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
-    });
-
     // --- ANIMATION LOOP ---
     function animate() {
         requestAnimationFrame(animate);
+
+        const time = performance.now() * 0.0005;
 
         // Slow Hexagon Drift
         hexagons.forEach(hex => {
@@ -129,16 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Math.abs(hex.position.y) > 25) hex.position.y *= -0.9;
         });
 
-        // Smooth Parallax
-        mouseX += (targetX - mouseX) * 0.05;
-        mouseY += (targetY - mouseY) * 0.05;
-
-        hexagonGroup.position.x = mouseX;
-        hexagonGroup.position.y = -mouseY;
+        // Smooth Autonomous Floating (Replced Mouse Parallax)
+        hexagonGroup.position.x = Math.sin(time * 0.5) * 1.5;
+        hexagonGroup.position.y = Math.cos(time * 0.3) * 1.5;
+        hexagonGroup.rotation.z = Math.sin(time * 0.2) * 0.1;
 
         // Subtle light movement
-        orangeLight.position.x = 20 + Math.sin(Date.now() * 0.001) * 5;
-        purpleLight.position.x = -20 + Math.cos(Date.now() * 0.001) * 5;
+        orangeLight.position.x = 20 + Math.sin(time * 2) * 5;
+        purpleLight.position.x = -20 + Math.cos(time * 2) * 5;
 
         renderer.render(scene, camera);
     }

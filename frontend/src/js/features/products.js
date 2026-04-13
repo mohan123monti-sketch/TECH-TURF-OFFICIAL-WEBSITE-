@@ -1,4 +1,4 @@
-import apiRequest from './api.js';
+import apiRequest from '../core/api.js';
 
 export const getAllProducts = async () => {
     return await apiRequest('/products', 'GET');

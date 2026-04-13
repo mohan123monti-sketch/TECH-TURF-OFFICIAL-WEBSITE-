@@ -202,7 +202,7 @@ class NexusAI {
 
     async getAIResponse(userMessage) {
         try {
-            const response = await fetch(`${this.apiUrl}/ai`, {
+            const response = await fetch(`${this.apiUrl}/ai/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -44,11 +44,14 @@ function renderPosts() {
                 <p class="text-sm text-gray-400 mb-6 line-clamp-2 leading-relaxed">${post.content.substring(0, 100)}...</p>
                 <div class="flex justify-between items-center pt-4 border-t border-white/5">
                     <span class="text-xs text-gray-500">${new Date(post.createdAt).toLocaleDateString()}</span>
+                                        <span class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString()}</span>
                     <div class="flex space-x-2">
                         <button onclick="editPost('${post._id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                                                    <button onclick="editPost('${post.id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
                             <i data-lucide="edit-3" class="w-4 h-4"></i>
                         </button>
                         <button onclick="deletePost('${post._id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition-all">
+                                                    <button onclick="deletePost('${post.id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition-all">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -69,6 +72,7 @@ function openPostModal(postId = null) {
 
     if (postId) {
         const post = posts.find(p => p._id === postId);
+            const post = posts.find(p => p.id == postId);
         title.textContent = 'Edit Blog Post';
         form.title.value = post.title;
         form.category.value = post.category || '';
@@ -116,6 +120,7 @@ async function savePost(event) {
         const formData = new FormData();
         for (let i = 0; i < fileInput.files.length; i++) {
             formData.append('images', fileInput.files[i]);
+                    formData.append('files', fileInput.files[i]);
         }
 
         try {

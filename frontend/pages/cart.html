@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -7,7 +7,7 @@
     <title>Tech Turf - Shopping Cart</title>
 
     <!-- External Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Styles & Scripts -->
@@ -53,19 +53,19 @@
                             <div class="flex justify-between items-center text-sm">
                                 <span
                                     class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Subtotal</span>
-                                <span id="summary-subtotal" class="text-white font-black text-lg">₹0.00</span>
+                                <span id="summary-subtotal" class="text-white font-black text-lg">â‚¹0.00</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">GST
                                     (18%)</span>
-                                <span id="summary-tax" class="text-white font-black text-lg">₹0.00</span>
+                                <span id="summary-tax" class="text-white font-black text-lg">â‚¹0.00</span>
                             </div>
                         </div>
 
                         <div class="flex justify-between items-center mb-10">
                             <span class="text-gray-300 font-black uppercase tracking-widest text-xs">Total</span>
                             <span id="summary-total"
-                                class="text-white font-black text-4xl tracking-tighter">₹0.00</span>
+                                class="text-white font-black text-4xl tracking-tighter">â‚¹0.00</span>
                         </div>
 
                         <a href="checkout.html" class="cta-btn magnetic-btn w-full justify-center">Proceed to
@@ -129,7 +129,7 @@
                                     <span class="text-white font-mono font-bold w-4 text-center">${qty}</span>
                                     <button onclick="updateDetails('${itemId}', ${qty + 1})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 rounded-md transition-all">+</button>
                                 </div>
-                                <span class="text-[#d2670e] font-mono font-bold text-lg">₹${itemTotal.toFixed(2)}</span>
+                                <span class="text-[#d2670e] font-mono font-bold text-lg">â‚¹${itemTotal.toFixed(2)}</span>
                             </div>
                         </div>
                     `;
@@ -140,9 +140,9 @@
                 const tax = subtotal * 0.18;
                 const total = subtotal + tax;
 
-                subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
-                taxEl.textContent = `₹${tax.toFixed(2)}`;
-                totalEl.textContent = `₹${total.toFixed(2)}`;
+                subtotalEl.textContent = `â‚¹${subtotal.toFixed(2)}`;
+                taxEl.textContent = `â‚¹${tax.toFixed(2)}`;
+                totalEl.textContent = `â‚¹${total.toFixed(2)}`;
                 
                 lucide.createIcons();
             }

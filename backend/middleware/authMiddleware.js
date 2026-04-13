@@ -1,58 +1,79 @@
-// --- Imports ---
 import jwt from 'jsonwebtoken';
-import User from '../models/user.model.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
-/**
- * --- Protect Middleware ---
- * This function protects routes that require a user to be logged in.
- * It gets the token from the 'Authorization' header.
- */
-const protect = async (req, res, next) => {
-    let token;
-    
-    // The token is expected to be in the format: 'Bearer [token]'
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const NEXUS_API_KEY = process.env.NEXUS_AI_API_KEY || '';
+
+const decodeBearerToken = (req) => {
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            // 1. Get token from header
-            token = req.headers.authorization.split(' ')[1];
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        return true;
+    }
+    return false;
+};
 
-            // 2. Verify the token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-            // 3. Get user from the token's ID and attach it to the request object
-            // We exclude the password when fetching the user
-            req.user = await User.findById(decoded.id).select('-password');
-            
-            if (!req.user) {
-                return res.status(401).json({ message: 'Not authorized, user not found' });
-            }
-
-            // 4. Move on to the next function (the actual route)
-            next();
-
-        } catch (error) {
-            console.error('Token verification failed:', error.message);
-            res.status(401).json({ message: 'Not authorized, token failed' });
+export const protect = (req, res, next) => {
+    try {
+        if (decodeBearerToken(req)) {
+            return next();
         }
+    } catch (error) {
+        console.error('Auth check error:', error);
+        return res.status(401).json({ message: 'Not authorized, token failed.' });
     }
 
-    if (!token) {
-        res.status(401).json({ message: 'Not authorized, no token' });
-    }
+    return res.status(401).json({ message: 'Not authorized, no token.' });
 };
 
-/**
- * --- Admin Middleware ---
- * This function protects routes that can *only* be accessed by an admin.
- * It *must* be used *after* the 'protect' middleware.
- */
-const admin = (req, res, next) => {
-    if (req.user && req.user.isAdmin) {
-        next(); // User is an admin, proceed
+export const optionalAuth = (req, res, next) => {
+    try {
+        decodeBearerToken(req);
+    } catch (error) {
+        console.error('Optional auth decode error:', error);
+    }
+    next();
+};
+
+export const protectOrApiKey = (req, res, next) => {
+    try {
+        if (decodeBearerToken(req)) {
+            return next();
+        }
+    } catch (error) {
+        console.error('Auth check error:', error);
+        return res.status(401).json({ message: 'Not authorized, token failed.' });
+    }
+
+    const apiKey = req.headers['x-api-key'];
+    if (NEXUS_API_KEY && apiKey === NEXUS_API_KEY) {
+        req.user = { id: 1, role: 'service' };
+        return next();
+    }
+
+    return res.status(401).json({ message: 'Not authorized, no valid token or API key.' });
+};
+
+export const singleTenantFallback = (req, res, next) => {
+    try {
+        decodeBearerToken(req);
+    } catch (error) {
+        console.error('Fallback auth decode error:', error);
+    }
+
+    if (!req.user) {
+        req.user = { id: 1, role: 'user' };
+    }
+
+    next();
+};
+
+export const adminOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
     } else {
-        res.status(403).json({ message: 'Not authorized as an admin' }); // 403 = Forbidden
+        res.status(403).json({ message: 'Not authorized as admin.' });
     }
 };
-
-// --- Export ---
-export { protect, admin };

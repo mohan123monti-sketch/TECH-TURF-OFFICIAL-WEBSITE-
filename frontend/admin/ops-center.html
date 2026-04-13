@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Turf - Unified Ops Center</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="admin-layout.js" defer></script>
+    <script src="ops-center.js" defer></script>
+</head>
+
+<body data-3d-enabled="true" class="text-white font-sans antialiased overflow-hidden">
+    <div id="three-container" class="fixed inset-0 -z-50"></div>
+
+    <div id="app-container" class="flex h-screen overflow-hidden relative z-10">
+        <aside id="sidebar-container" class="w-64 iphone-glass border-r border-white/5 hidden md:flex flex-col"></aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header id="topbar-container" class="h-16 iphone-glass border-b border-white/5 flex items-center justify-between px-6"></header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 space-y-6">
+                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <article class="iphone-glass rounded-2xl p-5 border border-white/10">
+                        <p class="text-xs uppercase text-white/50 tracking-[0.12em]">CPU Usage</p>
+                        <p class="text-3xl font-black mt-2"><span id="cpuUsage">0</span>%</p>
+                    </article>
+                    <article class="iphone-glass rounded-2xl p-5 border border-white/10">
+                        <p class="text-xs uppercase text-white/50 tracking-[0.12em]">CPU Temperature</p>
+                        <p class="text-3xl font-black mt-2"><span id="cpuTemp">N/A</span></p>
+                    </article>
+                    <article class="iphone-glass rounded-2xl p-5 border border-white/10">
+                        <p class="text-xs uppercase text-white/50 tracking-[0.12em]">RAM Usage</p>
+                        <p class="text-3xl font-black mt-2"><span id="ramUsage">0</span>%</p>
+                    </article>
+                    <article class="iphone-glass rounded-2xl p-5 border border-white/10">
+                        <p class="text-xs uppercase text-white/50 tracking-[0.12em]">Cache Memory</p>
+                        <p class="text-3xl font-black mt-2"><span id="cacheMem">N/A</span></p>
+                    </article>
+                </section>
+
+                <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="iphone-glass rounded-2xl border border-white/10 overflow-hidden">
+                        <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                            <h3 class="font-black tracking-tight">System Details</h3>
+                            <button id="refreshSystemBtn" class="px-3 py-1.5 text-xs rounded-lg bg-white/10 hover:bg-white/20">Refresh</button>
+                        </div>
+                        <div class="p-5 text-sm space-y-2 text-white/80">
+                            <p><strong>Host:</strong> <span id="hostName">-</span></p>
+                            <p><strong>Platform:</strong> <span id="platform">-</span></p>
+                            <p><strong>Architecture:</strong> <span id="arch">-</span></p>
+                            <p><strong>Uptime:</strong> <span id="uptime">-</span></p>
+                            <p><strong>RAM:</strong> <span id="ramDetail">-</span></p>
+                            <p><strong>Load Avg:</strong> <span id="loadAvg">-</span></p>
+                        </div>
+                    </div>
+
+                    <div class="iphone-glass rounded-2xl border border-white/10 overflow-hidden">
+                        <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                            <h3 class="font-black tracking-tight">Website Health</h3>
+                            <button id="refreshHealthBtn" class="px-3 py-1.5 text-xs rounded-lg bg-white/10 hover:bg-white/20">Refresh</button>
+                        </div>
+                        <div class="p-5">
+                            <div id="healthList" class="space-y-2 text-sm text-white/80">
+                                <p class="text-white/50">Loading service checks...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="iphone-glass rounded-2xl border border-white/10 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                        <h3 class="font-black tracking-tight">Quick Fix Commands</h3>
+                        <p class="text-xs text-white/50">Safe preset actions only</p>
+                    </div>
+                    <div id="commandGrid" class="p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                        <p class="text-white/50 text-sm">Loading commands...</p>
+                    </div>
+                </section>
+
+                <section class="iphone-glass rounded-2xl border border-white/10 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                        <h3 class="font-black tracking-tight">Command Output</h3>
+                        <button id="clearLogsBtn" class="px-3 py-1.5 text-xs rounded-lg bg-white/10 hover:bg-white/20">Clear</button>
+                    </div>
+                    <pre id="commandOutput" class="p-5 text-xs whitespace-pre-wrap text-green-300 min-h-[180px] max-h-[320px] overflow-auto">No command executed yet.</pre>
+                </section>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>
+

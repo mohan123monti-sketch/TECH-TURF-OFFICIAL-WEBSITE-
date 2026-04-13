@@ -9,7 +9,7 @@
    ======================================================================== */
 
 const apiOverride = localStorage.getItem('tt_api_base');
-window.API_BASE_URL = window.API_BASE_URL || apiOverride || window.__TECHTURF_API_BASE__ || '/api';
+window.API_BASE_URL = window.API_BASE_URL || apiOverride || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 // --- Real-time Order Updates (Socket.io) ---
 function initOrderSocket() {
@@ -187,7 +187,7 @@ function handleLogout() {
     } else {
         localStorage.removeItem('tt_token');
         window.showMessage('info', 'Logged out successfully.');
-        setTimeout(() => window.location.href = 'index.html', 1000);
+        setTimeout(() => window.location.href = '/index.html', 1000);
     }
     localStorage.removeItem('tt_cart');
     window.updateCartDisplay();
@@ -200,11 +200,11 @@ function generateHeader() {
     const currentPageFile = window.location.pathname.split('/').pop();
 
     const divisions = [
-        { name: 'Tech Turf', href: 'index.html' },
-        { name: 'Quinta', href: 'quinta.html' },
-        { name: 'Trend Hive', href: 'trend_hive.html' },
-        { name: 'Click Sphere', href: 'click_sphere.html' },
-        { name: 'Shop', href: 'shopping.html' }
+        { name: 'Tech Turf', href: '/index.html' },
+        { name: 'Quinta', href: '/pages/quinta.html' },
+        { name: 'Trend Hive', href: '/pages/trend_hive.html' },
+        { name: 'Click Sphere', href: '/pages/click_sphere.html' },
+        { name: 'Shop', href: '/pages/shopping.html' }
     ];
 
     const loggedIn = isLoggedIn();
@@ -213,14 +213,14 @@ function generateHeader() {
 
 function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
     const authLinks = isUserLoggedIn ?
-        `<a href="account.html" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm border border-transparent hover:border-white/10">
+        `<a href="/pages/account.html" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm border border-transparent hover:border-white/10">
                <i data-lucide="user" class="w-5 h-5 inline-block mr-1 align-sub"></i> Account
            </a>
            <button onclick="window.handleLogout()" class="magnetic-btn transition-link px-4 py-2 bg-red-600/70 text-white font-semibold rounded-lg hover:bg-red-500 transition-all text-sm">
                Sign Out
            </button>` :
-        `<a href="login.html" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm">Sign In</a>
-           <a href="register.html" class="magnetic-btn transition-link px-4 py-2 bg-orange-600/70 text-white font-semibold rounded-lg hover:bg-orange-500 transition-all text-sm">
+        `<a href="/pages/login.html" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm">Sign In</a>
+           <a href="/pages/register.html" class="magnetic-btn transition-link px-4 py-2 bg-orange-600/70 text-white font-semibold rounded-lg hover:bg-orange-500 transition-all text-sm">
                Register
            </a>`;
 
@@ -228,8 +228,8 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
        <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl z-50 transition-all duration-500 liquid-glass" id="site-header">
            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                <div class="flex justify-between items-center h-16">
-                   <a href="index.html" class="flex-shrink-0 flex items-center transition-link">
-                       <i data-lucide="rocket" class="w-7 h-7 text-orange-500 mr-2"></i>
+                   <a href="/index.html" class="flex-shrink-0 flex items-center transition-link">
+                       <img src="/public/images/logos/tech-turf.png" alt="Tech Turf Logo" class="w-10 h-10 object-contain mr-2">
                        <span class="text-xl font-bold tracking-wider text-white hidden sm:block">TECH TURF</span>
                        <span class="text-xl font-bold tracking-wider text-white sm:hidden">TT</span>
                    </a>
@@ -237,39 +237,19 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
                    <div class="hidden md:flex md:items-center space-x-1">
                        ${divisions.map(d => `
                            <a href="${d.href}" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm
-                           ${d.href === currentPageFile ? 'bg-orange-600/20 text-white' : ''}">
+                           ${d.href.split('/').pop() === currentPageFile ? 'bg-orange-600/20 text-white' : ''}">
                                ${d.name}
                            </a>
                        `).join('')}
                    </div>
                    
-                   <!-- Desktop Wishlist Button -->
-                   <a href="wishlist.html" class="hidden md:flex relative items-center gap-2 text-white/80 hover:text-white px-3 py-2 mr-2 rounded-lg border border-white/10 hover:border-white/30 transition-colors">
-                       <i data-lucide="heart" class="w-5 h-5"></i>
-                       <span class="text-[11px] font-black uppercase tracking-widest">Wishlist</span>
-                       <span class="wishlist-count absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold leading-none text-white bg-red-600 rounded-full hidden transform translate-x-1/4 -translate-y-1/4">0</span>
-                   </a>
 
-                   <!-- Desktop Cart Button -->
-                   <a href="cart.html" class="hidden md:flex relative items-center gap-2 text-white/80 hover:text-white px-3 py-2 mr-2 rounded-lg border border-white/10 hover:border-white/30 transition-colors">
-                       <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-                       <span class="text-[11px] font-black uppercase tracking-widest">Cart</span>
-                       <span class="cart-count absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold leading-none text-white bg-orange-600 rounded-full hidden transform translate-x-1/4 -translate-y-1/4">0</span>
-                   </a>
-                   
                    <div class="hidden md:flex md:items-center space-x-3" id="desktop-auth-container">
                         ${authLinks}
                    </div>
    
                    <div class="md:hidden flex items-center gap-4">
-                       <a href="wishlist.html" class="relative text-white hover:text-red-400">
-                           <i data-lucide="heart" class="w-6 h-6"></i>
-                           <span class="wishlist-count absolute -top-2 -right-2 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full hidden">0</span>
-                       </a>
-                       <a href="cart.html" class="relative text-white hover:text-orange-400">
-                           <i data-lucide="shopping-bag" class="w-6 h-6"></i>
-                           <span class="cart-count absolute -top-2 -right-2 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full hidden">0</span>
-                       </a>
+
                        <button id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                            <i data-lucide="menu" class="w-6 h-6"></i>
                        </button>
@@ -281,7 +261,7 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                    ${divisions.map(d => `
                        <a href="${d.href}" class="transition-link block text-white/70 hover:text-white px-3 py-2 rounded-md font-medium
-                       ${d.href === currentPageFile ? 'bg-orange-600/20 text-white' : ''}">
+                       ${d.href.split('/').pop() === currentPageFile ? 'bg-orange-600/20 text-white' : ''}">
                            ${d.name}
                        </a>
                    `).join('')}
@@ -325,11 +305,11 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
 
 window.updateAuthUI = function (user) {
     const divisions = [
-        { name: 'Tech Turf', href: 'index.html' },
-        { name: 'Quinta', href: 'quinta.html' },
-        { name: 'Trend Hive', href: 'trend_hive.html' },
-        { name: 'Click Sphere', href: 'click_sphere.html' },
-        { name: 'Shop', href: 'shopping.html' }
+        { name: 'Tech Turf', href: '/index.html' },
+        { name: 'Quinta', href: '/pages/quinta.html' },
+        { name: 'Trend Hive', href: '/pages/trend_hive.html' },
+        { name: 'Click Sphere', href: '/pages/click_sphere.html' },
+        { name: 'Shop', href: '/pages/shopping.html' }
     ];
     const currentPageFile = window.location.pathname.split('/').pop();
     renderNavHTML(!!user, divisions, currentPageFile);
@@ -338,11 +318,33 @@ window.updateAuthUI = function (user) {
 function generateFooter() {
     const footerHTML = `
        <footer class="relative z-10 border-t border-white/5 pt-12 pb-8 bg-[#05080f]/90">
+           <!-- Global Status Strip -->
+            <section class="border-y border-white/5 py-4 mb-12 bg-white/[0.02]">
+                <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span>Global Systems: Operational</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-orange-500"></i>
+                        <span>Secure Node Connection</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="cpu" class="w-4 h-4 text-orange-500"></i>
+                        <span>TT-OS v7.2.0-ALFA</span>
+                    </div>
+                    <div class="hidden md:flex items-center gap-3">
+                        <i data-lucide="activity" class="w-4 h-4 text-orange-500"></i>
+                        <span>Latency: 14ms</span>
+                    </div>
+                </div>
+            </section>
+
            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
                    <div class="col-span-2 md:col-span-1">
                        <a href="index.html" class="flex items-center transition-link">
-                           <i data-lucide="rocket" class="w-6 h-6 text-orange-500 mr-2"></i>
+                           <img src="/public/images/logos/tech-turf.png" alt="Tech Turf Logo" class="w-8 h-8 object-contain mr-2">
                            <span class="text-xl font-bold tracking-wider text-white">TECH TURF</span>
                        </a>
                        <p class="mt-4 text-gray-400 text-sm max-w-xs">
@@ -376,14 +378,23 @@ function generateFooter() {
                    <div>
                         <h3 class="text-lg font-semibold text-white mb-4">Connect</h3>
                         <ul class="space-y-3 text-sm">
-                            <li><a href="nexus_ai.html" class="text-gray-400 hover:text-orange-400 transition-link">Nexus AI</a></li>
-                            <li><a href="estimator.html" class="text-gray-400 hover:text-orange-400 transition-link">Estimator</a></li>
+                            <li><a href="/pages/nexus_ai.html" class="text-gray-400 hover:text-orange-400 transition-link">Nexus AI</a></li>
+                            <li><a href="/pages/estimator.html" class="text-gray-400 hover:text-orange-400 transition-link">Estimator</a></li>
                         </ul>
                         <p class="text-gray-400 text-sm mt-6">Coimbatore, India</p>
                    </div>
                </div>
-               <div class="mt-12 pt-8 border-t border-white/5 text-center">
-                   <p class="text-gray-500 text-sm">&copy; ${new Date().getFullYear()} Tech Turf. All rights reserved.</p>
+               <div class="mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] font-mono uppercase tracking-[0.2em] text-white/20">
+                   <div class="flex items-center gap-4">
+                       <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Global Systems: Operational</span>
+                       <span class="opacity-40">|</span>
+                       <span>Secure Node Connection</span>
+                   </div>
+                   <div class="flex items-center gap-4">
+                       <span>Latency: 24ms</span>
+                       <span class="opacity-40">|</span>
+                       <span>&copy; 2026 Tech Turf Collective</span>
+                   </div>
                </div>
            </div>
        </footer>
@@ -408,7 +419,7 @@ function initNexusWidget() {
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
-            <iframe src="nexus_ai.html" class="w-full h-full border-0" title="Nexus AI"></iframe>
+            <iframe src="/pages/nexus_ai.html" class="w-full h-full border-0" title="Nexus AI"></iframe>
         </div>
         <button id="nexus-toggle" class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-orange-600 text-white shadow-2xl flex items-center justify-center hover:bg-orange-500 transition-all">
             <i data-lucide="message-circle" class="w-6 h-6"></i>
@@ -623,7 +634,7 @@ function ensureSEO() {
 
     if (!document.querySelector('script[data-seo="true"]')) {
         const script = document.createElement('script');
-        script.src = 'js/seo.js';
+        script.src = '/src/js/features/seo.js';
         script.defer = true;
         script.dataset.seo = 'true';
         script.onload = () => {
@@ -724,7 +735,8 @@ function initThreeJS() {
     scene.add(starMesh);
 
     window.addEventListener('resize', onWindowResize, false);
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
+    // REMOVED: Cursor-dependent mousemove listener for 3D Earth
+    // document.addEventListener('mousemove', onDocumentMouseMove, false);
     animate();
 }
 
@@ -737,33 +749,18 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function onDocumentMouseMove(event) {
-    mouseX = (event.clientX - windowHalfX) * 0.1;
-    mouseY = (event.clientY - windowHalfY) * 0.1;
-}
-
 function animate() {
     requestAnimationFrame(animate);
 
-    if (earthMesh) {
-        earthMesh.rotation.y += 0.001; // Slow rotation of earth
-    }
-    if (cloudMesh) {
-        cloudMesh.rotation.y += 0.0012; // Clouds rotate slightly faster
-        cloudMesh.rotation.x += 0.0001;
-    }
-    if (starMesh) {
-        starMesh.rotation.y -= 0.0002;
-    }
+    // Autonomous rotation based on time, NO mouse dependency
+    const time = performance.now() * 0.0005;
+    
+    earthMesh.rotation.y = time * 0.1;
+    cloudMesh.rotation.y = time * 0.12;
 
-    // Gentle mouse interaction (parallax)
-    targetX = mouseX * 0.001;
-    targetY = mouseY * 0.001;
-
-    if (earthMesh) {
-        earthMesh.rotation.y += 0.05 * (targetX - earthMesh.rotation.y);
-        earthMesh.rotation.x += 0.05 * (targetY - earthMesh.rotation.x);
-    }
+    // Subtle floating tilt
+    scene.rotation.x = Math.sin(time) * 0.05;
+    scene.rotation.z = Math.cos(time * 0.5) * 0.05;
 
     renderer.render(scene, camera);
 }
@@ -827,11 +824,6 @@ document.addEventListener('DOMContentLoaded', () => {
     generateFooter();
     updateCartDisplay();
 
-    // Initialize cursor if not mobile
-    if (window.matchMedia("(min-width: 768px)").matches) {
-        initCustomCursor();
-    }
-
     // Initialize scroll reveal on all pages
     handleScrollReveal();
     window.addEventListener('scroll', handleScrollReveal);
@@ -840,9 +832,6 @@ document.addEventListener('DOMContentLoaded', () => {
         initThreeJS();
     }
 
-    handle3DTilt();
-    handleSpotlight();
-    handleMagneticButtons();
     handlePageTransitions();
     initContentProtection(); // Enable content protection
     initNexusWidget();

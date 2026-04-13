@@ -1,15 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech Turf - Admin Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <link rel="stylesheet" href="/src/css/pages/style.css">
     <link rel="stylesheet" href="admin.css">
+    <link rel="icon" type="image/png" href="https://techturf.com/favicon.png">
     <script src="admin-layout.js" defer></script>
     <script src="/src/js/ai/nexus-ai.js" defer></script>
 </head>
@@ -41,7 +42,7 @@
                             <h3 class="text-gray-400 text-sm font-bold">Total Revenue</h3>
                             <i data-lucide="dollar-sign" class="w-5 h-5 text-green-500"></i>
                         </div>
-                        <p class="text-3xl font-black text-white" id="stat-revenue">₹0</p>
+                        <p class="text-3xl font-black text-white" id="stat-revenue">â‚¹0</p>
                         <p class="text-xs text-gray-500 mt-2">Total sales</p>
                     </div>
 
@@ -93,12 +94,13 @@
 
     <script>
         // Admin Dashboard Init
-        const API_BASE_URL = '/api';
+        // API_BASE_URL is inherited from admin-layout.js
+
 
         async function loadDashboardStats() {
             const token = localStorage.getItem('tt_token');
-            if (!token) {
-                window.location.href = '../login.html';
+            if (!window.localStorage.getItem('tt_token')) {
+                window.location.href = '/pages/login.html';
                 return;
             }
 
@@ -127,7 +129,7 @@
                 // Calculate total revenue
                 const totalRevenue = Array.isArray(orders) ?
                     orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0) : 0;
-                document.getElementById('stat-revenue').textContent = `₹${totalRevenue.toFixed(0)}`;
+                document.getElementById('stat-revenue').textContent = `â‚¹${totalRevenue.toFixed(0)}`;
 
                 // Render recent orders
                 renderRecentOrders(orders);
@@ -156,20 +158,20 @@
                 const displayStatus = order.status || (order.isDelivered ? 'Delivered' : 'Pending');
                 return `
                     <tr class="hover:bg-white/5 transition-colors">
-                        <td class="p-6 font-mono text-gray-400">#${order._id.slice(-6).toUpperCase()}</td>
+                        <td class="p-6 font-mono text-gray-400">#${String(order.id).padStart(6, '0')}</td>
                         <td class="p-6">
-                            <div class="font-medium">${order.user?.username || 'Guest'}</div>
-                            <div class="text-xs text-gray-500">${order.user?.email || 'N/A'}</div>
+                            <div class="font-medium">${order.userName || 'Guest'}</div>
+                            <div class="text-xs text-gray-500">${order.userEmail || 'N/A'}</div>
                         </td>
-                        <td class="p-6 text-gray-400">${new Date(order.createdAt).toLocaleDateString()}</td>
-                        <td class="p-6 font-bold">₹${Number(order.totalPrice || 0).toFixed(2)}</td>
+                        <td class="p-6 text-gray-400">${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td class="p-6 font-bold">â‚¹${Number(order.totalPrice || 0).toFixed(2)}</td>
                         <td class="p-6">
                             <span class="px-3 py-1 text-xs font-semibold rounded-full ${statusColors[displayStatus] || statusColors['Pending']}">
                                 ${displayStatus}
                             </span>
                         </td>
                         <td class="p-6 text-right">
-                            <a href="orders.html?id=${order._id}" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View</a>
+                            <a href="orders.html?id=${order.id}" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View</a>
                         </td>
                     </tr>
                 `;
@@ -184,3 +186,4 @@
 </body>
 
 </html>
+

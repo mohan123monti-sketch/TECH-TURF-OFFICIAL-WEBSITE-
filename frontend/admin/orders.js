@@ -39,12 +39,12 @@ function renderOrders() {
         const totalPrice = Number(order.totalPrice || 0);
         return `
             <tr class="hover:bg-gray-700/30 transition-colors">
-                <td class="p-4 font-mono text-gray-400">#${order._id.slice(-6).toUpperCase()}</td>
+                <td class="p-4 font-mono text-gray-400">#${String(order.id).padStart(6, '0')}</td>
                 <td class="p-4">
-                    <div class="font-medium">${order.user?.username || 'Guest'}</div>
-                    <div class="text-xs text-gray-500">${order.user?.email || 'N/A'}</div>
+                    <div class="font-medium">${order.userName || 'Guest'}</div>
+                    <div class="text-xs text-gray-500">${order.userEmail || 'N/A'}</div>
                 </td>
-                <td class="p-4 text-gray-400">${new Date(order.createdAt).toLocaleDateString()}</td>
+                <td class="p-4 text-gray-400">${new Date(order.created_at).toLocaleDateString()}</td>
                 <td class="p-4 font-bold">₹${totalPrice.toFixed(2)}</td>
                 <td class="p-4">
                     <span class="px-3 py-1 text-xs font-semibold rounded-full ${statusColors[displayStatus] || statusColors['Pending']}">
@@ -52,7 +52,7 @@ function renderOrders() {
                     </span>
                 </td>
                 <td class="p-4 text-right space-x-2">
-                    <button onclick="viewOrder('${order._id}')" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View Details</button>
+                    <button onclick="viewOrder('${order.id}')" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View Details</button>
                     <!-- Status update dropdown/modal action would go here -->
                 </td>
             </tr>
@@ -92,16 +92,16 @@ async function updateOrderStatus(orderId, newStatus) {
 let currentViewingOrderId = null;
 
 function viewOrder(orderId) {
-    const order = orders.find(o => o._id === orderId);
+    const order = orders.find(o => String(o.id) === String(orderId));
     if (!order) return;
 
     currentViewingOrderId = orderId;
 
     // Set Basic Info
-    document.getElementById('modal-order-id').textContent = `Order #${order._id.slice(-6).toUpperCase()}`;
-    document.getElementById('modal-order-date').textContent = new Date(order.createdAt).toLocaleString();
-    document.getElementById('modal-customer-name').textContent = order.user?.username || 'Guest';
-    document.getElementById('modal-customer-email').textContent = order.user?.email || 'N/A';
+    document.getElementById('modal-order-id').textContent = `Order #${String(order.id).padStart(6, '0')}`;
+    document.getElementById('modal-order-date').textContent = new Date(order.created_at).toLocaleString();
+    document.getElementById('modal-customer-name').textContent = order.userName || 'Guest';
+    document.getElementById('modal-customer-email').textContent = order.userEmail || 'N/A';
     const displayStatus = order.status || (order.isDelivered ? 'Delivered' : 'Pending');
     document.getElementById('modal-total-price').textContent = `₹${Number(order.totalPrice || 0).toFixed(2)}`;
     document.getElementById('modal-status-select').value = displayStatus;

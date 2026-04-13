@@ -13,10 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     container.innerHTML = '';
 
-    // Create Liquid Cursor
-    const cursor = document.createElement('div');
-    cursor.className = 'liquid-cursor';
-    document.body.appendChild(cursor);
+    container.innerHTML = '';
 
     // --- SCENE SETUP ---
     const scene = new THREE.Scene();
@@ -123,19 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         starPos[i * 3 + 2] = r * Math.cos(phi);
     }
     starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    const stars = new THREE.Points(starGeom, new THREE.PointsMaterial({ color: 0xffffff, size: 0.02 }));
-    scene.add(stars);
-
-    // --- MOUSE INTERACTION ---
-    let mouseX = 0, mouseY = 0;
-    let targetX = 0, targetY = 0;
-
-    window.addEventListener('mousemove', (e) => {
-        targetX = (e.clientX - window.innerWidth / 2) / 200;
-        targetY = (e.clientY - window.innerHeight / 2) / 200;
-
-        cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
-    });
+    // --- ANIMATION ---
 
     // --- ANIMATION ---
     function animate() {
@@ -146,12 +131,13 @@ document.addEventListener('DOMContentLoaded', () => {
         planetGroup.rotation.x += 0.001;
         sphereLines.rotation.y -= 0.001;
 
-        // Smooth Parallax
-        mouseX += (targetX - mouseX) * 0.05;
-        mouseY += (targetY - mouseY) * 0.05;
+        // Smooth Automatic Movement (Floating effect)
+        const time = performance.now() * 0.001;
+        const autoX = Math.sin(time * 0.5) * 0.2;
+        const autoY = Math.cos(time * 0.3) * 0.2;
 
-        planetGroup.position.x = mouseX;
-        planetGroup.position.y = -mouseY;
+        planetGroup.position.x = autoX;
+        planetGroup.position.y = autoY;
 
         // Stars slow drift
         stars.rotation.y -= 0.0001;

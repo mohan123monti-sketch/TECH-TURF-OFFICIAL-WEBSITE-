@@ -1,6 +1,6 @@
 // Admin Layout Logic
 const isFile = window.location.protocol === 'file:';
-const API_BASE_URL = isFile ? 'http://localhost:5000/api' : '/api';
+const API_BASE_URL = isFile ? 'http://localhost:5000/api' : 'http://localhost:5000/api';
 
 // --- Toast Notification System (Made global for module scripts) ---
 window.showToast = function (message, type = 'info') {
@@ -42,7 +42,7 @@ function ensureSEO() {
 
     if (!document.querySelector('script[data-seo="true"]')) {
         const script = document.createElement('script');
-        script.src = '../js/seo.js';
+        script.src = '/src/js/features/seo.js';
         script.defer = true;
         script.dataset.seo = 'true';
         script.onload = () => {
@@ -60,7 +60,7 @@ function checkAuth() {
     if (!token) {
         console.log('[AUTH CHECK] No token found in localStorage');
         console.log('[AUTH CHECK] localStorage keys:', Object.keys(localStorage));
-        window.location.href = '../login.html';
+        window.location.href = '/pages/login.html';
         return null;
     }
     console.log('[AUTH CHECK] Token found:', token.substring(0, 20) + '...');
@@ -74,13 +74,17 @@ function renderSidebar() {
     if (!sidebar) return;
 
     const menuItems = [
+        { name: 'Master Admin', icon: 'layout-grid', href: 'master-admin.html' },
         { name: 'Dashboard', icon: 'layout-dashboard', href: 'dashboard.html' },
+        { name: 'Ops Center', icon: 'server-cog', href: 'ops-center.html' },
         { name: 'Products', icon: 'package', href: 'products.html' },
         { name: 'Orders', icon: 'shopping-cart', href: 'orders.html' },
         { name: 'Users', icon: 'users', href: 'users.html' },
         { name: 'Launches', icon: 'rocket', href: 'launches.html' },
         { name: 'Content', icon: 'file-text', href: 'content.html' },
         { name: 'Support', icon: 'life-buoy', href: 'support.html' },
+        { name: 'Business CRM', icon: 'briefcase', href: 'http://localhost:5173' },
+            { name: 'Business CRM', icon: 'briefcase', href: 'http://localhost:3100' },
         { name: 'Settings', icon: 'settings', href: 'settings.html' },
     ];
 
@@ -111,7 +115,7 @@ function renderSidebar() {
 
     document.getElementById('logout-button').addEventListener('click', () => {
         localStorage.removeItem('tt_token');
-        window.location.href = '../login.html';
+        window.location.href = '/pages/login.html';
     });
 }
 
@@ -122,6 +126,8 @@ function renderTopbar() {
 
     const currentPath = window.location.pathname.split('/').pop();
     let title = 'Admin Dashboard';
+    if (currentPath === 'master-admin.html') title = 'Master Admin Panel';
+    else if (currentPath === 'ops-center.html') title = 'Unified Operations Center';
     if (currentPath === 'products.html') title = 'Products & Inventory';
     else if (currentPath === 'orders.html') title = 'Orders & Requests';
     else if (currentPath === 'users.html') title = 'Team & Roles';

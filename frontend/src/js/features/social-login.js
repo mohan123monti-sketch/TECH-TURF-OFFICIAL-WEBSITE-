@@ -2,12 +2,52 @@
 // Add to login.html and register.html
 
 const SocialLogin = {
-    init() {
-        this.addSocialButtons();
+    isGoogleOriginAllowed() {
+        // Google OAuth must explicitly whitelist the current origin in Google Cloud Console.
+        const currentOrigin = window.location.origin;
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:3601',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:3601'
+        ];
+        return allowedOrigins.includes(currentOrigin);
     },
 
-    addSocialButtons() {
-        // Try multiple selectors to find the login form
+    async init() {
+        await this.addSocialButtons();
+        this.handleSocialCallback(); // for legacy or facebook redirects
+    },
+
+    async fetchGoogleConfig() {
+        try {
+            // Priority: Global var > Placeholder ID Check > Fallback direct URL
+            const baseUrl = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+            console.log('Social Login: Fetching config from', baseUrl);
+            
+            const res = await fetch(`${baseUrl}/auth/google/config`, {
+                cache: 'no-store' // Avoid stale config
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                if (data.clientId && !data.clientId.includes('your_google_client') && data.clientId.length > 10) {
+                    console.log('Social Login: Client ID validated');
+                    return data.clientId;
+                } else {
+                    console.warn('Social Login: Invalid Client ID received from backend');
+                }
+            } else {
+                console.error('Social Login: Backend returned status', res.status);
+            }
+        } catch (e) {
+            console.error('Social Login: Fetch error:', e.message);
+        }
+        return null;
+    },
+
+    async addSocialButtons() {
+        // Find suitable form to attach to
         const loginForm = document.querySelector('#signin-form') || 
                          document.querySelector('#login-form') ||
                          document.querySelector('#register-form') ||
@@ -20,8 +60,13 @@ const SocialLogin = {
             return;
         }
 
+        // Avoid duplicate containers
+        if (document.getElementById('google-btn-container')) return;
+
+        const clientId = await this.fetchGoogleConfig();
+
         const socialHTML = `
-            <div class="social-login-section mt-6">
+            <div class="social-login-section mt-6" id="social-login-section">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
                         <div class="w-full border-t border-white/10"></div>
@@ -31,44 +76,115 @@ const SocialLogin = {
                     </div>
                 </div>
 
-                <div class="mt-6 grid grid-cols-2 gap-3">
-                    <button type="button" onclick="SocialLogin.loginWithGoogle()" 
-                        class="flex items-center justify-center gap-3 px-4 py-3 bg-white text-gray-700 rounded-2xl font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        <span class="text-sm">Google</span>
-                    </button>
-
-                    <button type="button" onclick="SocialLogin.loginWithFacebook()" 
-                        class="flex items-center justify-center gap-3 px-4 py-3 bg-[#1877F2] text-white rounded-2xl font-bold hover:bg-[#166fe5] transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                        <span class="text-sm">Facebook</span>
-                    </button>
+                <div class="mt-6 flex justify-center">
+                    <div id="google-btn-container" class="w-full h-[50px] overflow-hidden rounded-2xl flex justify-center">
+                        <!-- Google button will render here -->
+                        ${!clientId ? '<div class="text-[10px] text-orange-500/70 text-center mt-3 font-black uppercase tracking-widest animate-pulse">Connection Link Offline</div>' : ''}
+                    </div>
                 </div>
             </div>
         `;
 
         loginForm.insertAdjacentHTML('afterend', socialHTML);
-        console.log('✓ Social login buttons added to page');
+        
+        if (clientId && this.isGoogleOriginAllowed()) {
+            this.initGoogleIdentity(clientId);
+        } else if (clientId && !this.isGoogleOriginAllowed()) {
+            const container = document.getElementById('google-btn-container');
+            if (container) {
+                container.innerHTML = '<div class="text-[10px] text-orange-500/70 text-center mt-3 font-black uppercase tracking-widest">Google login disabled: authorize this origin in Google Console</div>';
+            }
+        } else {
+            // Attempt retry after 3 seconds if first one failed (server might be starting)
+            setTimeout(async () => {
+                const retryId = await this.fetchGoogleConfig();
+                if (retryId && this.isGoogleOriginAllowed()) {
+                    const errorMsg = document.querySelector('#google-btn-container div');
+                    if (errorMsg) errorMsg.remove();
+                    this.initGoogleIdentity(retryId);
+                }
+            }, 3000);
+        }
     },
 
-    loginWithGoogle() {
-        const baseUrl = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || '/api';
-        window.location.href = `${baseUrl}/auth/social/google`;
+    initGoogleIdentity(clientId) {
+        if (!document.getElementById('gsi-script')) {
+            const script = document.createElement('script');
+            script.id = 'gsi-script';
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = () => this.renderGoogleButton(clientId);
+            document.head.appendChild(script);
+        } else if (window.google) {
+            this.renderGoogleButton(clientId);
+        }
     },
 
-    loginWithFacebook() {
-        const baseUrl = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || '/api';
-        window.location.href = `${baseUrl}/auth/social/facebook`;
+    renderGoogleButton(clientId) {
+        if (!window.google || !window.google.accounts || !window.google.accounts.id) return;
+
+        window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: this.handleGoogleResponse.bind(this)
+        });
+
+        const container = document.getElementById('google-btn-container');
+        if (container) {
+            window.google.accounts.id.renderButton(
+                container,
+                { theme: 'filled_black', size: 'large', type: 'standard', shape: 'pill', text: 'signin_with', width: container.offsetWidth } 
+            );
+        }
     },
 
-    // Handle callback from social login
+    async handleGoogleResponse(response) {
+        try {
+            const baseUrl = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+            const res = await fetch(`${baseUrl}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential })
+            });
+            const data = await res.json();
+            
+            if (!res.ok) {
+                throw new Error(data.message || 'Verification Failed');
+            }
+
+            if (data.twoFactorRequired) {
+                window.showMessage?.('info', '2-Step Verification Active. Check Email.');
+                // Simulate updating UI state for 2FA by reloading with params, 
+                // or if updateUIForState is available in global scope:
+                if (typeof window.updateUIForState === 'function') {
+                    window.userEmail = data.email;
+                    window.updateUIForState('2fa');
+                } else {
+                    window.location.href = `/pages/login.html?twoFactorRequired=true&email=${encodeURIComponent(data.email)}`;
+                }
+            } else {
+                this.finalizeLogin(data);
+            }
+        } catch (err) {
+            console.error(err);
+            window.showMessage?.('error', err.message);
+        }
+    },
+
+    finalizeLogin(data) {
+        window.showMessage?.('success', 'Link Established. Finalizing Sync...');
+        localStorage.setItem('tt_token', data.token);
+        localStorage.setItem('tt_user', JSON.stringify(data.user || {
+             id: data.id, name: data.name, email: data.email, role: data.role
+        }));
+        setTimeout(() => {
+            window.location.href = (data.role === 'admin' || (data.user && data.user.isAdmin) || data.role === 'manager') 
+                ? '/admin/dashboard.html' 
+                : '/index.html';
+        }, 1200);
+    },
+
+    // Handle callback from legacy social login redirects
     handleSocialCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
@@ -77,9 +193,8 @@ const SocialLogin = {
 
         if (success === 'true' && token) {
             localStorage.setItem('tt_token', token);
-            window.showToast?.(`Successfully logged in with ${social}!`, 'success');
+            window.showMessage?.(`Successfully logged in with ${social}!`, 'success');
             
-            // Redirect to dashboard or home
             setTimeout(() => {
                 window.location.href = '/pages/dashboard.html';
             }, 1000);
@@ -87,16 +202,12 @@ const SocialLogin = {
     }
 };
 
-// Make SocialLogin available globally
 window.SocialLogin = SocialLogin;
 
-// Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         SocialLogin.init();
-        SocialLogin.handleSocialCallback();
     });
 } else {
     SocialLogin.init();
-    SocialLogin.handleSocialCallback();
 }

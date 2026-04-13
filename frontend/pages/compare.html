@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech Turf - Compare Products</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/src/css/pages/style.css">
     <link rel="stylesheet" href="/src/css/pages/shop-styles.css">
@@ -57,7 +57,7 @@
                         </div>
                         <div class="p-6 space-y-3">
                             <h3 class="text-xl font-black text-white">${product.name}</h3>
-                            <p class="text-[#d2670e] font-mono font-bold">₹${product.price}</p>
+                            <p class="text-[#d2670e] font-mono font-bold">â‚¹${product.price}</p>
                             <p class="text-xs text-white/50">Brand: ${product.brand || 'Tech Turf'}</p>
                             <p class="text-xs text-white/50">ETA: ${Number(product.deliveryEtaDays || 3)} days</p>
                             <p class="text-xs text-white/50">Rating: ${(Number(product.ratingAvg || 0)).toFixed(1)} (${Number(product.ratingCount || 0)} reviews)</p>
@@ -77,3 +77,4 @@
 </body>
 
 </html>
+

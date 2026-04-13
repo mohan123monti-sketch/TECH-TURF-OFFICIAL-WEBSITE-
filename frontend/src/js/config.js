@@ -79,7 +79,6 @@ const CONFIG = {
   
   // Social Media Links
   SOCIAL: {
-    FACEBOOK: 'https://facebook.com/techturf',
     TWITTER: 'https://twitter.com/techturf',
     INSTAGRAM: 'https://instagram.com/techturf',
     LINKEDIN: 'https://linkedin.com/company/techturf',

@@ -43,12 +43,12 @@ function renderProducts() {
                     ${product.stock > 0 ? product.stock : 'Out of Stock'}
                 </span>
             </td>
-            <td class="p-4 text-gray-400">${product._id.slice(-6).toUpperCase()}</td>
+            <td class="p-4 text-gray-400">${String(product.id).padStart(6, '0')}</td>
             <td class="p-4 text-right space-x-2">
-                <button onclick="editProduct('${product._id}')" class="text-orange-400 hover:text-orange-300">
+                <button onclick="editProduct('${product.id}')" class="text-orange-400 hover:text-orange-300">
                     <i data-lucide="edit" class="w-4 h-4"></i>
                 </button>
-                <button onclick="deleteProduct('${product._id}')" class="text-red-400 hover:text-red-300">
+                <button onclick="deleteProduct('${product.id}')" class="text-red-400 hover:text-red-300">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             </td>
@@ -66,7 +66,7 @@ function openProductModal(productId = null) {
     editingProductId = productId;
 
     if (productId) {
-        const product = products.find(p => p._id === productId);
+        const product = products.find(p => String(p.id) === String(productId));
         title.textContent = 'Edit Product';
         form.name.value = product.name;
         form.description.value = product.description;
@@ -110,7 +110,7 @@ async function saveProduct(event) {
         formData.append('image', fileInput.files[0]);
 
         try {
-            const uploadResponse = await fetch(`${window.API_BASE_URL}/upload`, {
+            const uploadResponse = await fetch(`${window.API_BASE_URL}/media/upload`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData

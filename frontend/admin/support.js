@@ -1,3 +1,6 @@
+                        <span class="flex items-center gap-2"><i data-lucide="calendar" class="w-3 h-3"></i> ${new Date(ticket.created_at || ticket.createdAt).toLocaleDateString()}</span>
+                        <button onclick="updateTicketStatus('${ticket.id}', 'In Progress')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                        <button onclick="deleteTicket('${ticket.id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition-all">
 // Support/Tickets Page Logic
 // Note: API_BASE_URL and window.showToast are provided by admin-layout.js
 

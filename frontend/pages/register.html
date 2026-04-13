@@ -7,7 +7,7 @@
   <title>Tech Turf - Identity Initiation</title>
 
   <!-- External Libraries -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/src/css/tailwind.generated.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -60,6 +60,7 @@
     .input-group input {
       width: 100%;
       padding: 16px 24px;
+      padding-left: 56px;
       padding-right: 56px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -78,10 +79,9 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
-    .input-group i,
-    .input-group svg {
+    .input-group .absolute-icon {
       position: absolute;
-      right: 20px;
+      left: 20px;
       top: 50%;
       transform: translateY(-50%);
       color: rgba(255, 255, 255, 0.3);
@@ -90,8 +90,30 @@
       z-index: 20;
     }
 
-    .input-group input:focus~i,
-    .input-group input:focus~svg {
+    .input-group .toggle-password {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.4s var(--transition-curve);
+      z-index: 30;
+      background: none;
+      border: none;
+      padding: 0;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .input-group .toggle-password:hover {
+      color: white;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .input-group input:focus~.absolute-icon {
       color: white;
       transform: translateY(-50%) scale(1.1);
     }
@@ -188,6 +210,9 @@
           <input type="password" id="password" required placeholder="Security Key (Min 8 chars)" minlength="8"
             class="glass-input w-full px-8 py-5 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-white/30 transition-all text-sm font-medium">
           <i data-lucide="lock" class="absolute-icon"></i>
+          <button type="button" class="toggle-password" onclick="window.togglePasswordVisibility('password', this)">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+          </button>
         </div>
 
         <div class="flex justify-between items-center py-4 text-sm px-2">
@@ -284,15 +309,29 @@
       const registerButton = document.getElementById('register-button');
       const btnText = registerButton.querySelector('span');
 
+      // Password Visibility Toggle
+      window.togglePasswordVisibility = (inputId, btn) => {
+          const input = document.getElementById(inputId);
+          const icon = btn.querySelector('i');
+          if (input.type === 'password') {
+              input.type = 'text';
+              icon.setAttribute('data-lucide', 'eye-off');
+          } else {
+              input.type = 'password';
+              icon.setAttribute('data-lucide', 'eye');
+          }
+          if (window.lucide) lucide.createIcons();
+      };
+
       // 1. Safety Check for dependencies
-      if (typeof window.showMessage !== 'function' || typeof window.API_BASE_URL === 'undefined') {
+      if (typeof window.showMessage !== 'function' || typeof window.API_BASE_URL === 'undefined' || window.API_BASE_URL === '/api' || window.API_BASE_URL.includes('8080')) {
         console.warn('Registration: Layout dependencies missing, using fallbacks');
-        window.API_BASE_URL = window.location.protocol === 'file:' ? 'http://localhost:5000/api' : '/api';
+        window.API_BASE_URL = 'http://localhost:5000/api';
         window.showMessage = (type, msg) => alert(`${type.toUpperCase()}: ${msg}`);
         window.isLoggedIn = () => !!localStorage.getItem('tt_token');
       }
 
-      if (window.isLoggedIn()) { window.location.href = 'index.html'; return; }
+      if (window.isLoggedIn()) { window.location.href = '/index.html'; return; }
 
       registerForm.addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -322,7 +361,7 @@
             window.showMessage('success', 'Identity Created! Granting Access...');
             localStorage.setItem('tt_token', data.token);
             localStorage.setItem('tt_user', JSON.stringify(data.user));
-            setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+            setTimeout(() => { window.location.href = '/index.html'; }, 1500);
           } else {
             window.showMessage('error', data.message || 'Initiation Failed: Protocol Error');
             registerButton.disabled = false; btnText.textContent = 'Finalize Protocol';
@@ -338,6 +377,9 @@
     }
     window.addEventListener('load', () => { checkRegistrationLogic(); lucide.createIcons(); });
   </script>
+
+  <!-- Social Login Integration -->
+  <script src="/src/js/features/social-login.js?v=2.1"></script>
 </body>
 
 </html>

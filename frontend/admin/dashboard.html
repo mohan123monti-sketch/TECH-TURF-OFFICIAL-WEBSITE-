@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Tech Turf</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .sidebar-active { @apply bg-orange-100 border-r-4 border-orange-500; }
@@ -97,13 +97,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="stat-card border-l-orange-500">
                         <p class="text-gray-500 text-sm">Total Revenue</p>
-                        <p class="text-3xl font-bold text-gray-800">₹<span id="revenue">0</span></p>
-                        <p class="text-green-600 text-sm mt-2">↑ 12% from last month</p>
+                        <p class="text-3xl font-bold text-gray-800">â‚¹<span id="revenue">0</span></p>
+                        <p class="text-green-600 text-sm mt-2">â†‘ 12% from last month</p>
                     </div>
                     <div class="stat-card border-l-blue-500">
                         <p class="text-gray-500 text-sm">Total Orders</p>
                         <p class="text-3xl font-bold text-gray-800" id="totalOrders">0</p>
-                        <p class="text-blue-600 text-sm mt-2">↑ 8% from last month</p>
+                        <p class="text-blue-600 text-sm mt-2">â†‘ 8% from last month</p>
                     </div>
                     <div class="stat-card border-l-green-500">
                         <p class="text-gray-500 text-sm">Products</p>
@@ -113,7 +113,7 @@
                     <div class="stat-card border-l-purple-500">
                         <p class="text-gray-500 text-sm">Active Users</p>
                         <p class="text-3xl font-bold text-gray-800" id="activeUsers">0</p>
-                        <p class="text-purple-600 text-sm mt-2">↑ 24% growth</p>
+                        <p class="text-purple-600 text-sm mt-2">â†‘ 24% growth</p>
                     </div>
                 </div>
 
@@ -194,7 +194,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="stat-card border-l-orange-500">
                         <p class="text-gray-500 text-sm">Avg Order Value</p>
-                        <p class="text-3xl font-bold">₹<span id="avgOrderValue">0</span></p>
+                        <p class="text-3xl font-bold">â‚¹<span id="avgOrderValue">0</span></p>
                     </div>
                     <div class="stat-card border-l-blue-500">
                         <p class="text-gray-500 text-sm">Conversion Rate</p>

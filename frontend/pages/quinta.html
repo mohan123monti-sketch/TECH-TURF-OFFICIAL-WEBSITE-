@@ -7,7 +7,7 @@
     <title>Quinta - Aerospace & Space Systems</title>
 
     <!-- External Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -43,6 +43,9 @@
             </div>
 
             <div class="max-w-6xl mx-auto space-y-8 relative z-10 mt-[-50px]">
+                <div class="flex justify-center mb-10 reveal-hidden">
+                    <img src="/public/images/logos/quinta.png" alt="Quinta Logo" class="w-48 h-48 object-contain">
+                </div>
                 <div
                     class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full status-badge text-[10px] font-bold tracking-[0.3em] mb-8 technical-label">
                     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
@@ -64,7 +67,7 @@
             </div>
         </section>
 
-        <!-- 🔵 ABOUT & MISSION -->
+        <!-- ðŸ”µ ABOUT & MISSION -->
         <section class="py-32 px-4 max-w-7xl mx-auto section-dark">
             <div class="grid md:grid-cols-2 gap-20 items-center mb-32">
                 <div class="reveal-hidden">
@@ -113,117 +116,9 @@
             </div>
         </section>
 
-        <!-- 🔵 WHAT WE BUILD -->
-        <section id="rockets" class="py-24 relative">
-            <div
-                class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E')] opacity-20 pointer-events-none">
-            </div>
+<!-- Removed: What We Build Section -->
 
-            <div class="max-w-7xl mx-auto px-4 relative z-10">
-                <div class="text-center mb-16 reveal-hidden">
-                    <h2 class="text-4xl md:text-5xl font-bold mb-4">What We <span
-                            class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Build</span>
-                    </h2>
-                    <p class="text-gray-400 max-w-2xl mx-auto">Pushing the boundaries of young Indian aerospace
-                        innovation.</p>
-                </div>
-
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Item 1 -->
-                    <div class="liquid-card spotlight-group p-10 group reveal-hidden">
-                        <div class="spotlight-overlay"></div>
-                        <div class="relative z-10">
-                            <div
-                                class="w-16 h-16 rounded-2xl iphone-glass flex items-center justify-center text-white mb-8 border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-700">
-                                <i data-lucide="rocket" class="w-8 h-8"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Research Rockets
-                            </h3>
-                            <p class="text-gray-400 text-sm font-medium leading-relaxed opacity-70">Propulsion
-                                profiling, structural stability analysis, and high-altitude flight performance tests.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Item 2 -->
-                    <div class="liquid-card spotlight-group p-10 group reveal-hidden" style="transition-delay: 0.1s;">
-                        <div class="spotlight-overlay"></div>
-                        <div class="relative z-10">
-                            <div
-                                class="w-16 h-16 rounded-2xl iphone-glass flex items-center justify-center text-white mb-8 border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-700">
-                                <i data-lucide="cpu" class="w-8 h-8"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Flight Avionics
-                            </h3>
-                            <p class="text-gray-400 text-sm font-medium leading-relaxed opacity-70">IMU fusion,
-                                barometric telemetry, gas diagnostics, and 32GB high-speed autonomous logging.</p>
-                        </div>
-                    </div>
-
-                    <!-- Item 3 -->
-                    <div class="liquid-card spotlight-group p-10 group reveal-hidden" style="transition-delay: 0.2s;">
-                        <div class="spotlight-overlay"></div>
-                        <div class="relative z-10">
-                            <div
-                                class="w-16 h-16 rounded-2xl iphone-glass flex items-center justify-center text-white mb-8 border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-700">
-                                <i data-lucide="flame" class="w-8 h-8"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Solid Propulsion
-                            </h3>
-                            <p class="text-gray-400 text-sm font-medium leading-relaxed opacity-70">Thrust vectoring
-                                R&D, grain shaping, chamber safety protocols, and nozzle optimization.</p>
-                        </div>
-                    </div>
-
-                    <!-- Item 4 -->
-                    <div class="liquid-card spotlight-group p-10 group reveal-hidden" style="transition-delay: 0.3s;">
-                        <div class="spotlight-overlay"></div>
-                        <div class="relative z-10">
-                            <div
-                                class="w-16 h-16 rounded-2xl iphone-glass flex items-center justify-center text-white mb-8 border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-700">
-                                <i data-lucide="shield-check" class="w-8 h-8"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Recovery Nodes
-                            </h3>
-                            <p class="text-gray-400 text-sm font-medium leading-relaxed opacity-70">Automated parachute
-                                deployment, impact protection, and secure wireless ignition sequences.</p>
-                        </div>
-                    </div>
-
-                    <!-- Item 5 -->
-                    <div class="liquid-card spotlight-group p-10 group reveal-hidden" style="transition-delay: 0.4s;">
-                        <div class="spotlight-overlay"></div>
-                        <div class="relative z-10">
-                            <div
-                                class="w-16 h-16 rounded-2xl iphone-glass flex items-center justify-center text-white mb-8 border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-700">
-                                <i data-lucide="cloud-fog" class="w-8 h-8"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Atmospheric Data
-                            </h3>
-                            <p class="text-gray-400 text-sm font-medium leading-relaxed opacity-70">Multi-layer
-                                environmental monitoring for pressure, thermal flux, and air-quality analytics.</p>
-                        </div>
-                    </div>
-
-                    <!-- Item 6 -->
-                    <div class="liquid-card spotlight-group p-10 group reveal-hidden" style="transition-delay: 0.5s;">
-                        <div class="spotlight-overlay"></div>
-                        <div class="relative z-10">
-                            <div
-                                class="w-16 h-16 rounded-2xl iphone-glass flex items-center justify-center text-white mb-8 border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-700">
-                                <i data-lucide="radio" class="w-8 h-8"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Wireless Uplink
-                            </h3>
-                            <p class="text-gray-400 text-sm font-medium leading-relaxed opacity-70">Secure long-distance
-                                ignition protocols and real-time telemetry broadcast architectures.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 🔵 FEATURED PROJECT -->
+        <!-- ðŸ”µ FEATURED PROJECT -->
         <section class="py-24 px-4 max-w-7xl mx-auto">
             <div class="liquid-card spotlight-group rounded-[4rem] overflow-hidden relative reveal-hidden">
                 <div class="spotlight-overlay"></div>
@@ -274,86 +169,9 @@
             </div>
         </section>
 
-        <!-- 🔵 TIMELINE & TECH -->
-        <section class="py-24 border-y border-white/5">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="grid lg:grid-cols-2 gap-16">
+<!-- Removed: Timeline & Tech Section -->
 
-                    <!-- Timeline -->
-                    <div class="reveal-hidden">
-                        <h3 class="text-3xl font-bold mb-8 flex items-center gap-3"><i data-lucide="history"
-                                class="text-blue-500"></i> Development Timeline</h3>
-                        <div class="space-y-0 border-l-2 border-gray-800 ml-3">
-                            <div class="pl-8 pb-8 relative">
-                                <span
-                                    class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-700 border-2 border-[#020408]"></span>
-                                <h4 class="text-lg font-bold text-gray-500">Mark-1</h4>
-                                <p class="text-gray-500">First concept and body prototype.</p>
-                            </div>
-                            <div class="pl-8 pb-8 relative">
-                                <span
-                                    class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-700 border-2 border-[#020408]"></span>
-                                <h4 class="text-lg font-bold text-gray-500">Mark-2</h4>
-                                <p class="text-gray-500">Stability and fin testing.</p>
-                            </div>
-                            <div class="pl-8 pb-8 relative">
-                                <span
-                                    class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-700 border-2 border-[#020408]"></span>
-                                <h4 class="text-lg font-bold text-gray-500">Mark-3 & 4</h4>
-                                <p class="text-gray-500">Material optimization and aerodynamic refinement.</p>
-                            </div>
-                            <div class="pl-8 pb-8 relative">
-                                <span
-                                    class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-900 border-2 border-[#020408]"></span>
-                                <h4 class="text-lg font-bold text-blue-400">Mark-5</h4>
-                                <p class="text-gray-400">First electronics-enabled flight computer.</p>
-                            </div>
-                            <div class="pl-8 relative">
-                                <span
-                                    class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500 border-2 border-[#020408] animate-pulse"></span>
-                                <h4 class="text-xl font-bold text-white">Rockbreaker V0.1</h4>
-                                <p class="text-gray-300">Full-scale research rocket with sensor suite.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tech Stack -->
-                    <div class="reveal-hidden" style="transition-delay: 0.2s;">
-                        <h3 class="text-3xl font-bold mb-8 flex items-center gap-3"><i data-lucide="server"
-                                class="text-cyan-500"></i> Technology Stack</h3>
-                        <div class="grid sm:grid-cols-2 gap-4">
-                            <div class="iphone-glass p-6 rounded-2xl">
-                                <h4 class="font-bold text-white mb-2">Avionics Architecture</h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">Sensor fusion, power management, secure
-                                    data writing,
-                                    multi-layer logic checks.</p>
-                            </div>
-                            <div class="iphone-glass p-6 rounded-2xl">
-                                <h4 class="font-bold text-white mb-2">Propulsion Lab</h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">Thrust profiling, grain shaping,
-                                    oxidizer–fuel ratio
-                                    tuning, thermal analysis.</p>
-                            </div>
-                            <div class="iphone-glass p-6 rounded-2xl">
-                                <h4 class="font-bold text-white mb-2">Aerodynamics</h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">Fin alignment, CG–CP calculation, drag
-                                    reduction,
-                                    CFD-based refinements.</p>
-                            </div>
-                            <div class="iphone-glass p-6 rounded-2xl">
-                                <h4 class="font-bold text-white mb-2">Data & Telemetry</h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">Mission data stored on-board,
-                                    structured logging,
-                                    future ground-station comms.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- 🔵 SAFETY & ROADMAP -->
+        <!-- ðŸ”µ SAFETY & ROADMAP -->
         <section class="py-24 px-4 max-w-7xl mx-auto">
             <div class="grid md:grid-cols-2 gap-8">
                 <!-- Safety -->
@@ -363,18 +181,18 @@
                         <i data-lucide="shield-alert" class="text-red-500"></i> Safety Protocols
                     </h3>
                     <ul class="space-y-4 text-gray-400">
-                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">•</span> Wireless ignition
+                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">â€¢</span> Wireless ignition
                             system</li>
-                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">•</span> IR & Ultrasonic
+                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">â€¢</span> IR & Ultrasonic
                             pre-launch validation</li>
-                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">•</span> Engine stress
+                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">â€¢</span> Engine stress
                             testing & casing checks</li>
-                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">•</span> Designated
+                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">â€¢</span> Designated
                             controlled launch areas</li>
-                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">•</span> Thermal and
+                        <li class="flex items-start gap-3"><span class="text-red-500 mt-1">â€¢</span> Thermal and
                             structural inspection</li>
                     </ul>
-                    <p class="mt-6 text-sm text-red-400 font-bold italic">"Safety is not optional — it is part of our
+                    <p class="mt-6 text-sm text-red-400 font-bold italic">"Safety is not optional â€” it is part of our
                         engineering culture."</p>
                 </div>
 
@@ -386,41 +204,24 @@
                         <i data-lucide="map" class="text-green-500"></i> Future Roadmap
                     </h3>
                     <ul class="space-y-4 text-gray-400">
-                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">→</span> Reusable model
+                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">â†’</span> Reusable model
                             rocket platform</li>
-                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">→</span> Autonomous landing
+                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">â†’</span> Autonomous landing
                             & stabilization</li>
-                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">→</span> High-altitude
+                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">â†’</span> High-altitude
                             balloon missions</li>
-                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">→</span> Real-time
+                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">â†’</span> Real-time
                             telemetry broadcasting</li>
-                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">→</span> Student aerospace
+                        <li class="flex items-start gap-3"><span class="text-green-500 mt-1">â†’</span> Student aerospace
                             fellowship programs</li>
                     </ul>
                 </div>
             </div>
         </section>
 
-        <!-- 🔵 GALLERY PLACEHOLDER -->
-        <section class="py-24 border-t border-white/5">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="text-center mb-16 reveal-hidden">
-                    <h2 class="text-4xl font-bold mb-4">Mission <span class="text-blue-500">Gallery</span></h2>
-                    <p class="text-gray-400">Snapshots of innovation, assembly, and launch.</p>
-                </div>
-                <div id="quinta-gallery-container"
-                    class="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] reveal-hidden">
-                    <!-- Images from category 'Quinta Gallery' will load here -->
-                    <div class="animate-pulse bg-white/5 md:col-span-2 md:row-span-2 rounded-xl"></div>
-                    <div class="animate-pulse bg-white/5 rounded-xl"></div>
-                    <div class="animate-pulse bg-white/5 rounded-xl"></div>
-                    <div class="animate-pulse bg-white/5 rounded-xl"></div>
-                    <div class="animate-pulse bg-white/5 rounded-xl"></div>
-                </div>
-            </div>
-        </section>
+<!-- Removed: Mission Gallery Section -->
 
-        <!-- 🔵 JOIN & CONTACT -->
+        <!-- ðŸ”µ JOIN & CONTACT -->
         <section id="join" class="py-24 relative">
             <div class="max-w-4xl mx-auto px-4 text-center reveal-hidden">
                 <h2 class="text-5xl md:text-7xl font-black mb-10 uppercase tracking-tighter leading-none">Join
@@ -465,14 +266,16 @@
                     </div>
                 </div>
 
-                <p class="mt-16 text-white/20 text-[10px] font-black uppercase tracking-[0.5em]">Quinta Aerospace //
-                    Division of Tech Turf
-                </p>
-            </div>
-        </section>
+                <p class="mt-16 text-white/20 text-[10px] font-black uppercase tracking-[0.5em]"><!-- Removed: What We Build Section -->
+<!-- Removed: Rocketheads Vol.1 Section -->
+    <div>
+                        <span class="text-blue-500 font-mono tracking-widest text-sm uppercase">Mission Logs</span>
+                        <h2 class="text-4xl font-bold mt-2">Latest <span class="text-blue-400">Updates</span></h2>
+                    </div>
+                </div>
 
-        <!-- 🔵 DYNAMIC MISSION UPDATES -->
-        <section class="py-24 relative overflow-hidden">
+        <!-- ðŸ”µ DYNAMIC MISSION UPDATES -->
+        <section id="quinta-updates" class="py-16 relative overflow-hidden hidden">
             <div class="max-w-7xl mx-auto px-4 relative z-10">
                 <div class="flex justify-between items-end mb-12 reveal-hidden">
                     <div>
@@ -498,7 +301,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             async function loadQuintaNews() {
+                const isAdmin = localStorage.getItem('isAdmin') === 'true';
+                if (!isAdmin) return; // Only admin can see/manage updates
+
                 const container = document.getElementById('quinta-news-container');
+                const section = document.getElementById('quinta-updates');
                 if (!container || !window.API_BASE_URL) return;
 
                 try {
@@ -508,7 +315,9 @@
                     const allPosts = await response.json();
                     const posts = allPosts.filter(p => p.category === 'Quinta').slice(0, 3);
 
-                    if (posts.length === 0) {
+                    if (posts.length > 0) {
+                        section.classList.remove('hidden');
+                    } else {
                         container.innerHTML = '<p class="text-gray-500 col-span-full text-center py-12">No recent flight logs available.</p>';
                         return;
                     }
@@ -592,38 +401,43 @@
 
             async function loadQuintaGallery() {
                 const container = document.getElementById('quinta-gallery-container');
-                if (!container || !window.API_BASE_URL) return;
+                const section = document.getElementById('updates');
+                const adminControls = document.getElementById('quinta-admin-controls');
+                
+                if (localStorage.getItem('isAdmin') === 'true') {
+                    adminControls.classList.remove('hidden');
+                }
 
                 try {
-                    const response = await fetch(`${window.API_BASE_URL}/blog?category=Quinta Gallery`);
+                    const response = await fetch(`${window.API_BASE_URL}/blog?category=Quinta`);
                     if (!response.ok) return;
 
                     const allPosts = await response.json();
-                    const photos = allPosts.filter(p => p.category === 'Quinta Gallery');
+                    const posts = allPosts.filter(p => p.category === 'Quinta').slice(0, 3);
 
-                    if (photos.length === 0) {
-                        container.innerHTML = '<p class="text-gray-500 col-span-full text-center py-12">New mission photos coming soon.</p>';
+                    if (posts.length > 0) {
+                        section.classList.remove('hidden');
+                    } else {
+                        container.innerHTML = '<p class="text-gray-500 col-span-full text-center py-12">No recent flight logs available.</p>';
                         return;
                     }
 
-                    container.innerHTML = photos.map((photo, index) => {
-                        const isLarge = index === 0 || index === 5;
-                        const imageUrl = photo.imageUrl || `https://placehold.co/800x600/1e293b/e5e7eb?text=${encodeURIComponent(photo.title)}`;
-                        return `
-                            <div onclick="window.location.href='post-details.html?id=${photo._id}'" 
-                                 class="iphone-glass rounded-[1.5rem] overflow-hidden relative group cursor-pointer reveal-hidden ${isLarge ? 'md:col-span-2 md:row-span-2' : ''}" 
-                                 style="transition-delay: ${index * 0.05}s">
-                                <img src="${imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="${photo.title}">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-                                    <h4 class="text-white font-bold text-sm translate-y-2 group-hover:translate-y-0 transition-transform">${photo.title}</h4>
-                                </div>
+                    container.innerHTML = posts.map((post, index) => `
+                        <div class="liquid-card spotlight-group p-8 group reveal-hidden" style="transition-delay: ${index * 0.1}s">
+                            <div class="spotlight-overlay"></div>
+                            <div class="relative z-10">
+                                <span class="text-[10px] font-bold text-blue-500/50 uppercase tracking-widest mb-4 block">${new Date(post.createdAt).toLocaleDateString()}</span>
+                                <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors uppercase tracking-tight">${post.title}</h3>
+                                <p class="text-gray-500 text-sm line-clamp-3 mb-6">${post.content}</p>
+                                <a href="/pages/post-details.html?id=${post._id}" class="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2 group-hover:gap-4 transition-all">Read Log <i data-lucide="arrow-right" class="w-3 h-3"></i></a>
                             </div>
-                        `;
-                    }).join('');
+                        </div>
+                    `).join('');
 
+                    if (window.lucide) lucide.createIcons();
                     if (window.handleScrollReveal) window.handleScrollReveal();
-                } catch (err) {
-                    console.error('Error loading gallery:', err);
+                } catch (error) {
+                    console.error('Error loading Quinta news:', error);
                 }
             }
         });

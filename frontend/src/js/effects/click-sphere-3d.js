@@ -4,16 +4,17 @@
  * Concept: Floating connection nodes with thin neural lines.
  */
 
+/**
+ * Click Sphere - Floating Smart Nodes Network
+ * Theme: "Smart Technology / IoT / Digital Grid"
+ * Concept: Floating connection nodes with thin neural lines.
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     if (!document.body.classList.contains('click-sphere-branding')) return;
 
     const container = document.getElementById('three-container');
     if (!container) return;
-
-    // Create Liquid Cursor
-    const cursor = document.createElement('div');
-    cursor.className = 'liquid-cursor';
-    document.body.appendChild(cursor);
 
     container.innerHTML = '';
 
@@ -104,17 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nodesGroup.add(lineMesh);
     }
 
-    // --- MOUSE PARALLAX ---
-    let mouseX = 0, mouseY = 0;
-    let targetX = 0, targetY = 0;
-
-    window.addEventListener('mousemove', (e) => {
-        targetX = (e.clientX - window.innerWidth / 2) / 250;
-        targetY = (e.clientY - window.innerHeight / 2) / 250;
-
-        cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
-    });
-
     // --- ANIMATION LOOP ---
     function animate() {
         requestAnimationFrame(animate);
@@ -136,12 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateConnections();
 
-        // Smooth Parallax
-        mouseX += (targetX - mouseX) * 0.05;
-        mouseY += (targetY - mouseY) * 0.05;
-
-        nodesGroup.position.x = mouseX;
-        nodesGroup.position.y = -mouseY;
+        // Automatic Movement (Floating)
+        const time = performance.now() * 0.001;
+        nodesGroup.rotation.y += 0.0005;
+        nodesGroup.position.x = Math.sin(time * 0.3) * 0.4;
+        nodesGroup.position.y = Math.cos(time * 0.2) * 0.3;
 
         // Subtle glow fluctuation
         greenLight.intensity = 2 + Math.sin(Date.now() * 0.001) * 0.5;
@@ -156,16 +145,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     animate();
-
-    // --- SPOTLIGHT TRACKING ---
-    const spotlights = document.querySelectorAll('.spotlight-group');
-    spotlights.forEach(spotlight => {
-        spotlight.addEventListener('mousemove', e => {
-            const rect = spotlight.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            spotlight.style.setProperty('--x', `${x}px`);
-            spotlight.style.setProperty('--y', `${y}px`);
-        });
-    });
 });

@@ -42,10 +42,10 @@ function renderUsers() {
             <tr class="hover:bg-gray-700/30 transition-colors">
                 <td class="p-4 flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-sm font-bold text-white">
-                        ${user.username?.charAt(0).toUpperCase() || 'U'}
+                        ${user.name?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div>
-                        <div class="font-medium">${user.username || 'N/A'}</div>
+                        <div class="font-medium">${user.name || 'N/A'}</div>
                         <div class="text-xs text-gray-500">${user.email}</div>
                     </div>
                 </td>
@@ -54,9 +54,9 @@ function renderUsers() {
                         ${roleDisplay.charAt(0).toUpperCase() + roleDisplay.slice(1)}
                     </span>
                 </td>
-                <td class="p-4 text-gray-400">${new Date(user.createdAt).toLocaleDateString()}</td>
+                <td class="p-4 text-gray-400">${new Date(user.created_at).toLocaleDateString()}</td>
                 <td class="p-4 text-right">
-                    <button onclick="editUser('${user._id}')" class="text-blue-400 hover:text-blue-300">
+                    <button onclick="editUser('${user.id}')" class="text-blue-400 hover:text-blue-300">
                         <i data-lucide="user-cog" class="w-4 h-4"></i>
                     </button>
                 </td>
@@ -113,7 +113,7 @@ async function inviteUser(event) {
     const form = event.target;
 
     const userData = {
-        username: form.username.value,
+        name: form.username.value,
         email: form.email.value,
         password: form.password.value,
         role: form.role.value

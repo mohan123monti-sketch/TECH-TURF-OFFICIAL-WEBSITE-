@@ -1,3 +1,4 @@
+                    <button onclick="editLaunch('${launch.id}')" class="p-2 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition-colors">
 // Launches Page Logic
 // Note: API_BASE_URL and showToast are provided by admin-layout.js
 
@@ -91,6 +92,7 @@ function openLaunchModal(launchId = null) {
 
     if (launchId) {
         const launch = launches.find(l => l._id === launchId);
+            const launch = launches.find(l => l.id == launchId);
         title.textContent = 'Edit Mission';
         form.missionName.value = launch.missionName;
         // Format date for input type="date"

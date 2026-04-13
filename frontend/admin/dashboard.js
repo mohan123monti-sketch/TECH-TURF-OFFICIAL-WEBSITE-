@@ -4,17 +4,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadDashboardStats() {
         try {
-            const response = await fetch(`${window.API_BASE_URL}/admin/stats`, {
+            const response = await fetch(`${window.API_BASE_URL}/admin/stats/dashboard`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (response.ok) {
                 const stats = await response.json();
 
-                // Display values directly - NO ANIMATION
-                displayValue('kpi-revenue', stats.revenue || 0, true);
-                displayValue('kpi-orders', stats.orders || 0);
-                displayValue('kpi-users', stats.users || 0);
+                // Display values directly
+                displayValue('revenue', stats.revenue || 0, true);
+                displayValue('totalOrders', stats.totalOrders || 0);
+                displayValue('totalProducts', stats.totalProducts || 0);
+                displayValue('activeUsers', stats.totalUsers || 0);
             } else {
                 console.error('Failed to load statistics');
             }

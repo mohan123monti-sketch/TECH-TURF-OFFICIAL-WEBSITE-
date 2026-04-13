@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aadil - Vibe Coding | UI/UX | AI Innovation</title>
+    <meta name="description" content="Explore the high-end digital ecosystem of Aadil. Expert in Vibe Coding, AI integration, and Swiss-inspired UI/UX design.">
+    <link rel="stylesheet" href="/src/css/aadil_portfolio.css">
+    <!-- Lucide Icons for subtle touches if needed -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Stark Watermark Background -->
+        <h2 class="watermark">AADIL</h2>
+        
+        <!-- Diagonal Focal Zone (Red) -->
+        <div class="background-slice"></div>
+
+        <!-- Header Tech Specs (Brutalist style) -->
+        <div class="header-specs">
+            <div class="status-row">
+                <div class="status-dot"></div>
+                <div class="metadata">STATUS: AVAILABLE</div>
+            </div>
+            <div class="metadata">LATITUDE: 28.6139° N</div>
+            <div class="metadata">LONGITUDE: 77.2090° E</div>
+        </div>
+
+        <!-- Information Zone (White) -->
+        <div class="info-zone">
+            <h1 class="headline">WELCOME</h1>
+            <div class="tech-specs">
+                <span>TECH: VIBE CODING / AI / UI/UX</span>
+                <span>SYSTEM: AGENTIC ARCHITECTURES</span>
+                <span>OBJECTIVE: NEURAL AESTHETICS</span>
+            </div>
+        </div>
+
+        <!-- Subject Reveal Zone -->
+        <div class="focal-zone">
+            <div class="subject-container">
+                <img src="/public/images/aadil/portrait.png" alt="Aadil - Digital Architect" class="subject-image">
+            </div>
+        </div>
+
+        <!-- Minimalist Navigation Anchors -->
+        <div class="nav-anchors">
+            <div class="navigation-links">
+                <a class="nav-item">PREV</a>
+                <div class="nav-counter">01 / 08</div>
+                <a class="nav-item">NEXT</a>
+            </div>
+            <div class="metadata" style="color: #999; margin: 0;">PROJ: TECH TURF O.1</div>
+        </div>
+    </div>
+
+    <script>
+        // Minimal interaction logic
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            
+            const subject = document.querySelector('.subject-image');
+            
+            // Subtle motion parallax on mouse move (Static but alive)
+            document.addEventListener('mousemove', (e) => {
+                const x = (window.innerWidth / 2 - e.pageX) / 50;
+                const y = (window.innerHeight / 2 - e.pageY) / 50;
+                
+                subject.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1.02)`;
+            });
+
+            // Handle navigation clicks (Visual feedback)
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // Just a subtle flicker for brutalist feedback
+                    document.body.style.opacity = '0.5';
+                    setTimeout(() => document.body.style.opacity = '1', 100);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

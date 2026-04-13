@@ -92,23 +92,20 @@ function initDepthPanels(containerId, height, isMinimal = false) {
     function animate() {
         requestAnimationFrame(animate);
 
-        const time = Date.now();
+        const time = performance.now() * 0.001;
 
         // Animate Float
         group.children.forEach(panel => {
             const data = panel.userData;
             if (data) {
-                panel.position.y = data.baseY + Math.sin(time * data.speed + data.offset) * 1.5;
-                panel.rotation.y += 0.0002;
+                panel.position.y = data.baseY + Math.sin(time * 0.5 + data.offset) * 1.5;
+                panel.rotation.y += 0.0005;
             }
         });
 
-        // Smooth Mouse Parallax
-        targetX += (mouseX - targetX) * 0.05;
-        targetY += (mouseY - targetY) * 0.05;
-
-        group.rotation.x = -targetY * 0.05;
-        group.rotation.y = targetX * 0.05;
+        // Smooth Autonomous Floating (Replaced Mouse Parallax)
+        group.rotation.x = Math.sin(time * 0.2) * 0.1;
+        group.rotation.y = Math.cos(time * 0.3) * 0.1;
 
         renderer.render(scene, camera);
     }

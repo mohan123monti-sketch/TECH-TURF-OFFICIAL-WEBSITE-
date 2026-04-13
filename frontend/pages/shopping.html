@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech Turf - Futuristic Technology Marketplace</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <link rel="stylesheet" href="/src/css/pages/style.css">
@@ -20,6 +20,9 @@
 
     <section class="shop-hero">
         <div class="shop-container reveal-hidden">
+            <div class="flex justify-center mb-10 reveal-hidden">
+                <img src="/public/images/logos/tech-turf.png" alt="Tech Turf Corporate Logo" class="w-40 h-40 object-contain">
+            </div>
             <h1 class="reveal-hidden">Advanced Tech <br>Marketplace</h1>
             <p class="text-gray-400 text-lg mb-10 tracking-[0.3em] uppercase reveal-hidden">Strategic Hardware & Global
                 Engineering Nodes</p>
@@ -29,6 +32,28 @@
                     <span>Initialize Supply Chain</span>
                     <i data-lucide="arrow-down" class="w-5 h-5"></i>
                 </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🛒 FEATURED PRODUCTS (High-Performance Assets) -->
+    <section id="featured-section" class="py-16 relative">
+        <div class="shop-container relative z-10">
+            <div class="flex justify-between items-end mb-10 reveal-hidden">
+                <div>
+                    <span class="text-orange-500 font-mono tracking-widest text-xs uppercase mb-2 block">Premium
+                        Selection</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
+                        High-Performance <span class="shop-text-gradient">Assets</span></h2>
+                </div>
+            </div>
+
+            <!-- Featured Grid -->
+            <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Featured items will be injected here -->
+                <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
+                <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
+                <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
             </div>
         </div>
     </section>
@@ -45,16 +70,8 @@
         </div>
     </section>
 
-    <section class="featured-section">
-        <div class="shop-container">
-            <h2 class="section-title reveal-hidden">High-Performance <span class="text-[#d2670e]">Assets</span></h2>
-            <div id="featured-grid" class="featured-grid reveal-hidden"></div>
-        </div>
-    </section>
-
     <section class="product-section">
         <div class="shop-container">
-            <h2 class="section-title reveal-hidden">Inventory <span class="text-[#d2670e]">Manifest</span></h2>
 
             <div class="mb-8 grid grid-cols-1 lg:grid-cols-4 gap-4">
                 <div class="lg:col-span-2">
@@ -132,41 +149,19 @@
                 </button>
             </div>
 
-            <div id="compare-bar" class="mb-10 hidden items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl">
-                <span id="compare-count" class="text-xs text-white/70 uppercase tracking-widest">Compare (0)</span>
-                <button id="compare-go"
-                    class="px-4 py-2 bg-white/10 border border-white/10 rounded-xl text-xs text-white/80 uppercase tracking-widest hover:bg-white/20 transition-all">
-                    Compare Now
-                </button>
-            </div>
-
-            <div id="recent-section" class="mb-12 hidden">
-                <h3 class="text-xl font-black text-white uppercase tracking-widest mb-6">Recently Viewed</h3>
-                <div id="recent-grid" class="product-grid"></div>
-            </div>
-
             <div id="products-grid" class="product-grid"></div>
             <div id="pagination" class="mt-10 flex items-center justify-between text-xs text-white/60 uppercase tracking-widest"></div>
         </div>
     </section>
 
-    <section class="status-strip">
-        <div class="shop-container">
-            <div class="status-item">
-                <div class="status-dot"></div>
-                <span>Server Status: Online</span>
+    <section class="status-strip py-6 border-t border-white/5 bg-black/20">
+        <div class="shop-container flex justify-between items-center text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+            <div class="status-item flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                <span>Node Status: Core Online</span>
             </div>
             <div class="status-item">
-                <i data-lucide="package" class="w-4 h-4"></i>
-                <span id="product-count">Scanning Inventory...</span>
-            </div>
-            <div class="status-item">
-                <i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i>
-                <span>Secure SSL Encryption</span>
-            </div>
-            <div class="status-item">
-                <i data-lucide="cpu" class="w-4 h-4"></i>
-                <span>Tech Turf OS v6.0</span>
+                <span id="product-count">Loading Manifest...</span>
             </div>
         </div>
     </section>
@@ -542,6 +537,29 @@
             render();
         });
     </script>
+
+    <!-- 🛒 SHOP QUICK CONTROLS (Always Visible) -->
+    <div class="shop-floating-controls reveal-hidden">
+        <a href="wishlist.html" class="shop-control-btn transition-link">
+            <i data-lucide="heart"></i>
+            <span>Wishlist</span>
+            <div class="wishlist-count count-badge hidden">0</div>
+        </a>
+        <a href="cart.html" class="shop-control-btn transition-link">
+            <i data-lucide="shopping-bag"></i>
+            <span>Cart</span>
+            <div class="cart-count count-badge hidden">0</div>
+        </a>
+    </div>
+
+    <style>
+        /* Trigger reveal animation for the bar immediately or via scroll */
+        .shop-floating-controls.reveal-hidden {
+             opacity: 1;
+             visibility: visible;
+        }
+    </style>
 </body>
 
 </html>
+

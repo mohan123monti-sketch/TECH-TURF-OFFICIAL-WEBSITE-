@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech Turf - Mission Logs</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/src/css/pages/style.css">
     <script src="/src/js/core/layout.js" defer></script>
@@ -111,7 +111,7 @@
                             <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover border border-white/10">
                             <div class="flex-1">
                                 <h4 class="text-white text-sm font-black tracking-widest uppercase">${item.name}</h4>
-                                <p class="text-[10px] text-white/30 font-black tracking-widest mt-1">QTY: ${item.qty} | ₹${item.price.toFixed(2)} Each</p>
+                                <p class="text-[10px] text-white/30 font-black tracking-widest mt-1">QTY: ${item.qty} | â‚¹${item.price.toFixed(2)} Each</p>
                             </div>
                         </div>
                     `).join('');
@@ -148,7 +148,7 @@
                             </div>
                             <div class="text-center md:text-right">
                                 <p class="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Total Resource Value</p>
-                                <span class="text-3xl font-black text-white">₹${order.totalPrice.toFixed(2)}</span>
+                                <span class="text-3xl font-black text-white">â‚¹${order.totalPrice.toFixed(2)}</span>
                             </div>
                         </div>
                     `;

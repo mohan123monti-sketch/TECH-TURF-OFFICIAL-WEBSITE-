@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8,7 +8,7 @@
     <meta http-equiv="refresh" content="0; url=login.html">
 
     <!-- External Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -436,7 +436,7 @@
                         window.showMessage('success', 'Access Granted.');
                         localStorage.setItem('tt_token', data.token);
                         setTimeout(() => {
-                            window.location.href = (data.user && data.user.isAdmin) ? 'admin/dashboard.html' : 'index.html';
+                            window.location.href = (data.user && data.user.isAdmin) ? '/admin/dashboard.html' : '/index.html';
                         }, 1000);
                     } else {
                         window.showMessage('error', 'Access Denied: ' + (data.message || 'Invalid Credentials'));

@@ -81,13 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     camera.position.z = 15;
 
-    // --- Mouse Interaction ---
-    let mouseX = 0;
-    let mouseY = 0;
+    // --- Cursor Tracking ---
     window.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX - window.innerWidth / 2) / 100;
-        mouseY = (e.clientY - window.innerHeight / 2) / 100;
-
         // Update spotlight position for CSS effects
         document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
         document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
@@ -108,8 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
             node.rotation.y += 0.01;
         });
 
-        orbitalGroup.rotation.y += (mouseX * 0.05 - orbitalGroup.rotation.y) * 0.05;
-        orbitalGroup.rotation.x += (mouseY * 0.05 - orbitalGroup.rotation.x) * 0.05;
+        // Automatic Movement (Floating)
+        const time = performance.now() * 0.001;
+        orbitalGroup.rotation.y += 0.0005;
+        orbitalGroup.position.x = Math.sin(time * 0.3) * 0.4;
+        orbitalGroup.position.y = Math.cos(time * 0.2) * 0.3;
 
         renderer.render(scene, camera);
     };

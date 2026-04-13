@@ -1,4 +1,4 @@
-import apiRequest from './api.js';
+import apiRequest from '../core/api.js';
 
 export const createOrder = async (orderData) => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));

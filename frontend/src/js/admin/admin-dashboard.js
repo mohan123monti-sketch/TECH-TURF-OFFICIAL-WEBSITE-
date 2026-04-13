@@ -1120,7 +1120,6 @@ function getPageFields(page, content) {
         ],
         footer: [
             { key: 'footer_text', label: 'Footer Text', type: 'text', value: sections.get?.('footer_text') || '© 2026 Tech Turf' },
-            { key: 'facebook', label: 'Facebook URL', type: 'url', value: sections.get?.('facebook') || '' },
             { key: 'twitter', label: 'Twitter URL', type: 'url', value: sections.get?.('twitter') || '' },
             { key: 'instagram', label: 'Instagram URL', type: 'url', value: sections.get?.('instagram') || '' }
         ]

@@ -1,6 +1,6 @@
 const API_BASE = (typeof window !== 'undefined' && window.API_BASE_URL)
     ? window.API_BASE_URL
-    : '/api';
+    : 'http://localhost:5000/api';
 
 const apiRequest = async (endpoint, method = 'GET', body = null, token = null) => {
     const headers = {

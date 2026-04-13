@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -7,7 +7,7 @@
     <title>Tech Turf - Secure Checkout</title>
 
     <!-- External Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Styles & Scripts -->
@@ -173,18 +173,18 @@
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">GST
                                     (18%)</span>
-                                <span id="summary-tax" class="text-white font-black text-lg">₹0.00</span>
+                                <span id="summary-tax" class="text-white font-black text-lg">â‚¹0.00</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Discount</span>
-                                <span id="summary-discount" class="text-white font-black text-lg">₹0.00</span>
+                                <span id="summary-discount" class="text-white font-black text-lg">â‚¹0.00</span>
                             </div>
                         </div>
 
                         <div class="flex justify-between items-center mb-10">
                             <span class="text-gray-300 font-black uppercase tracking-widest text-xs">Final Total</span>
                             <span id="summary-total"
-                                class="text-white font-black text-4xl tracking-tighter">₹0.00</span>
+                                class="text-white font-black text-4xl tracking-tighter">â‚¹0.00</span>
                         </div>
 
                         <button id="place-order-btn" type="submit"
@@ -242,16 +242,16 @@
                     div.className = 'flex justify-between gap-4 py-2 border-b border-white/5';
                     div.innerHTML = `
                         <span class="text-xs text-gray-400 font-bold uppercase">${item.name} x${qty}</span>
-                        <span class="text-xs text-white font-black shrink-0">₹${(Number(item.price) || 0).toFixed(2)}</span>
+                        <span class="text-xs text-white font-black shrink-0">â‚¹${(Number(item.price) || 0).toFixed(2)}</span>
                     `;
                     list.appendChild(div);
                 });
 
                 const tax = subtotal * 0.18;
                 const total = subtotal + tax - discountAmount;
-                document.getElementById('summary-tax').textContent = `₹${tax.toFixed(2)}`;
-                if (summaryDiscount) summaryDiscount.textContent = `₹${discountAmount.toFixed(2)}`;
-                document.getElementById('summary-total').textContent = `₹${total.toFixed(2)}`;
+                document.getElementById('summary-tax').textContent = `â‚¹${tax.toFixed(2)}`;
+                if (summaryDiscount) summaryDiscount.textContent = `â‚¹${discountAmount.toFixed(2)}`;
+                document.getElementById('summary-total').textContent = `â‚¹${total.toFixed(2)}`;
             }
 
             async function loadAddresses() {
@@ -317,7 +317,7 @@
                     }
                     discountAmount = Number(payload.discount || 0);
                     activePromoCode = payload.code || code.toUpperCase();
-                    window.showMessage('success', `Promo applied: -₹${discountAmount.toFixed(2)}`);
+                    window.showMessage('success', `Promo applied: -â‚¹${discountAmount.toFixed(2)}`);
                     initSummary();
                 } catch (error) {
                     window.showMessage('error', 'Failed to apply promo');
