@@ -797,3 +797,31 @@ body.page-transition-out .page-transition-overlay {
         4px 4px 0 rgba(0, 71, 171, 0.1),
         6px 6px 20px rgba(0, 0, 0, 0.7);
 }
+
+/* --- Brand Logo Integration --- */
+.logo-nav {
+    height: 40px;
+    object-fit: contain;
+    transition: transform 0.4s var(--transition-curve), filter 0.4s ease;
+    filter: drop-shadow(0 0 0px transparent);
+}
+
+.logo-nav:hover {
+    transform: scale(1.08) translateY(-2px);
+    filter: drop-shadow(0 0 12px var(--accent, rgba(255, 255, 255, 0.4)));
+}
+
+.logo-hero {
+    height: 100px;
+    margin-bottom: 2rem;
+    object-fit: contain;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
+    animation: float 6s ease-in-out infinite;
+}
+
+.hero-logo-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1rem;
+}

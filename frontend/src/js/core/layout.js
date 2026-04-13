@@ -224,14 +224,32 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
                Register
            </a>`;
 
+    let logoSrc = '/assets/logos/tech-turf.png';
+    let brandName = 'Tech Turf';
+    let shortBrand = 'TT';
+
+    if (currentPageFile === 'click_sphere.html') {
+        logoSrc = '/assets/logos/click-sphere.png';
+        brandName = 'Click Sphere';
+        shortBrand = 'CS';
+    } else if (currentPageFile === 'quinta.html') {
+        logoSrc = '/assets/logos/quinta.png';
+        brandName = 'Quinta';
+        shortBrand = 'Q';
+    } else if (currentPageFile === 'trend_hive.html') {
+        logoSrc = '/assets/logos/trend-hive.png';
+        brandName = 'Trend Hive';
+        shortBrand = 'TH';
+    }
+
     const navHTML = `
        <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl z-50 transition-all duration-500 liquid-glass" id="site-header">
            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                <div class="flex justify-between items-center h-16">
-                   <a href="/index.html" class="flex-shrink-0 flex items-center transition-link">
-                       <img src="/public/images/logos/tech-turf.png" alt="Tech Turf Logo" class="w-10 h-10 object-contain mr-2">
-                       <span class="text-xl font-bold tracking-wider text-white hidden sm:block">TECH TURF</span>
-                       <span class="text-xl font-bold tracking-wider text-white sm:hidden">TT</span>
+                   <a href="/index.html" class="flex-shrink-0 flex items-center transition-link group">
+                       <img src="${logoSrc}" alt="${brandName} Logo" class="logo-nav mr-2">
+                       <span class="text-xl font-bold tracking-wider text-white hidden sm:block uppercase">${brandName}</span>
+                       <span class="text-xl font-bold tracking-wider text-white sm:hidden">${shortBrand}</span>
                    </a>
    
                    <div class="hidden md:flex md:items-center space-x-1">
