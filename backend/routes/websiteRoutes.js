@@ -28,9 +28,9 @@ const upload = multer({ storage });
 
 // Products
 router.get('/products', getAllProducts);
-router.post('/products', createProduct);
-router.put('/products/:id', updateProduct);
-router.delete('/products/:id', deleteProduct);
+router.post('/products', protect, createProduct);
+router.put('/products/:id', protect, updateProduct);
+router.delete('/products/:id', protect, deleteProduct);
 
 // Orders
 router.get('/orders', getAllOrders);
