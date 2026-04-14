@@ -1,6 +1,6 @@
 import express from 'express';
-import { getClients, getClientById, createClient, updateClient, deleteClient } from '../controllers/clientController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { getClients, getClientById, createClient, updateClient, deleteClient } from '../controllers/client-controller.js';
+import { protect } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 

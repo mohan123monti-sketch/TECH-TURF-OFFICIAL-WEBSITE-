@@ -1,6 +1,6 @@
 /**
  * Nexus AI Page Logic
- * Specifically for within the nexus_ai.html page/iframe
+ * Specifically for within the nexus-ai.html page/iframe
  */
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -99,7 +99,7 @@
                     <section>
                         <h3 class="text-2xl font-black uppercase tracking-tight mb-4">Products (${productResults.length})</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            ${productResults.map(p => card(p.name || 'Product', p.description || 'No description', `product_details.html?id=${p.id || p._id || ''}`)).join('') || '<p class="text-white/50">No product matches.</p>'}
+                            ${productResults.map(p => card(p.name || 'Product', p.description || 'No description', `product-details.html?id=${p.id || p._id || ''}`)).join('') || '<p class="text-white/50">No product matches.</p>'}
                         </div>
                     </section>
                     <section>

@@ -1,6 +1,6 @@
 import express from 'express';
-import { chatWithAI, getChatHistory, analyzeBrandDNA, generateBrandCampaign } from '../controllers/aiController.js';
-import { optionalAuth, protect, protectOrApiKey } from '../middleware/authMiddleware.js';
+import { chatWithAI, getChatHistory, analyzeBrandDNA, generateBrandCampaign } from '../controllers/ai-controller.js';
+import { optionalAuth, protect, protectOrApiKey } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 

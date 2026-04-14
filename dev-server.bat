@@ -2,7 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 set "BACKEND_PORT=5000"
-set "FRONTEND_PORT=3000"
+set "FRONTEND_PORT=3601"
 set "ROOT=%~dp0"
 
 if "%~1"=="" goto :start

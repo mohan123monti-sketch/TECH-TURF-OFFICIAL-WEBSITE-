@@ -9,7 +9,7 @@ module.exports = {
     {
       name: 'TT-Website',
       script: 'npx',
-      args: 'http-server ./ -p 3000 --cors',
+      args: 'http-server ./ -p 3601 --cors',
       cwd: './frontend'
     },
     {

@@ -1,6 +1,6 @@
 import express from 'express';
-import { getAttendance, markAttendance, getEmployeeAttendance } from '../controllers/attendanceController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { getAttendance, markAttendance, getEmployeeAttendance } from '../controllers/attendance-controller.js';
+import { protect } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 

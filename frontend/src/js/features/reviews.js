@@ -257,7 +257,7 @@ class ProductReviews {
 }
 
 // Initialize on product details page
-if (window.location.pathname.includes('product_details.html')) {
+if (window.location.pathname.includes('product-details.html')) {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
     if (productId) {

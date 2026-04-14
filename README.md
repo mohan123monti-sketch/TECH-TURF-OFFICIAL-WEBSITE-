@@ -1,5 +1,12 @@
 # Tech Turf - Production-Ready Full-Stack Platform
 
+## Current Deployment Guide
+
+Use the live deployment instructions for this codebase here:
+- docs/deployment/production-deploy.md
+
+Note: parts of this README describe an older SQL/PostgreSQL target that does not match the current unified SQLite backend structure.
+
 Tech Turf is a modular, deployable web platform with:
 - Multi-page frontend (company site + e-commerce + admin UI)
 - SQL backend API (Node.js + Express + PostgreSQL)

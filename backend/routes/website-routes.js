@@ -3,13 +3,27 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { getAllProducts, createProduct, updateProduct, deleteProduct } from '../controllers/productController.js';
-import { getAllOrders, getMyOrders, getOrderById, createOrder, updateOrderStatus, deleteOrder } from '../controllers/orderController.js';
-import { getAllPromos, createPromo, updatePromo, deletePromo, validatePromo } from '../controllers/promoController.js';
-import { getAllAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement } from '../controllers/announcementController.js';
-import { protect, adminOnly } from '../middleware/authMiddleware.js';
+import { getAllProducts, createProduct, updateProduct, deleteProduct } from '../controllers/product-controller.js';
+import { getAllOrders, getMyOrders, getOrderById, createOrder, updateOrderStatus, deleteOrder } from '../controllers/order-controller.js';
+import { getAllPromos, createPromo, updatePromo, deletePromo, validatePromo } from '../controllers/promo-controller.js';
+import { getAllAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement } from '../controllers/announcement-controller.js';
+import { protect, adminOnly } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
+
+const resolveFrontendRoot = () => {
+    const direct = path.resolve(process.cwd(), 'frontend');
+    if (fs.existsSync(direct)) return direct;
+
+    const sibling = path.resolve(process.cwd(), '..', 'frontend');
+    if (fs.existsSync(sibling)) return sibling;
+
+    return direct;
+};
+
+const FRONTEND_ROOT = resolveFrontendRoot();
+const EDITABLE_PATHS = ['pages', '_headers'];
+const ROOT_HTML_ALLOWLIST = ['index.html', 'aadil-portfolio.html'];
 
 const parseJSONSafe = (value, fallback) => {
     if (value == null) return fallback;
@@ -19,6 +33,93 @@ const parseJSONSafe = (value, fallback) => {
     } catch {
         return fallback;
     }
+};
+
+const toForwardSlash = (value) => String(value || '').replace(/\\/g, '/');
+
+const getRelativePath = (absolutePath) => {
+    const relative = path.relative(FRONTEND_ROOT, absolutePath);
+    return toForwardSlash(relative);
+};
+
+const listHtmlFilesRecursive = (dirPath) => {
+    const files = [];
+    if (!fs.existsSync(dirPath)) return files;
+
+    for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+        const absolute = path.join(dirPath, entry.name);
+        if (entry.isDirectory()) {
+            files.push(...listHtmlFilesRecursive(absolute));
+            continue;
+        }
+
+        if (entry.isFile() && entry.name.toLowerCase().endsWith('.html')) {
+            files.push(absolute);
+        }
+    }
+
+    return files;
+};
+
+const listEditableWebsitePages = () => {
+    const pageEntries = [];
+
+    for (const relativePath of EDITABLE_PATHS) {
+        const absoluteEntry = path.join(FRONTEND_ROOT, relativePath);
+        if (!fs.existsSync(absoluteEntry)) continue;
+
+        const stat = fs.statSync(absoluteEntry);
+        if (stat.isDirectory()) {
+            const htmlFiles = listHtmlFilesRecursive(absoluteEntry);
+            for (const absolutePath of htmlFiles) {
+                pageEntries.push(absolutePath);
+            }
+            continue;
+        }
+
+        if (stat.isFile()) {
+            const name = path.basename(absoluteEntry).toLowerCase();
+            if (name.endsWith('.html') || name === '_headers') {
+                pageEntries.push(absoluteEntry);
+            }
+        }
+    }
+
+    for (const rootFileName of ROOT_HTML_ALLOWLIST) {
+        const absolutePath = path.join(FRONTEND_ROOT, rootFileName);
+        if (fs.existsSync(absolutePath)) {
+            pageEntries.push(absolutePath);
+        }
+    }
+
+    const unique = Array.from(new Set(pageEntries.map((filePath) => path.resolve(filePath))));
+
+    return unique
+        .map((absolutePath) => {
+            const stat = fs.statSync(absolutePath);
+            const relativePath = getRelativePath(absolutePath);
+            return {
+                path: relativePath,
+                name: path.basename(relativePath),
+                directory: path.dirname(relativePath) === '.' ? '' : path.dirname(relativePath),
+                size: stat.size,
+                updatedAt: stat.mtime.toISOString()
+            };
+        })
+        .sort((a, b) => a.path.localeCompare(b.path));
+};
+
+const resolveEditablePagePath = (requestedPath) => {
+    const normalizedInput = toForwardSlash(String(requestedPath || '').trim()).replace(/^\/+/, '');
+    if (!normalizedInput || normalizedInput.includes('..')) return null;
+
+    const editablePages = listEditableWebsitePages();
+    const matched = editablePages.find((page) => page.path === normalizedInput);
+    if (!matched) return null;
+
+    const absolutePath = path.resolve(FRONTEND_ROOT, normalizedInput);
+    if (!absolutePath.startsWith(FRONTEND_ROOT)) return null;
+    return { absolutePath, relativePath: normalizedInput };
 };
 
 const normalizeUploadUrl = (filepath) => {
@@ -262,6 +363,66 @@ router.delete('/launches/:id', protect, async (req, res) => {
     try {
         await req.db.run('DELETE FROM launches WHERE id = ?', [req.params.id]);
         res.json({ message: 'Launch deleted' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Website Editor (admin only)
+router.get('/editor/pages', protect, adminOnly, async (req, res) => {
+    try {
+        const pages = listEditableWebsitePages();
+        res.json({ pages, total: pages.length });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get('/editor/page', protect, adminOnly, async (req, res) => {
+    try {
+        const requestedPath = String(req.query.path || '');
+        const resolved = resolveEditablePagePath(requestedPath);
+        if (!resolved) {
+            return res.status(400).json({ message: 'Invalid or non-editable page path' });
+        }
+
+        const content = fs.readFileSync(resolved.absolutePath, 'utf8');
+        const stat = fs.statSync(resolved.absolutePath);
+
+        res.json({
+            path: resolved.relativePath,
+            content,
+            size: stat.size,
+            updatedAt: stat.mtime.toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.put('/editor/page', protect, adminOnly, async (req, res) => {
+    try {
+        const requestedPath = String(req.query.path || '');
+        const resolved = resolveEditablePagePath(requestedPath);
+        if (!resolved) {
+            return res.status(400).json({ message: 'Invalid or non-editable page path' });
+        }
+
+        const content = typeof req.body?.content === 'string' ? req.body.content : null;
+        if (content === null) {
+            return res.status(400).json({ message: 'Page content must be provided as a string' });
+        }
+
+        fs.writeFileSync(resolved.absolutePath, content, 'utf8');
+        const stat = fs.statSync(resolved.absolutePath);
+
+        res.json({
+            success: true,
+            message: 'Page updated successfully',
+            path: resolved.relativePath,
+            size: stat.size,
+            updatedAt: stat.mtime.toISOString()
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -5,8 +5,8 @@ import {
     getAllUsers, deleteUser, updateUserRole, getPublicTeam,
     getUserProfile, updateUserProfile, getUserAddresses, addUserAddress,
     getUserCart, saveUserCart, getUserWishlist, saveUserWishlist, getUserCompare, saveUserCompare
-} from '../controllers/authController.js';
-import { protect, adminOnly } from '../middleware/authMiddleware.js';
+} from '../controllers/auth-controller.js';
+import { protect, adminOnly } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 

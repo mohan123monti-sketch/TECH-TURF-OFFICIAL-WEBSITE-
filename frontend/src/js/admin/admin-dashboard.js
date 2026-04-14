@@ -7,6 +7,39 @@ let charts = {};
 let currentEditingProduct = null;
 let currentEditingPromo = null;
 let currentOrdersCache = [];
+let ordersReadOnlyMode = false;
+
+async function fetchOrdersWithFallback(token) {
+    const adminResponse = await fetch(`${API_BASE}/orders`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (adminResponse.status === 401) {
+        throw new Error('Session expired. Please login again.');
+    }
+
+    if (adminResponse.ok) {
+        return { orders: await adminResponse.json(), readOnly: false };
+    }
+
+    if (adminResponse.status !== 403) {
+        throw new Error(`HTTP ${adminResponse.status}: Failed to fetch orders`);
+    }
+
+    const ownOrdersResponse = await fetch(`${API_BASE}/orders/myorders`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (ownOrdersResponse.status === 401) {
+        throw new Error('Session expired. Please login again.');
+    }
+
+    if (!ownOrdersResponse.ok) {
+        throw new Error(`HTTP ${ownOrdersResponse.status}: Failed to fetch orders`);
+    }
+
+    return { orders: await ownOrdersResponse.json(), readOnly: true };
+}
 
 function normalizeImageUrl(url) {
     if (!url) return '';
@@ -120,14 +153,12 @@ async function loadDashboardData() {
             return {};
         });
 
-        const ordersRequest = fetch(`${API_BASE}/orders`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        }).then(async (response) => {
-            if (response.status === 401) throw new Error('Session expired. Please login again.');
-            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch orders`);
-            return response.json();
+        const ordersRequest = fetchOrdersWithFallback(token).then((result) => {
+            ordersReadOnlyMode = !!result.readOnly;
+            return Array.isArray(result.orders) ? result.orders : [];
         }).catch((error) => {
             console.error('Dashboard orders fetch failed:', error);
+            ordersReadOnlyMode = false;
             return [];
         });
 
@@ -238,20 +269,27 @@ async function loadOrders() {
             throw new Error('Session expired. Please login again.');
         }
         
-        let res = await fetch(`${API_BASE}/orders`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (res.status === 401) {
+        const result = await fetchOrdersWithFallback(token);
+        ordersReadOnlyMode = !!result.readOnly;
+
+        if (!Array.isArray(result.orders)) {
+            throw new Error('Failed to fetch orders');
+        }
+
+        const orders = result.orders;
+
+        if (!ordersReadOnlyMode) {
+            // Keep legacy compatibility: some tabs rely on recent cache for admin-wide metrics.
+            currentOrdersCache = orders;
+        }
+
+        if (!token) {
             localStorage.removeItem('tt_token');
             localStorage.removeItem('token');
             alert('Your session has expired. Please login again.');
             window.location.href = '/pages/login.html';
             return;
         }
-        
-        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch orders`);
-        const orders = await res.json();
         
         const tbody = document.getElementById('allOrdersBody');
         if (!tbody) {
@@ -264,15 +302,25 @@ async function loadOrders() {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8">No orders found</td></tr>';
             return;
         }
+
+        if (ordersReadOnlyMode) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-amber-700">Read-only mode: showing your orders only (admin access required for all orders).</td></tr>';
+        }
         
         orders.forEach(order => {
             const orderId = String(order._id || order.id || '');
             const shortOrderId = orderId ? orderId.slice(-8) : 'N/A';
             const orderTotal = Number(order.totalPrice || order.total_price || 0);
             const row = document.createElement('tr');
+            const customerEmail = order.user?.email || order.userEmail || 'N/A';
+            const actionsHtml = ordersReadOnlyMode
+                ? '<span class="text-gray-500 text-xs">Read-only</span>'
+                : `<button onclick="editOrder('${orderId}')" class="text-blue-600 hover:underline text-xs">Edit</button>
+                    <button onclick="deleteOrder('${orderId}')" class="text-red-600 hover:underline text-xs">Delete</button>`;
+
             row.innerHTML = `
                 <td class="py-3 px-4 text-sm">${shortOrderId}</td>
-                <td class="py-3 px-4 text-sm">${order.user?.email || 'N/A'}</td>
+                <td class="py-3 px-4 text-sm">${customerEmail}</td>
                 <td class="py-3 px-4 text-sm">INR ${orderTotal.toFixed(0)}</td>
                 <td class="py-3 px-4">
                     <span class="status-${order.status?.toLowerCase() || 'pending'}">
@@ -281,8 +329,7 @@ async function loadOrders() {
                 </td>
                 <td class="py-3 px-4 text-sm">${order.paymentMethod || 'COD'}</td>
                 <td class="py-3 px-4">
-                    <button onclick="editOrder('${orderId}')" class="text-blue-600 hover:underline text-xs">Edit</button>
-                    <button onclick="deleteOrder('${orderId}')" class="text-red-600 hover:underline text-xs">Delete</button>
+                    ${actionsHtml}
                 </td>
             `;
             tbody.appendChild(row);
@@ -346,18 +393,16 @@ async function loadAnalytics() {
         if (!token) {
             throw new Error('Session expired. Please login again.');
         }
-        
-        // Fetch analytics data from admin endpoint
-        let res = await fetch(`${API_BASE}/admin/analytics`, {
+
+        const avgEl = document.getElementById('avgOrderValue');
+        const convEl = document.getElementById('conversionRate');
+        const catEl = document.getElementById('topCategory');
+
+        // Prefer admin stats endpoint when available.
+        const res = await fetch(`${API_BASE}/stats/dashboard`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
-        if (res.status === 404) {
-            res = await fetch(`${API_BASE}/orders`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-        }
-        
+
         if (res.status === 401) {
             localStorage.removeItem('tt_token');
             localStorage.removeItem('token');
@@ -365,23 +410,51 @@ async function loadAnalytics() {
             window.location.href = '/pages/login.html';
             return;
         }
-        
-        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch analytics`);
-        const data = await res.json();
-        
-        // Extract metrics from response
-        const metrics = data.metrics || {};
-        const topProducts = data.topProducts || [];
-        const topCategories = data.topCategories || [];
-        
-        // Update metrics
-        const avgEl = document.getElementById('avgOrderValue');
-        const convEl = document.getElementById('conversionRate');
-        const catEl = document.getElementById('topCategory');
-        
-        if (avgEl) avgEl.textContent = metrics.avgOrderValue || '0';
-        if (convEl) convEl.textContent = metrics.conversions ? (parseFloat(metrics.conversions) / (metrics.totalOrders || 1)).toFixed(1) : '0';
-        if (catEl) catEl.textContent = topCategories.length > 0 ? topCategories[0]._id : '-';
+
+        let avgOrderValue = 0;
+        let conversionRate = 0;
+        let topCategory = '-';
+
+        if (res.ok) {
+            const data = await res.json();
+            const totalOrders = Number(data.totalOrders || 0);
+            const totalRevenue = Number(data.totalRevenue || data.revenue || 0);
+            avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+            const statusBuckets = Array.isArray(data.ordersByStatus) ? data.ordersByStatus : [];
+            const deliveredCount = Number(statusBuckets[3] || 0);
+            conversionRate = totalOrders > 0 ? (deliveredCount / totalOrders) * 100 : 0;
+        } else {
+            // Non-admin users get 403 on stats/orders list. Fall back to my orders.
+            const { orders } = await fetchOrdersWithFallback(token);
+            const safeOrders = Array.isArray(orders) ? orders : [];
+
+            const totalOrders = safeOrders.length;
+            const totalRevenue = safeOrders.reduce((sum, order) => sum + Number(order.totalPrice || order.total_price || 0), 0);
+            const deliveredCount = safeOrders.filter((order) => String(order.status || '').toLowerCase() === 'delivered').length;
+            avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+            conversionRate = totalOrders > 0 ? (deliveredCount / totalOrders) * 100 : 0;
+
+            const categoryCounts = new Map();
+            for (const order of safeOrders) {
+                const items = Array.isArray(order.orderItems)
+                    ? order.orderItems
+                    : (Array.isArray(order.items) ? order.items : []);
+
+                for (const item of items) {
+                    const categoryName = String(item?.category || item?.branch || 'General').trim() || 'General';
+                    categoryCounts.set(categoryName, (categoryCounts.get(categoryName) || 0) + 1);
+                }
+            }
+
+            if (categoryCounts.size > 0) {
+                topCategory = Array.from(categoryCounts.entries()).sort((a, b) => b[1] - a[1])[0][0];
+            }
+        }
+
+        if (avgEl) avgEl.textContent = Number.isFinite(avgOrderValue) ? avgOrderValue.toFixed(0) : '0';
+        if (convEl) convEl.textContent = Number.isFinite(conversionRate) ? conversionRate.toFixed(1) : '0';
+        if (catEl) catEl.textContent = topCategory;
         
     } catch (err) {
         console.error('Load analytics error:', err);
@@ -389,9 +462,10 @@ async function loadAnalytics() {
         const convEl = document.getElementById('conversionRate');
         const catEl = document.getElementById('topCategory');
         
-        if (avgEl) avgEl.textContent = 'Error';
-        if (convEl) convEl.textContent = 'Error';
-        if (catEl) catEl.textContent = 'Error';
+        // Keep UI stable even when analytics APIs fail.
+        if (avgEl) avgEl.textContent = '0';
+        if (convEl) convEl.textContent = '0';
+        if (catEl) catEl.textContent = '-';
     }
 }
 

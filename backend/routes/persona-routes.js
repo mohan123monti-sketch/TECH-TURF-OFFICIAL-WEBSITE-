@@ -1,6 +1,6 @@
 import express from 'express';
-import { getPersonas, createPersona } from '../controllers/personaController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { getPersonas, createPersona } from '../controllers/persona-controller.js';
+import { protect } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 

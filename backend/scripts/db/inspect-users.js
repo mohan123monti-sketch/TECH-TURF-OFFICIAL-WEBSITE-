@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 async function inspectDB() {
     const db = await open({
-        filename: path.resolve(__dirname, 'database', 'database.sqlite'),
+        filename: path.resolve(__dirname, '../../database/database.sqlite'),
         driver: sqlite3.Database
     });
 

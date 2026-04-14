@@ -7,7 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm start --prefix backend",
     "dev": "npm run dev --prefix backend",
-    "build": "npm install --prefix backend"
+    "build": "npm install --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "start:frontend": "npm start --prefix frontend",
+    "start:prod": "npm start --prefix backend",
+    "validate:naming": "node scripts/validate-naming.js"
   },
   "keywords": [],
   "author": "",

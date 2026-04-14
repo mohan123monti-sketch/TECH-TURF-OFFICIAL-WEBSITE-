@@ -4,8 +4,8 @@
   "description": "Tech Turf E-commerce Frontend",
   "main": "index.html",
   "scripts": {
-    "start": "npx http-server -p 3000",
-    "dev": "npx live-server --port=3000",
+    "start": "npx http-server -p 3601",
+    "dev": "npx live-server --port=3601",
     "build:css": "tailwindcss -c ../tailwind.config.js -i ./src/css/tailwind.input.css -o ./src/css/tailwind.generated.css --minify",
     "build": "npm run build:css && echo 'Static site ready for deployment'",
     "deploy": "echo 'Ready for deployment'"

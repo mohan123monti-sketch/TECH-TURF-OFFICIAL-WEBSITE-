@@ -2,6 +2,7 @@
 // Note: API_BASE_URL and window.showToast are provided by admin-layout.js
 
 let orders = [];
+let ordersReadOnlyMode = false;
 const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 async function loadOrders() {
@@ -10,8 +11,41 @@ async function loadOrders() {
         const response = await fetch(`${apiBase}/orders`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        orders = await response.json();
-        renderOrders();
+
+        if (response.status === 401) {
+            window.location.href = '/pages/login.html';
+            return;
+        }
+
+        if (response.ok) {
+            orders = await response.json();
+            ordersReadOnlyMode = false;
+            renderOrders();
+            return;
+        }
+
+        if (response.status === 403) {
+            const ownOrdersResponse = await fetch(`${apiBase}/orders/myorders`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (ownOrdersResponse.status === 401) {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            if (!ownOrdersResponse.ok) {
+                throw new Error(`HTTP ${ownOrdersResponse.status}: Failed to fetch orders`);
+            }
+
+            orders = await ownOrdersResponse.json();
+            ordersReadOnlyMode = true;
+            renderOrders();
+            window.showToast('Read-only mode: showing your orders only', 'info');
+            return;
+        }
+
+        throw new Error(`HTTP ${response.status}: Failed to fetch orders`);
     } catch (error) {
         console.error('Error loading orders:', error);
         window.showToast('Failed to load orders', 'error');
@@ -38,12 +72,17 @@ function renderOrders() {
 
         const displayStatus = order.status || (order.isDelivered ? 'Delivered' : 'Pending');
         const totalPrice = Number(order.totalPrice || 0);
+        const customerName = order.userName || order.user?.name || 'Guest';
+        const customerEmail = order.userEmail || order.user?.email || 'N/A';
+        const actionHtml = ordersReadOnlyMode
+            ? '<span class="text-gray-500 text-xs">Read-only</span>'
+            : '<button onclick="viewOrder(\'' + order.id + '\')" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View Details</button>';
         return `
             <tr class="hover:bg-gray-700/30 transition-colors">
                 <td class="p-4 font-mono text-gray-400">#${String(order.id).padStart(6, '0')}</td>
                 <td class="p-4">
-                    <div class="font-medium">${order.userName || 'Guest'}</div>
-                    <div class="text-xs text-gray-500">${order.userEmail || 'N/A'}</div>
+                    <div class="font-medium">${customerName}</div>
+                    <div class="text-xs text-gray-500">${customerEmail}</div>
                 </td>
                 <td class="p-4 text-gray-400">${new Date(order.created_at).toLocaleDateString()}</td>
                 <td class="p-4 font-bold">₹${totalPrice.toFixed(2)}</td>
@@ -53,7 +92,7 @@ function renderOrders() {
                     </span>
                 </td>
                 <td class="p-4 text-right space-x-2">
-                    <button onclick="viewOrder('${order.id}')" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View Details</button>
+                    ${actionHtml}
                     <!-- Status update dropdown/modal action would go here -->
                 </td>
             </tr>

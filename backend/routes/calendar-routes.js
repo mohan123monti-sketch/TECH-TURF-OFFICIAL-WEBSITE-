@@ -7,8 +7,8 @@ import {
     getReflections, createUpdateReflection,
     getPlanner, createPlannerBlock, deletePlannerBlock,
     getNotes, createUpdateNote, deleteNote
-} from '../controllers/calendarController.js';
-import { singleTenantFallback } from '../middleware/authMiddleware.js';
+} from '../controllers/calendar-controller.js';
+import { singleTenantFallback } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 

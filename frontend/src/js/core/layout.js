@@ -452,8 +452,8 @@ function generateHeader() {
     const divisions = [
         { name: 'Tech Turf', href: '/index.html' },
         { name: 'Quinta', href: '/pages/quinta.html' },
-        { name: 'Trend Hive', href: '/pages/trend_hive.html' },
-        { name: 'Click Sphere', href: '/pages/click_sphere.html' },
+        { name: 'Trend Hive', href: '/pages/trend-hive.html' },
+        { name: 'Click Sphere', href: '/pages/click-sphere.html' },
         { name: 'Shop', href: '/pages/shopping.html' }
     ];
 
@@ -484,10 +484,10 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
         if (pageFile === 'quinta.html') {
             return 'background: rgba(14, 116, 144, 0.28); border: 1px solid rgba(34, 211, 238, 0.42); color: #d9fbff;';
         }
-        if (pageFile === 'trend_hive.html') {
+        if (pageFile === 'trend-hive.html') {
             return 'background: rgba(242, 101, 34, 0.28); border: 1px solid rgba(251, 146, 60, 0.45); color: #fff2e8;';
         }
-        if (pageFile === 'click_sphere.html') {
+        if (pageFile === 'click-sphere.html') {
             return 'background: rgba(34, 197, 94, 0.24); border: 1px solid rgba(74, 222, 128, 0.45); color: #eafff0;';
         }
         if (pageFile === 'shopping.html') {
@@ -497,13 +497,13 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
         return 'background: rgba(37, 99, 235, 0.28); border: 1px solid rgba(96, 165, 250, 0.45); color: #e8f1ff;';
     };
 
-    if (currentPageFile === 'click_sphere.html') {
+    if (currentPageFile === 'click-sphere.html') {
         logoSrc = '/assets/logos/click-sphere.png';
         brandName = 'Click Sphere';
     } else if (currentPageFile === 'quinta.html') {
         logoSrc = '/assets/logos/quinta.png';
         brandName = 'Quinta';
-    } else if (currentPageFile === 'trend_hive.html') {
+    } else if (currentPageFile === 'trend-hive.html') {
         logoSrc = '/assets/logos/trend-hive.png';
         brandName = 'Trend Hive';
     }
@@ -593,8 +593,8 @@ window.updateAuthUI = function (user) {
     const divisions = [
         { name: 'Tech Turf', href: '/index.html' },
         { name: 'Quinta', href: '/pages/quinta.html' },
-        { name: 'Trend Hive', href: '/pages/trend_hive.html' },
-        { name: 'Click Sphere', href: '/pages/click_sphere.html' },
+        { name: 'Trend Hive', href: '/pages/trend-hive.html' },
+        { name: 'Click Sphere', href: '/pages/click-sphere.html' },
         { name: 'Shop', href: '/pages/shopping.html' }
     ];
     const currentPageFile = window.location.pathname.split('/').pop();
@@ -627,22 +627,22 @@ function generateFooter() {
                        <h3 class="text-lg font-semibold text-white mb-4">Divisions</h3>
                        <ul class="space-y-3 text-sm">
                            <li><a href="/pages/quinta.html" class="text-gray-400 hover:text-orange-400 transition-link">Quinta</a></li>
-                           <li><a href="/pages/trend_hive.html" class="text-gray-400 hover:text-orange-400 transition-link">Trend Hive</a></li>
-                           <li><a href="/pages/click_sphere.html" class="text-gray-400 hover:text-orange-400 transition-link">Click Sphere</a></li>
+                           <li><a href="/pages/trend-hive.html" class="text-gray-400 hover:text-orange-400 transition-link">Trend Hive</a></li>
+                           <li><a href="/pages/click-sphere.html" class="text-gray-400 hover:text-orange-400 transition-link">Click Sphere</a></li>
                            <li><a href="/pages/shopping.html" class="text-gray-400 hover:text-orange-400 transition-link">Shop</a></li>
                        </ul>
                    </div>
                    <div>
                        <h3 class="text-lg font-semibold text-white mb-4">Legal</h3>
                        <ul class="space-y-3 text-sm">
-                           <li><a href="/pages/terms_of_service.html" class="text-gray-400 hover:text-orange-400 transition-link">Terms</a></li>
-                           <li><a href="/pages/privacy_policy.html" class="text-gray-400 hover:text-orange-400 transition-link">Privacy</a></li>
+                           <li><a href="/pages/terms-of-service.html" class="text-gray-400 hover:text-orange-400 transition-link">Terms</a></li>
+                           <li><a href="/pages/privacy-policy.html" class="text-gray-400 hover:text-orange-400 transition-link">Privacy</a></li>
                        </ul>
                    </div>
                    <div>
                         <h3 class="text-lg font-semibold text-white mb-4">Connect</h3>
                         <ul class="space-y-3 text-sm">
-                            <li><a href="/pages/nexus_ai.html" class="text-gray-400 hover:text-orange-400 transition-link">Nexus AI</a></li>
+                            <li><a href="/pages/nexus-ai.html" class="text-gray-400 hover:text-orange-400 transition-link">Nexus AI</a></li>
                             <li><a href="/pages/help-center.html" class="text-gray-400 hover:text-orange-400 transition-link">Help Center</a></li>
                             <li><a href="/pages/blog.html" class="text-gray-400 hover:text-orange-400 transition-link">Blog & News</a></li>
                             <li><a href="/pages/search.html" class="text-gray-400 hover:text-orange-400 transition-link">Global Search</a></li>
@@ -710,7 +710,7 @@ function initNexusWidget() {
     toggle.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
-        window.location.assign('/pages/nexus_ai.html');
+        window.location.assign('/pages/nexus-ai.html');
     });
 
     widget.appendChild(toggle);

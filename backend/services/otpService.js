@@ -1,4 +1,4 @@
-import { generateOTP } from '../utils/generateOTP.js';
+import { generateOTP } from '../utils/generate-otp.js';
 import { sendOTPEmail } from './emailService.js';
 
 export const requestOTP = async (db, email, type = 'Verification') => {

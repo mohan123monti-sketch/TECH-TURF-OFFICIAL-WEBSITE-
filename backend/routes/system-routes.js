@@ -3,8 +3,8 @@ import {
     getMetrics, addMetric, getEvents, addEvent, getStats,
     getRealtimeStats, executeCommand, getPm2List, getLogData,
     getServiceHealth, getPresetCommands, runPresetCommand
-} from '../controllers/systemController.js';
-import { adminOnly, protect } from '../middleware/authMiddleware.js';
+} from '../controllers/system-controller.js';
+import { adminOnly, protect } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 

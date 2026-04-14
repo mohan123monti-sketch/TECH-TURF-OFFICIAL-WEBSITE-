@@ -1,7 +1,7 @@
 import express from 'express';
-import { getBrand, saveBrand, getSettings, saveSettings } from '../controllers/brandController.js';
-import { getPersonas, createPersona } from '../controllers/personaController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { getBrand, saveBrand, getSettings, saveSettings } from '../controllers/brand-controller.js';
+import { getPersonas, createPersona } from '../controllers/persona-controller.js';
+import { protect } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 

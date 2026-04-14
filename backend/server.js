@@ -3,31 +3,40 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { initDatabase } from './config/database.js';
-import { errorHandler, notFound } from './middleware/errorHandler.js';
+import { errorHandler, notFound } from './middleware/error-handler.js';
 
 // Routes Imports
-import authRoutes from './routes/authRoutes.js';
-import employeeRoutes from './routes/employeeRoutes.js';
-import clientRoutes from './routes/clientRoutes.js';
-import projectRoutes from './routes/projectRoutes.js';
-import taskRoutes from './routes/taskRoutes.js';
-import brandRoutes from './routes/brandRoutes.js';
-import campaignRoutes from './routes/campaignRoutes.js';
-import personaRoutes from './routes/personaRoutes.js';
-import calendarRoutes from './routes/calendarRoutes.js';
-import aiRoutes from './routes/aiRoutes.js';
-import systemRoutes from './routes/systemRoutes.js';
-import attendanceRoutes from './routes/attendanceRoutes.js';
-import transactionRoutes from './routes/transactionRoutes.js';
-import statsRoutes from './routes/statsRoutes.js';
-import websiteRoutes from './routes/websiteRoutes.js';
+import authRoutes from './routes/auth-routes.js';
+import employeeRoutes from './routes/employee-routes.js';
+import clientRoutes from './routes/client-routes.js';
+import projectRoutes from './routes/project-routes.js';
+import taskRoutes from './routes/task-routes.js';
+import brandRoutes from './routes/brand-routes.js';
+import campaignRoutes from './routes/campaign-routes.js';
+import personaRoutes from './routes/persona-routes.js';
+import calendarRoutes from './routes/calendar-routes.js';
+import aiRoutes from './routes/ai-routes.js';
+import systemRoutes from './routes/system-routes.js';
+import attendanceRoutes from './routes/attendance-routes.js';
+import transactionRoutes from './routes/transaction-routes.js';
+import statsRoutes from './routes/stats-routes.js';
+import websiteRoutes from './routes/website-routes.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3601';
+const SHOULD_SERVE_FRONTEND =
+    process.env.SERVE_FRONTEND === 'true' ||
+    process.env.NODE_ENV === 'production';
+const FRONTEND_ROOT = path.resolve(__dirname, '..', 'frontend');
 
 // Middleware
 const allowedOrigins = process.env.CORS_ORIGIN
@@ -95,13 +104,47 @@ app.use('/api/admin', statsRoutes); // General admin mapping
 app.use('/api', websiteRoutes); // Products, Orders, Promos, Announcements, Media
 app.use('/uploads', express.static('uploads'));
 
+if (SHOULD_SERVE_FRONTEND) {
+    app.use(express.static(FRONTEND_ROOT));
+}
+
 // Health Check
+app.get('/health', (req, res) => {
+    res.json({
+        success: true,
+        message: 'Tech Turf Unified Backend is healthy',
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
 app.get('/', (req, res) => {
-    res.json({ message: 'Tech Turf Unified Backend is running...' });
+    if (SHOULD_SERVE_FRONTEND) {
+        return res.sendFile(path.join(FRONTEND_ROOT, 'index.html'));
+    }
+
+    return res.json({ message: 'Tech Turf Unified Backend is running...' });
 });
 
 // Convenience redirects for local development when frontend routes are opened on backend port.
 app.get(['/admin', '/admin/*', '/pages', '/pages/*'], (req, res) => {
+    if (SHOULD_SERVE_FRONTEND) {
+        const normalizedPath = String(req.path || '/').replace(/\\/g, '/');
+        const relativePath = normalizedPath.replace(/^\/+/, '');
+        const directPath = path.resolve(FRONTEND_ROOT, relativePath);
+
+        if (relativePath && directPath.startsWith(FRONTEND_ROOT)) {
+            return res.sendFile(directPath, (error) => {
+                if (!error) return;
+                if (normalizedPath === '/admin' || normalizedPath.startsWith('/admin/')) {
+                    return res.sendFile(path.join(FRONTEND_ROOT, 'admin', 'index.html'));
+                }
+                return res.sendFile(path.join(FRONTEND_ROOT, 'index.html'));
+            });
+        }
+
+        return res.sendFile(path.join(FRONTEND_ROOT, 'index.html'));
+    }
+
     try {
         const targetUrl = new URL(`${FRONTEND_BASE_URL}${req.originalUrl}`);
         const requestOrigin = `${req.protocol}://${req.get('host')}`;

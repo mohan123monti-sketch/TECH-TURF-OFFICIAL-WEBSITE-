@@ -31,7 +31,7 @@
             description: 'Shop high-performance tech modules and innovation assets from Tech Turf divisions.',
             keywords: 'Tech Turf marketplace, products, ecommerce, technology'
         },
-        'product_details.html': {
+        'product-details.html': {
             title: 'Tech Turf Product Details',
             description: 'View detailed specifications and pricing for Tech Turf products.',
             keywords: 'Tech Turf product details, specifications, pricing',
@@ -62,17 +62,17 @@
             description: 'Quinta is the Tech Turf aerospace division focused on propulsion, avionics, and flight systems.',
             keywords: 'Quinta, aerospace, propulsion, avionics, Tech Turf'
         },
-        'click_sphere.html': {
+        'click-sphere.html': {
             title: 'Click Sphere - Software Division',
             description: 'Click Sphere delivers full-stack software, digital products, and engineering services.',
             keywords: 'Click Sphere, software, full-stack, Tech Turf'
         },
-        'trend_hive.html': {
+        'trend-hive.html': {
             title: 'Trend Hive - Growth Division',
             description: 'Trend Hive drives branding, marketing, and high-velocity growth systems.',
             keywords: 'Trend Hive, marketing, branding, growth, Tech Turf'
         },
-        'nexus_ai.html': {
+        'nexus-ai.html': {
             title: 'Nexus AI - Tech Turf Assistant',
             description: 'Nexus AI is the Tech Turf intelligent assistant for projects and system insights.',
             keywords: 'Nexus AI, Tech Turf assistant, AI'
@@ -102,12 +102,12 @@
             description: 'Review your Tech Turf order history and mission logs.',
             keywords: 'Tech Turf orders, order history'
         },
-        'privacy_policy.html': {
+        'privacy-policy.html': {
             title: 'Tech Turf Privacy Policy',
             description: 'Read the Tech Turf privacy policy and data protection practices.',
             keywords: 'Tech Turf privacy policy, data protection'
         },
-        'terms_of_service.html': {
+        'terms-of-service.html': {
             title: 'Tech Turf Terms of Service',
             description: 'Read the Tech Turf terms of service and usage policies.',
             keywords: 'Tech Turf terms of service, legal'

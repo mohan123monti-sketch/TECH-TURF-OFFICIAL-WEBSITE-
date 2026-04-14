@@ -78,15 +78,15 @@ frontend/
 ├── pages/                       # HTML pages (user-facing)
 │   ├── shopping.html
 │   ├── products.html
-│   ├── product_details.html
+│   ├── product-details.html
 │   ├── cart.html
 │   ├── checkout.html
 │   ├── about.html
 │   ├── contact.html
 │   ├── quinta.html
-│   ├── trend_hive.html
-│   ├── click_sphere.html
-│   ├── nexus_ai.html
+│   ├── trend-hive.html
+│   ├── click-sphere.html
+│   ├── nexus-ai.html
 │   ├── dashboard.html
 │   ├── orders.html
 │   ├── wishlist.html
