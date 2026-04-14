@@ -1,6 +1,27 @@
 // Shop Logic for Tech Turf
 
-window.API_BASE_URL = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || '/api';
+const resolveApiBaseUrl = () => {
+    const explicitBase = window.__TECHTURF_API_BASE__ || localStorage.getItem('tt_api_base');
+    if (explicitBase) return explicitBase;
+
+    const currentBase = window.API_BASE_URL;
+    if (currentBase && !/^\/api\/?$/.test(currentBase)) return currentBase;
+
+    return 'http://localhost:5000/api';
+};
+
+window.API_BASE_URL = resolveApiBaseUrl();
+
+function normalizeProductImageUrl(url) {
+    if (!url) return '';
+    const value = String(url).trim().replace(/\\/g, '/');
+    if (!value) return '';
+    if (/^data:image\//i.test(value) || /^https?:\/\//i.test(value) || value.startsWith('//')) return value;
+    const apiOrigin = new URL(window.API_BASE_URL).origin;
+    return value.startsWith('/') ? `${apiOrigin}${value}` : `${apiOrigin}/${value}`;
+}
+
+window.normalizeProductImageUrl = normalizeProductImageUrl;
 
 // --- State Management ---
 // Keep cart key aligned with layout.js (tt_cart). Migrate legacy key if needed.
@@ -21,8 +42,15 @@ async function fetchProducts() {
         const response = await fetch(`${window.API_BASE_URL}/products`);
         if (!response.ok) throw new Error('Failed to fetch products');
         const products = await response.json();
-        state.products = products;
-        return products;
+        const normalizedProducts = Array.isArray(products)
+            ? products.map((product) => ({
+                ...product,
+                imageUrl: normalizeProductImageUrl(product.imageUrl || product.image_url || product.image),
+                image_url: normalizeProductImageUrl(product.image_url || product.imageUrl || product.image)
+            }))
+            : [];
+        state.products = normalizedProducts;
+        return normalizedProducts;
     } catch (error) {
         console.error('Error fetching products:', error);
         return [];

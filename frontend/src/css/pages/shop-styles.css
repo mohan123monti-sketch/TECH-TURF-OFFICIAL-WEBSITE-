@@ -172,6 +172,10 @@ body.shop-branding .section-head {
     padding: 0 40px;
 }
 
+.product-section {
+    padding-top: clamp(150px, 18vh, 220px);
+}
+
 #featured-section {
     padding-top: clamp(190px, 22vh, 260px);
 }

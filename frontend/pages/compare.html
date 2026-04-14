@@ -33,27 +33,61 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const grid = document.getElementById('compare-grid');
             const params = new URLSearchParams(window.location.search);
-            const ids = params.get('ids') ? params.get('ids').split(',').filter(Boolean) : [];
+            const queryIds = params.get('ids') ? params.get('ids').split(',').filter(Boolean) : [];
 
-            if (ids.length === 0) {
-                grid.innerHTML = '<p class="text-white/40">No products selected for comparison.</p>';
-                return;
-            }
+            const resolveIds = async () => {
+                if (queryIds.length > 0) return queryIds;
 
-            const products = await window.fetchProducts();
-            const compareItems = products.filter(p => ids.includes(String(p._id || p.id)));
+                const liveIds = window.getCompareIds ? window.getCompareIds().map(String) : [];
+                if (liveIds.length > 0) return liveIds;
 
-            if (compareItems.length === 0) {
-                grid.innerHTML = '<p class="text-white/40">No products found.</p>';
-                return;
-            }
+                if (window.getAuthToken && window.getAuthToken()) {
+                    try {
+                        const response = await fetch(`${window.API_BASE_URL}/users/compare`, {
+                            headers: { 'Authorization': `Bearer ${window.getAuthToken()}` }
+                        });
+
+                        if (response.ok) {
+                            const payload = await response.json();
+                            return Array.isArray(payload?.items) ? payload.items.map(String) : [];
+                        }
+                    } catch (error) {
+                        console.error('Failed to load compare list:', error);
+                    }
+                }
+
+                return [];
+            };
+
+            const renderCompare = async () => {
+                const ids = await resolveIds();
+
+                if (ids.length === 0) {
+                    grid.innerHTML = '<p class="text-white/40">No products selected for comparison.</p>';
+                    return;
+                }
+
+                const products = await window.fetchProducts();
+                const compareItems = products.filter(p => ids.includes(String(p._id || p.id)));
+
+                if (compareItems.length === 0) {
+                    grid.innerHTML = '<p class="text-white/40">No products found.</p>';
+                    return;
+                }
+
+                grid.innerHTML = compareItems.map(renderCard).join('');
+                if (window.lucide) lucide.createIcons();
+            };
 
             const renderCard = (product) => {
                 const stock = Number(product.stock || product.countInStock || 0);
+                const imageUrl = window.normalizeProductImageUrl
+                    ? window.normalizeProductImageUrl(product.imageUrl || product.image_url || (product.images && product.images[0]) || product.image)
+                    : (product.imageUrl || product.image_url || (product.images && product.images[0]) || product.image || '/public/images/space-bg.png');
                 return `
                     <div class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
                         <div class="aspect-square bg-black/20">
-                            <img src="${product.imageUrl || (product.images && product.images[0]) || '/public/images/space-bg.png'}" alt="${product.name}" class="w-full h-full object-cover">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover">
                         </div>
                         <div class="p-6 space-y-3">
                             <h3 class="text-xl font-black text-white">${product.name}</h3>
@@ -70,8 +104,11 @@
                 `;
             };
 
-            grid.innerHTML = compareItems.map(renderCard).join('');
-            if (window.lucide) lucide.createIcons();
+            window.addEventListener('compareUpdated', () => {
+                renderCompare();
+            });
+
+            await renderCompare();
         });
     </script>
 </body>

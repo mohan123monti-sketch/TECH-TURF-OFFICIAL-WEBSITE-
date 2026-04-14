@@ -103,15 +103,17 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const savedEmail = params.get('email') || localStorage.getItem('tt_notify_email') || '';
+            const savedEmail = params.get('email') || '';
             const emailInput = document.getElementById('email');
             emailInput.value = savedEmail;
 
             document.getElementById('pref-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const val = emailInput.value.trim();
-                if (val) localStorage.setItem('tt_notify_email', val);
-                else localStorage.removeItem('tt_notify_email');
+                const next = new URL(window.location.href);
+                if (val) next.searchParams.set('email', val);
+                else next.searchParams.delete('email');
+                history.replaceState(null, '', next.toString());
                 loadNotifications(val);
             });
 

@@ -18,24 +18,6 @@
 <body data-page="Shop" class="shop-branding">
     <div id="header-container"></div>
 
-    <!-- Featured Products -->
-    <section id="featured-section" class="py-16 relative">
-        <div class="shop-container relative z-10">
-            <div class="section-head reveal-hidden">
-                <div>
-                    <span class="text-orange-500 font-mono tracking-widest text-xs uppercase mb-2 block">Premium Selection</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">High-Performance <span class="shop-text-gradient">Assets</span></h2>
-                </div>
-            </div>
-
-            <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
-                <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
-                <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
-            </div>
-        </div>
-    </section>
-
     <section class="product-section">
         <div class="shop-container">
 
@@ -145,7 +127,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const productsGrid = document.getElementById('products-grid');
-            const featuredGrid = document.getElementById('featured-grid');
             const productCount = document.getElementById('product-count');
             const searchInput = document.getElementById('search-input');
             const sortSelect = document.getElementById('sort-select');
@@ -163,6 +144,9 @@
             const compareGo = document.getElementById('compare-go');
             const recentSection = document.getElementById('recent-section');
             const recentGrid = document.getElementById('recent-grid');
+            let recentProductsCache = [];
+            let recentProductsLoaded = false;
+            let recentProductsLoading = null;
 
             if (productCount) productCount.textContent = 'Loading Inventory...';
 
@@ -189,8 +173,8 @@
                 deliveryMax: 0,
                 inStockOnly: false,
                 wishlistOnly: false,
-                wishlist: new Set(JSON.parse(localStorage.getItem('tt_wishlist') || '[]')),
-                compare: new Set(JSON.parse(localStorage.getItem('tt_compare') || '[]')),
+                wishlist: new Set((window.getWishlistIds ? window.getWishlistIds() : []).map(String)),
+                compare: new Set((window.getCompareIds ? window.getCompareIds() : []).map(String)),
             };
 
             const productMap = new Map();
@@ -217,6 +201,9 @@
                 const isCompared = productId ? state.compare.has(String(productId)) : false;
                 const wishlistClass = isWishlisted ? 'text-red-400 border-red-400/40' : 'text-white/50 border-white/10';
                 const compareClass = isCompared ? 'text-blue-400 border-blue-400/40' : 'text-white/50 border-white/10';
+                const imageUrl = window.normalizeProductImageUrl
+                    ? window.normalizeProductImageUrl(product.imageUrl || (product.images && product.images[0]) || product.image_url || product.image)
+                    : (product.imageUrl || (product.images && product.images[0]) || product.image_url || product.image || '/public/images/space-bg.png');
 
                 return `
                 <div class="product-card group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-[#d2670e]/50 transition-all duration-300" data-category="${product.branch || product.category || 'Tech Turf'}" data-product-id="${productId || ''}">
@@ -229,7 +216,7 @@
                         </button>
                     </div>
                     <div class="aspect-square bg-black/20 relative overflow-hidden">
-                        <img src="${product.imageUrl || (product.images && product.images[0]) || '/public/images/space-bg.png'}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-6">
                             <button
                                 ${stockCount > 0 ? '' : 'disabled'}
@@ -351,19 +338,67 @@
             };
 
             const renderRecent = () => {
-                const recentIds = JSON.parse(localStorage.getItem('tt_recent') || '[]');
-                const recentProducts = recentIds
-                    .map((id) => productMap.get(String(id)))
-                    .filter(Boolean)
-                    .slice(0, 6);
+                if (!recentSection || !recentGrid) return;
 
-                if (recentProducts.length === 0) {
+                if (!window.getAuthToken || !window.getAuthToken()) {
+                    recentSection.classList.add('hidden');
+                    recentGrid.innerHTML = '';
+                    return;
+                }
+
+                if (!recentProductsLoaded) {
+                    if (!recentProductsLoading) {
+                        recentProductsLoading = (async () => {
+                            try {
+                                const token = window.getAuthToken();
+                                const response = await fetch(`${window.API_BASE_URL}/orders/myorders`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+
+                                if (!response.ok) {
+                                    recentProductsCache = [];
+                                    return;
+                                }
+
+                                const orders = await response.json();
+                                const seen = new Set();
+                                const collected = [];
+
+                                (Array.isArray(orders) ? orders : []).forEach((order) => {
+                                    const items = Array.isArray(order.orderItems) ? order.orderItems : Array.isArray(order.items) ? order.items : [];
+                                    items.forEach((item) => {
+                                        const productId = item._id || item.id || item.productId || item.product_id;
+                                        const key = productId ? String(productId) : '';
+                                        if (!key || seen.has(key)) return;
+                                        seen.add(key);
+                                        const liveProduct = productMap.get(key) || item;
+                                        collected.push(liveProduct);
+                                    });
+                                });
+
+                                recentProductsCache = collected.slice(0, 6);
+                            } catch (error) {
+                                console.error('Failed to load recent products from orders:', error);
+                                recentProductsCache = [];
+                            } finally {
+                                recentProductsLoaded = true;
+                                recentProductsLoading = null;
+                                renderRecent();
+                            }
+                        })();
+                    }
                     recentSection.classList.add('hidden');
                     return;
                 }
 
+                if (recentProductsCache.length === 0) {
+                    recentSection.classList.add('hidden');
+                    recentGrid.innerHTML = '';
+                    return;
+                }
+
                 recentSection.classList.remove('hidden');
-                recentGrid.innerHTML = recentProducts.map(renderProduct).join('');
+                recentGrid.innerHTML = recentProductsCache.map(renderProduct).join('');
             };
 
             const render = () => {
@@ -379,10 +414,6 @@
                 productsGrid.innerHTML = pageItems.length
                     ? pageItems.map(renderProduct).join('')
                     : '<p class="text-white text-center col-span-full">No products found.</p>';
-
-                if (featuredGrid) {
-                    featuredGrid.innerHTML = state.products.slice(0, 3).map(renderProduct).join('');
-                }
 
                 renderPagination();
                 renderRecent();
@@ -423,7 +454,9 @@
                     } else {
                         state.wishlist.add(key);
                     }
-                    localStorage.setItem('tt_wishlist', JSON.stringify(Array.from(state.wishlist)));
+                    if (window.saveWishlistIds) {
+                        window.saveWishlistIds(Array.from(state.wishlist));
+                    }
                     if (window.updateWishlistDisplay) window.updateWishlistDisplay();
                     render();
                 }
@@ -435,7 +468,9 @@
                     } else {
                         state.compare.add(key);
                     }
-                    localStorage.setItem('tt_compare', JSON.stringify(Array.from(state.compare)));
+                    if (window.saveCompareIds) {
+                        window.saveCompareIds(Array.from(state.compare));
+                    }
                     updateCompareBar();
                     render();
                 }
@@ -464,6 +499,18 @@
             deliveryMaxSelect.addEventListener('change', handleFilterChange);
             inStockOnlyInput.addEventListener('change', handleFilterChange);
             wishlistOnlyInput.addEventListener('change', handleFilterChange);
+
+            if (window.addEventListener) {
+                window.addEventListener('wishlistUpdated', () => {
+                    state.wishlist = new Set((window.getWishlistIds ? window.getWishlistIds() : []).map(String));
+                    render();
+                });
+                window.addEventListener('compareUpdated', () => {
+                    state.compare = new Set((window.getCompareIds ? window.getCompareIds() : []).map(String));
+                    updateCompareBar();
+                    render();
+                });
+            }
 
             clearFiltersBtn.addEventListener('click', () => {
                 searchInput.value = '';

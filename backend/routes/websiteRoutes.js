@@ -21,6 +21,33 @@ const parseJSONSafe = (value, fallback) => {
     }
 };
 
+const normalizeUploadUrl = (filepath) => {
+    if (!filepath) return '';
+    const normalized = String(filepath).replace(/\\/g, '/');
+    return normalized.startsWith('/') ? normalized : `/${normalized}`;
+};
+
+const normalizeImageUrl = (value) => {
+    if (!value) return '';
+    return String(value).trim().replace(/\\/g, '/');
+};
+
+const isLocalUploadUrl = (value) => {
+    const normalized = normalizeImageUrl(value);
+    return normalized.startsWith('/uploads/') || normalized.startsWith('uploads/');
+};
+
+const resolveLocalUploadPath = (value) => {
+    const normalized = normalizeImageUrl(value).replace(/^\//, '');
+    return normalized ? path.resolve(process.cwd(), normalized) : '';
+};
+
+const resolveMediaFilePath = (filepath) => {
+    if (!filepath) return '';
+    const normalized = String(filepath).replace(/\\/g, '/').replace(/^\//, '');
+    return normalized ? path.resolve(process.cwd(), normalized) : '';
+};
+
 // Multer Config for Media
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -76,11 +103,12 @@ router.get('/media', protect, async (req, res) => {
 router.post('/media/upload', protect, upload.single('file'), async (req, res) => {
     try {
         const { filename, path: filepath, mimetype, size } = req.file;
+        const normalizedUrl = normalizeUploadUrl(filepath);
         const result = await req.db.run(
             'INSERT INTO media (filename, filepath, mimetype, size) VALUES (?, ?, ?, ?)',
             [filename, filepath, mimetype, size]
         );
-        res.status(201).json({ id: result.lastID, filename, url: '/' + filepath });
+        res.status(201).json({ id: result.lastID, filename, url: normalizedUrl, filepath: normalizedUrl, imageUrl: normalizedUrl });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -89,8 +117,11 @@ router.post('/media/upload', protect, upload.single('file'), async (req, res) =>
 router.delete('/media/:id', protect, async (req, res) => {
     try {
         const item = await req.db.get('SELECT * FROM media WHERE id = ?', [req.params.id]);
-        if (item && fs.existsSync(item.filepath)) {
-            fs.unlinkSync(item.filepath);
+        if (item) {
+            const filePath = resolveMediaFilePath(item.filepath);
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
         }
         await req.db.run('DELETE FROM media WHERE id = ?', [req.params.id]);
         res.json({ message: 'Media deleted' });
@@ -105,7 +136,7 @@ router.post('/upload/multi', protect, (req, res) => {
     multiUpload(req, res, async (err) => {
         if (err) return res.status(400).json({ message: err.message });
         try {
-            const imageUrls = req.files.map(f => '/' + f.path.replace(/\\/g, '/'));
+            const imageUrls = req.files.map(f => normalizeUploadUrl(f.path));
             res.status(201).json({ imageUrls });
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -137,10 +168,11 @@ router.get('/blog/:id', async (req, res) => {
 router.post('/blog', protect, async (req, res) => {
     const { title, content, category, tags, imageUrl, status } = req.body;
     if (!title || !content) return res.status(400).json({ message: 'Title and content are required' });
+    const normalizedImageUrl = normalizeImageUrl(imageUrl);
     try {
         const result = await req.db.run(
             'INSERT INTO blog_posts (title, content, category, tags, imageUrl, status) VALUES (?, ?, ?, ?, ?, ?)',
-            [title, content, category || 'General', tags || '', imageUrl || '', status || 'draft']
+            [title, content, category || 'General', tags || '', normalizedImageUrl, status || 'draft']
         );
         const post = await req.db.get('SELECT * FROM blog_posts WHERE id = ?', [result.lastID]);
         res.status(201).json(post);
@@ -150,10 +182,11 @@ router.post('/blog', protect, async (req, res) => {
 });
 router.put('/blog/:id', protect, async (req, res) => {
     const { title, content, category, tags, imageUrl, status } = req.body;
+    const normalizedImageUrl = normalizeImageUrl(imageUrl);
     try {
         await req.db.run(
             'UPDATE blog_posts SET title=?, content=?, category=?, tags=?, imageUrl=?, status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
-            [title, content, category, tags, imageUrl, status, req.params.id]
+            [title, content, category, tags, normalizedImageUrl, status, req.params.id]
         );
         const post = await req.db.get('SELECT * FROM blog_posts WHERE id = ?', [req.params.id]);
         res.json(post);
@@ -163,6 +196,25 @@ router.put('/blog/:id', protect, async (req, res) => {
 });
 router.delete('/blog/:id', protect, async (req, res) => {
     try {
+        const post = await req.db.get('SELECT * FROM blog_posts WHERE id = ?', [req.params.id]);
+        if (!post) return res.status(404).json({ message: 'Post not found' });
+
+        const imageUrl = normalizeImageUrl(post.imageUrl);
+        if (isLocalUploadUrl(imageUrl)) {
+            const filePath = resolveLocalUploadPath(imageUrl);
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+
+            await req.db.run(
+                `DELETE FROM media
+                 WHERE REPLACE(filepath, '\\', '/') = ?
+                    OR REPLACE(filepath, '\\', '/') = ?
+                    OR REPLACE(filepath, '\\', '/') = ?`,
+                [imageUrl.replace(/^\//, ''), imageUrl, filePath.replace(/\\/g, '/')]
+            );
+        }
+
         await req.db.run('DELETE FROM blog_posts WHERE id = ?', [req.params.id]);
         res.json({ message: 'Post deleted' });
     } catch (error) {

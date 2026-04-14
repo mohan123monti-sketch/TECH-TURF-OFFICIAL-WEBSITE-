@@ -1,11 +1,29 @@
 // Admin Dashboard JavaScript
 const API_BASE = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+const API_ORIGIN = new URL(API_BASE).origin;
 
 let currentTab = 'dashboard';
 let charts = {};
 let currentEditingProduct = null;
 let currentEditingPromo = null;
 let currentOrdersCache = [];
+
+function normalizeImageUrl(url) {
+    if (!url) return '';
+
+    const value = String(url).trim().replace(/\\/g, '/');
+    if (!value) return '';
+
+    if (/^data:image\//i.test(value) || /^https?:\/\//i.test(value) || value.startsWith('//')) {
+        return value;
+    }
+
+    if (value.startsWith('/')) {
+        return `${API_ORIGIN}${value}`;
+    }
+
+    return `${API_ORIGIN}/${value}`;
+}
 
 // Initialize with token check and retry logic
 document.addEventListener('DOMContentLoaded', () => {
@@ -87,63 +105,73 @@ function switchTab(tab) {
 async function loadDashboardData() {
     try {
         const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
-        
         if (!token) {
             throw new Error('Session expired. Please login again.');
         }
-        
-        // Fetch dashboard stats from the real stats endpoint
-        let statsRes = await fetch(`${API_BASE}/stats/dashboard`, {
+
+        const statsRequest = fetch(`${API_BASE}/stats/dashboard`, {
             headers: { 'Authorization': `Bearer ${token}` }
+        }).then(async (response) => {
+            if (response.status === 401) throw new Error('Session expired. Please login again.');
+            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch stats`);
+            return response.json();
+        }).catch((error) => {
+            console.error('Dashboard stats fetch failed:', error);
+            return {};
         });
-        
-        if (statsRes.status === 401) {
-            throw new Error('Session expired. Please login again.');
-        }
-        
-        if (!statsRes.ok) throw new Error(`HTTP ${statsRes.status}: Failed to fetch stats`);
-        const stats = await statsRes.json();
-        
-        // Fetch orders directly from the website API
-        let ordersRes = await fetch(`${API_BASE}/orders`, {
+
+        const ordersRequest = fetch(`${API_BASE}/orders`, {
             headers: { 'Authorization': `Bearer ${token}` }
+        }).then(async (response) => {
+            if (response.status === 401) throw new Error('Session expired. Please login again.');
+            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch orders`);
+            return response.json();
+        }).catch((error) => {
+            console.error('Dashboard orders fetch failed:', error);
+            return [];
         });
-        
-        if (!ordersRes.ok) throw new Error(`HTTP ${ordersRes.status}: Failed to fetch orders`);
-        const orders = await ordersRes.json();
-        currentOrdersCache = Array.isArray(orders) ? orders : [];
-        
-        // Fetch products (no auth needed)
-        const productsRes = await fetch(`${API_BASE}/products`);
-        const products = await productsRes.json();
-        
-        // Calculate metrics
-        const totalRevenue = stats.totalRevenue || (Array.isArray(orders) ? orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0) : 0);
-        const totalOrders = stats.totalOrders || (Array.isArray(orders) ? orders.length : 0);
-        const totalProducts = stats.totalProducts || (Array.isArray(products) ? products.length : 0);
-        const activeUsers = stats.activeUsers || 0;
-        
-        // Update dashboard stats
+
+        const productsRequest = fetch(`${API_BASE}/products`).then(async (response) => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch products`);
+            return response.json();
+        }).catch((error) => {
+            console.error('Dashboard products fetch failed:', error);
+            return [];
+        });
+
+        const [stats, orders, products] = await Promise.all([statsRequest, ordersRequest, productsRequest]);
+        const safeOrders = Array.isArray(orders) ? orders : [];
+        const safeProducts = Array.isArray(products) ? products : [];
+        currentOrdersCache = safeOrders;
+
+        const totalRevenue = Number(
+            stats.totalRevenue ?? safeOrders.reduce((sum, order) => sum + Number(order.totalPrice || order.total_price || 0), 0)
+        ) || 0;
+        const totalOrders = Number(stats.totalOrders ?? safeOrders.length) || 0;
+        const totalProducts = Number(stats.totalProducts ?? safeProducts.length) || 0;
+        const activeUsers = Number(stats.activeUsers ?? 0) || 0;
+
         const revenueEl = document.getElementById('revenue');
         const ordersEl = document.getElementById('totalOrders');
         const productsEl = document.getElementById('totalProducts');
         const usersEl = document.getElementById('activeUsers');
-        
+
         if (revenueEl) revenueEl.textContent = totalRevenue.toFixed(0);
         if (ordersEl) ordersEl.textContent = totalOrders;
         if (productsEl) productsEl.textContent = totalProducts;
         if (usersEl) usersEl.textContent = activeUsers;
-        
-        // Load recent orders
-        if (Array.isArray(orders) && orders.length > 0) {
-            loadRecentOrders(orders.slice(0, 5));
-            updateCharts(orders);
+
+        if (safeOrders.length > 0) {
+            loadRecentOrders(safeOrders.slice(0, 5));
+            updateCharts(safeOrders);
+        } else {
+            const tbody = document.getElementById('recentOrdersBody');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">No recent orders found</td></tr>';
+            }
         }
-        
     } catch (err) {
         console.error('Dashboard error:', err);
-        
-        // Handle 401 - redirect to login
         if (err.message.includes('Session expired')) {
             localStorage.removeItem('tt_token');
             localStorage.removeItem('token');
@@ -151,22 +179,20 @@ async function loadDashboardData() {
             window.location.href = '/pages/login.html';
             return;
         }
-        
-        // Show error messages
+
         const revenueEl = document.getElementById('revenue');
         const ordersEl = document.getElementById('totalOrders');
         const productsEl = document.getElementById('totalProducts');
         const usersEl = document.getElementById('activeUsers');
-        
-        if (revenueEl) revenueEl.textContent = 'Error';
-        if (ordersEl) ordersEl.textContent = 'Error';
-        if (productsEl) productsEl.textContent = 'Error';
-        if (usersEl) usersEl.textContent = 'Error';
-        
-        // Show error in recent orders table
+
+        if (revenueEl) revenueEl.textContent = '0';
+        if (ordersEl) ordersEl.textContent = '0';
+        if (productsEl) productsEl.textContent = '0';
+        if (usersEl) usersEl.textContent = '0';
+
         const tbody = document.getElementById('recentOrdersBody');
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-600">${err.message}</td></tr>`;
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-600">Unable to load recent orders</td></tr>';
         }
     }
 }
@@ -181,19 +207,22 @@ function loadRecentOrders(orders) {
     tbody.innerHTML = '';
     
     orders.forEach(order => {
+        const orderId = String(order._id || order.id || '');
+        const shortOrderId = orderId ? orderId.slice(-8) : 'N/A';
+        const orderTotal = Number(order.totalPrice || order.total_price || 0);
         const row = document.createElement('tr');
         row.className = 'border-b hover:bg-gray-50';
         row.innerHTML = `
-            <td class="py-3 px-4 text-sm">${order._id.slice(-8)}</td>
+            <td class="py-3 px-4 text-sm">${shortOrderId}</td>
             <td class="py-3 px-4 text-sm">${order.user?.email || 'Guest'}</td>
-            <td class="py-3 px-4 text-sm">INR ${order.totalPrice?.toFixed(0) || 0}</td>
+            <td class="py-3 px-4 text-sm">INR ${orderTotal.toFixed(0)}</td>
             <td class="py-3 px-4">
                 <span class="status-${order.status?.toLowerCase() || 'pending'}">
                     ${order.status || 'Pending'}
                 </span>
             </td>
             <td class="py-3 px-4">
-                <button onclick="viewOrder('${order._id}')" class="text-orange-600 hover:underline text-sm">View</button>
+                <button onclick="viewOrder('${orderId}')" class="text-orange-600 hover:underline text-sm">View</button>
             </td>
         `;
         tbody.appendChild(row);
@@ -237,11 +266,14 @@ async function loadOrders() {
         }
         
         orders.forEach(order => {
+            const orderId = String(order._id || order.id || '');
+            const shortOrderId = orderId ? orderId.slice(-8) : 'N/A';
+            const orderTotal = Number(order.totalPrice || order.total_price || 0);
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="py-3 px-4 text-sm">${order._id.slice(-8)}</td>
+                <td class="py-3 px-4 text-sm">${shortOrderId}</td>
                 <td class="py-3 px-4 text-sm">${order.user?.email || 'N/A'}</td>
-                <td class="py-3 px-4 text-sm">INR ${order.totalPrice?.toFixed(0) || 0}</td>
+                <td class="py-3 px-4 text-sm">INR ${orderTotal.toFixed(0)}</td>
                 <td class="py-3 px-4">
                     <span class="status-${order.status?.toLowerCase() || 'pending'}">
                         ${order.status || 'Pending'}
@@ -249,8 +281,8 @@ async function loadOrders() {
                 </td>
                 <td class="py-3 px-4 text-sm">${order.paymentMethod || 'COD'}</td>
                 <td class="py-3 px-4">
-                    <button onclick="editOrder('${order._id}')" class="text-blue-600 hover:underline text-xs">Edit</button>
-                    <button onclick="deleteOrder('${order._id}')" class="text-red-600 hover:underline text-xs">Delete</button>
+                    <button onclick="editOrder('${orderId}')" class="text-blue-600 hover:underline text-xs">Edit</button>
+                    <button onclick="deleteOrder('${orderId}')" class="text-red-600 hover:underline text-xs">Delete</button>
                 </td>
             `;
             tbody.appendChild(row);
@@ -280,7 +312,7 @@ async function loadInventory() {
         
         products.forEach(product => {
             const productId = product.id || product._id;
-            const imageSrc = product.image_url || product.imageUrl || product.image || '/public/images/space-bg.png';
+            const imageSrc = normalizeImageUrl(product.image_url || product.imageUrl || product.image || '/public/images/space-bg.png');
             const card = document.createElement('div');
             card.className = 'bg-white rounded-lg p-4 shadow hover:shadow-lg';
             card.innerHTML = `
@@ -810,10 +842,11 @@ async function saveProduct(event) {
         }
 
         const uploadData = await uploadResponse.json();
-        const uploadedImageUrl = uploadData.imageUrl || uploadData.url || uploadData.filepath || '';
+        const uploadedImageUrl = normalizeImageUrl(uploadData.imageUrl || uploadData.url || uploadData.filepath || '');
         payload.image_url = uploadedImageUrl;
         payload.imageUrl = uploadedImageUrl;
     } else if (payload.image_url) {
+        payload.image_url = normalizeImageUrl(payload.image_url);
         payload.imageUrl = payload.image_url;
     }
 

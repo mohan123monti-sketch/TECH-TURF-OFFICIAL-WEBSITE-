@@ -381,6 +381,14 @@ export async function initDatabase() {
             status TEXT DEFAULT 'Pending',
             paymentMethod TEXT,
             shippingAddress TEXT,
+            itemsPrice REAL DEFAULT 0,
+            taxPrice REAL DEFAULT 0,
+            shippingPrice REAL DEFAULT 0,
+            promoCode TEXT,
+            discountAmount REAL DEFAULT 0,
+            deliverySlot TEXT,
+            orderNotes TEXT,
+            giftMessage TEXT,
             isPaid BOOLEAN DEFAULT 0,
             isDelivered BOOLEAN DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -427,6 +435,24 @@ export async function initDatabase() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE NOT NULL,
             cart TEXT DEFAULT '[]',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS user_wishlists (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE NOT NULL,
+            items TEXT DEFAULT '[]',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS user_compares (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE NOT NULL,
+            items TEXT DEFAULT '[]',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -547,11 +573,22 @@ export async function initDatabase() {
     try { await db.run('ALTER TABLE users ADD COLUMN two_factor_enabled BOOLEAN DEFAULT 0'); } catch (e) { }
     try { await db.run('ALTER TABLE users ADD COLUMN backup_codes TEXT'); } catch (e) { }
     try { await db.run('ALTER TABLE user_addresses ADD COLUMN addressLine2 TEXT'); } catch (e) { }
+    try { await db.run('ALTER TABLE orders ADD COLUMN itemsPrice REAL DEFAULT 0'); } catch (e) { }
+    try { await db.run('ALTER TABLE orders ADD COLUMN taxPrice REAL DEFAULT 0'); } catch (e) { }
+    try { await db.run('ALTER TABLE orders ADD COLUMN shippingPrice REAL DEFAULT 0'); } catch (e) { }
+    try { await db.run('ALTER TABLE orders ADD COLUMN promoCode TEXT'); } catch (e) { }
+    try { await db.run('ALTER TABLE orders ADD COLUMN discountAmount REAL DEFAULT 0'); } catch (e) { }
+    try { await db.run('ALTER TABLE orders ADD COLUMN deliverySlot TEXT'); } catch (e) { }
+    try { await db.run('ALTER TABLE orders ADD COLUMN orderNotes TEXT'); } catch (e) { }
+    try { await db.run('ALTER TABLE orders ADD COLUMN giftMessage TEXT'); } catch (e) { }
     try { await db.run("CREATE TABLE IF NOT EXISTS user_carts (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER UNIQUE NOT NULL, cart TEXT DEFAULT '[]', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)"); } catch (e) { }
+    try { await db.run("CREATE TABLE IF NOT EXISTS user_wishlists (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER UNIQUE NOT NULL, items TEXT DEFAULT '[]', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)"); } catch (e) { }
+    try { await db.run("CREATE TABLE IF NOT EXISTS user_compares (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER UNIQUE NOT NULL, items TEXT DEFAULT '[]', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)"); } catch (e) { }
     try { await db.run("CREATE TABLE IF NOT EXISTS newsletter_subscribers (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, preferences TEXT DEFAULT '{}', status TEXT DEFAULT 'active', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (e) { }
     try { await db.run('CREATE TABLE IF NOT EXISTS product_reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER NOT NULL, user_id INTEGER, rating INTEGER NOT NULL, comment TEXT, helpful INTEGER DEFAULT 0, verified BOOLEAN DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL, FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE)'); } catch (e) { }
     try { await db.run("ALTER TABLE announcements ADD COLUMN priority TEXT DEFAULT 'medium'"); } catch (e) { }
     try { await db.run('ALTER TABLE announcements ADD COLUMN notifyUsers BOOLEAN DEFAULT 1'); } catch (e) { }
+    try { await db.run("UPDATE products SET image_url = REPLACE(image_url, '\\\\', '/') WHERE image_url LIKE '%\\\\%'"); } catch (e) { }
 
     // Seed default admin if no users exist
     const userCount = await db.get('SELECT COUNT(*) as count FROM users');

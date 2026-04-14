@@ -1,3 +1,20 @@
+import fs from 'fs';
+import path from 'path';
+
+const normalizeImageUrl = (value) => {
+    if (!value) return '';
+    return String(value).trim().replace(/\\/g, '/');
+};
+
+const isLocalUploadUrl = (value) => {
+    const normalized = normalizeImageUrl(value);
+    return normalized.startsWith('/uploads/') || normalized.startsWith('uploads/');
+};
+
+const resolveLocalUploadPath = (value) => {
+    const normalized = normalizeImageUrl(value).replace(/^\//, '');
+    return normalized ? path.resolve(process.cwd(), normalized) : '';
+};
 // EMPLOYEE CONTROLLER
 
 export const getEmployees = async (req, res) => {
@@ -120,6 +137,30 @@ export const deleteEmployee = async (req, res) => {
     const { id } = req.params;
     const db = req.db;
     try {
+        const employee = await db.get('SELECT id, profile_image FROM employees WHERE id = ?', [id]);
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+
+        if (isLocalUploadUrl(employee.profile_image)) {
+            const filePath = resolveLocalUploadPath(employee.profile_image);
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+
+            await db.run(
+                `DELETE FROM media
+                 WHERE REPLACE(filepath, '\\', '/') = ?
+                    OR REPLACE(filepath, '\\', '/') = ?
+                    OR REPLACE(filepath, '\\', '/') = ?`,
+                [
+                    normalizeImageUrl(employee.profile_image).replace(/^\//, ''),
+                    normalizeImageUrl(employee.profile_image),
+                    filePath.replace(/\\/g, '/')
+                ]
+            );
+        }
+
         await db.run('DELETE FROM employees WHERE id = ?', [id]);
         res.json({ message: 'Employee deleted successfully' });
     } catch (error) {

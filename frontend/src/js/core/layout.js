@@ -9,7 +9,9 @@
    ======================================================================== */
 
 const apiOverride = localStorage.getItem('tt_api_base');
-window.API_BASE_URL = window.API_BASE_URL || apiOverride || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+window.API_BASE_URL = (window.API_BASE_URL && !/^\/api\/?$/.test(window.API_BASE_URL))
+    ? window.API_BASE_URL
+    : apiOverride || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 // --- Real-time Order Updates (Socket.io) ---
 function initOrderSocket() {
@@ -102,22 +104,92 @@ function showMessage(type, message) {
 window.showMessage = showMessage;
 
 // --- 2. Cart Logic (Shopping) ---
-function getCart() {
+function readStoredCart() {
     try {
         const cartJson = localStorage.getItem('tt_cart');
         return cartJson ? JSON.parse(cartJson) : [];
     } catch (error) {
-        console.error("Error reading cart:", error);
+        console.error('Error reading cart:', error);
         return [];
     }
+}
+
+function persistCart(cart) {
+    localStorage.setItem('tt_cart', JSON.stringify(cart));
+}
+
+let cartState = readStoredCart();
+
+function getCart() {
+    return Array.isArray(cartState) ? cartState : [];
 }
 window.getCart = getCart;
 
 function saveCart(cart) {
-    localStorage.setItem('tt_cart', JSON.stringify(cart));
+    cartState = Array.isArray(cart) ? cart : [];
+    persistCart(cartState);
     window.updateCartDisplay();
+    window.dispatchEvent(new Event('cartUpdated'));
+    if (isLoggedIn()) {
+        syncCartToServer();
+    }
 }
 window.saveCart = saveCart;
+
+async function syncCartToServer() {
+    if (!isLoggedIn()) return;
+
+    try {
+        const token = getAuthToken();
+        await fetch(`${window.API_BASE_URL}/users/cart`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ cart: cartState })
+        });
+    } catch (error) {
+        console.error('Failed to sync cart:', error);
+    }
+}
+
+async function hydrateCartFromServer() {
+    if (!isLoggedIn()) return;
+
+    try {
+        const token = getAuthToken();
+        const response = await fetch(`${window.API_BASE_URL}/users/cart`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        const serverCart = Array.isArray(payload?.cart) ? payload.cart : [];
+        const localCart = Array.isArray(cartState) ? cartState : [];
+
+        if (serverCart.length > 0) {
+            cartState = serverCart;
+            persistCart(cartState);
+            window.updateCartDisplay();
+            window.dispatchEvent(new Event('cartUpdated'));
+            return;
+        }
+
+        if (localCart.length > 0) {
+            await syncCartToServer();
+            return;
+        }
+
+        cartState = [];
+        persistCart(cartState);
+        window.updateCartDisplay();
+        window.dispatchEvent(new Event('cartUpdated'));
+    } catch (error) {
+        console.error('Failed to load cart from server:', error);
+    }
+}
 
 function updateCartDisplay() {
     const cart = getCart();
@@ -130,17 +202,6 @@ function updateCartDisplay() {
 }
 window.updateCartDisplay = updateCartDisplay;
 
-function getWishlistIds() {
-    try {
-        const wishlistJson = localStorage.getItem('tt_wishlist');
-        return wishlistJson ? JSON.parse(wishlistJson) : [];
-    } catch (error) {
-        console.error('Error reading wishlist:', error);
-        return [];
-    }
-}
-window.getWishlistIds = getWishlistIds;
-
 function updateWishlistDisplay() {
     const wishlist = getWishlistIds();
     const wishlistCountElements = document.querySelectorAll('.wishlist-count');
@@ -151,6 +212,177 @@ function updateWishlistDisplay() {
     });
 }
 window.updateWishlistDisplay = updateWishlistDisplay;
+
+function readStoredWishlist() {
+    try {
+        const wishlistJson = localStorage.getItem('tt_wishlist');
+        return wishlistJson ? JSON.parse(wishlistJson) : [];
+    } catch (error) {
+        console.error('Error reading wishlist:', error);
+        return [];
+    }
+}
+
+function persistWishlist(items) {
+    localStorage.setItem('tt_wishlist', JSON.stringify(items));
+}
+
+let wishlistState = readStoredWishlist();
+
+function getWishlistIds() {
+    return Array.isArray(wishlistState) ? wishlistState : [];
+}
+window.getWishlistIds = getWishlistIds;
+
+function saveWishlistIds(items) {
+    wishlistState = Array.isArray(items) ? items.map(String) : [];
+    persistWishlist(wishlistState);
+    updateWishlistDisplay();
+    window.dispatchEvent(new Event('wishlistUpdated'));
+    if (isLoggedIn()) {
+        syncWishlistToServer();
+    }
+}
+window.saveWishlistIds = saveWishlistIds;
+
+function readStoredCompareIds() {
+    try {
+        const compareJson = localStorage.getItem('tt_compare');
+        return compareJson ? JSON.parse(compareJson) : [];
+    } catch (error) {
+        console.error('Error reading compare list:', error);
+        return [];
+    }
+}
+
+function persistCompareIds(items) {
+    localStorage.setItem('tt_compare', JSON.stringify(items));
+}
+
+let compareState = readStoredCompareIds();
+
+function getCompareIds() {
+    return Array.isArray(compareState) ? compareState : [];
+}
+window.getCompareIds = getCompareIds;
+
+function saveCompareIds(items) {
+    compareState = Array.isArray(items) ? items.map(String) : [];
+    persistCompareIds(compareState);
+    if (isLoggedIn()) {
+        syncCompareToServer();
+    }
+    window.dispatchEvent(new Event('compareUpdated'));
+}
+window.saveCompareIds = saveCompareIds;
+
+async function syncCompareToServer() {
+    if (!isLoggedIn()) return;
+
+    try {
+        const token = getAuthToken();
+        await fetch(`${window.API_BASE_URL}/users/compare`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ items: compareState })
+        });
+    } catch (error) {
+        console.error('Failed to sync compare list:', error);
+    }
+}
+
+async function hydrateCompareFromServer() {
+    if (!isLoggedIn()) return;
+
+    try {
+        const token = getAuthToken();
+        const response = await fetch(`${window.API_BASE_URL}/users/compare`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        const serverItems = Array.isArray(payload?.items) ? payload.items.map(String) : [];
+        const localItems = Array.isArray(compareState) ? compareState.map(String) : [];
+
+        if (serverItems.length > 0) {
+            compareState = serverItems;
+            persistCompareIds(compareState);
+            window.dispatchEvent(new Event('compareUpdated'));
+            return;
+        }
+
+        if (localItems.length > 0) {
+            await syncCompareToServer();
+            return;
+        }
+
+        compareState = [];
+        persistCompareIds(compareState);
+        window.dispatchEvent(new Event('compareUpdated'));
+    } catch (error) {
+        console.error('Failed to load compare list from server:', error);
+    }
+}
+
+async function syncWishlistToServer() {
+    if (!isLoggedIn()) return;
+
+    try {
+        const token = getAuthToken();
+        await fetch(`${window.API_BASE_URL}/users/wishlist`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ items: wishlistState })
+        });
+    } catch (error) {
+        console.error('Failed to sync wishlist:', error);
+    }
+}
+
+async function hydrateWishlistFromServer() {
+    if (!isLoggedIn()) return;
+
+    try {
+        const token = getAuthToken();
+        const response = await fetch(`${window.API_BASE_URL}/users/wishlist`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        const serverItems = Array.isArray(payload?.items) ? payload.items.map(String) : [];
+        const localItems = Array.isArray(wishlistState) ? wishlistState.map(String) : [];
+
+        if (serverItems.length > 0) {
+            wishlistState = serverItems;
+            persistWishlist(wishlistState);
+            updateWishlistDisplay();
+            window.dispatchEvent(new Event('wishlistUpdated'));
+            return;
+        }
+
+        if (localItems.length > 0) {
+            await syncWishlistToServer();
+            return;
+        }
+
+        wishlistState = [];
+        persistWishlist(wishlistState);
+        updateWishlistDisplay();
+        window.dispatchEvent(new Event('wishlistUpdated'));
+    } catch (error) {
+        console.error('Failed to load wishlist from server:', error);
+    }
+}
 
 function addToCart(product) {
     const cart = getCart();
@@ -201,7 +433,14 @@ function handleLogout() {
         setTimeout(() => window.location.href = '/index.html', 1000);
     }
     localStorage.removeItem('tt_cart');
+    localStorage.removeItem('tt_wishlist');
+    localStorage.removeItem('tt_compare');
+    cartState = [];
+    wishlistState = [];
+    compareState = [];
     window.updateCartDisplay();
+    window.updateWishlistDisplay();
+    window.dispatchEvent(new Event('compareUpdated'));
 }
 window.handleLogout = handleLogout;
 
@@ -854,6 +1093,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateCartDisplay();
+    updateWishlistDisplay();
+    hydrateCartFromServer();
+    hydrateWishlistFromServer();
+    hydrateCompareFromServer();
 
     // Initialize scroll reveal on all pages
     handleScrollReveal();

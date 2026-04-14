@@ -4,7 +4,7 @@ import {
     forgotPassword, resetPassword, generateBackupCodes, getMe, getGoogleConfig,
     getAllUsers, deleteUser, updateUserRole, getPublicTeam,
     getUserProfile, updateUserProfile, getUserAddresses, addUserAddress,
-    getUserCart, saveUserCart
+    getUserCart, saveUserCart, getUserWishlist, saveUserWishlist, getUserCompare, saveUserCompare
 } from '../controllers/authController.js';
 import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
@@ -26,6 +26,10 @@ router.get('/addresses', protect, getUserAddresses);
 router.post('/addresses', protect, addUserAddress);
 router.get('/cart', protect, getUserCart);
 router.put('/cart', protect, saveUserCart);
+router.get('/wishlist', protect, getUserWishlist);
+router.put('/wishlist', protect, saveUserWishlist);
+router.get('/compare', protect, getUserCompare);
+router.put('/compare', protect, saveUserCompare);
 
 // Admin Routes
 router.get('/', protect, adminOnly, getAllUsers);

@@ -202,7 +202,7 @@ class AdvancedSearch {
         resultsDiv.innerHTML = this.results.map(product => `
             <a href="product_details.html?id=${product._id}" class="group block bg-gray-800/30 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-all">
                 <div class="aspect-square bg-gray-700">
-                    <img src="${product.imageUrl || product.images?.[0] || '/public/images/space-bg.png'}" 
+                    <img src="${window.normalizeProductImageUrl ? window.normalizeProductImageUrl(product.imageUrl || product.image_url || product.images?.[0] || product.image) : (product.imageUrl || product.image_url || product.images?.[0] || product.image || '/public/images/space-bg.png')}" 
                          alt="${product.name}" 
                          class="w-full h-full object-cover">
                 </div>

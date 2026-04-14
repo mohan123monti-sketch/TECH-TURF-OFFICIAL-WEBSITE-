@@ -71,6 +71,14 @@ export const createOrder = async (req, res) => {
     const totalPrice = Number(body.totalPrice ?? body.total_price ?? 0);
     const paymentMethod = body.paymentMethod || body.payment_method || 'COD';
     const shippingAddress = body.shippingAddress || body.shipping_address || {};
+    const itemsPrice = Number(body.itemsPrice ?? body.items_price ?? 0);
+    const taxPrice = Number(body.taxPrice ?? body.tax_price ?? 0);
+    const shippingPrice = Number(body.shippingPrice ?? body.shipping_price ?? 0);
+    const promoCode = body.promoCode || body.promo_code || '';
+    const discountAmount = Number(body.discountAmount ?? body.discount_amount ?? 0);
+    const deliverySlot = body.deliverySlot || body.delivery_slot || '';
+    const orderNotes = body.orderNotes || body.order_notes || '';
+    const giftMessage = body.giftMessage || body.gift_message || '';
 
     if (!Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ message: 'Order items are required' });
@@ -81,8 +89,26 @@ export const createOrder = async (req, res) => {
 
     try {
         const result = await req.db.run(
-            'INSERT INTO orders (user_id, items, totalPrice, paymentMethod, shippingAddress) VALUES (?, ?, ?, ?, ?)',
-            [user_id, JSON.stringify(items), totalPrice, paymentMethod, JSON.stringify(shippingAddress)]
+            `INSERT INTO orders (
+                user_id, items, totalPrice, paymentMethod, shippingAddress,
+                itemsPrice, taxPrice, shippingPrice, promoCode, discountAmount,
+                deliverySlot, orderNotes, giftMessage
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                user_id,
+                JSON.stringify(items),
+                totalPrice,
+                paymentMethod,
+                JSON.stringify(shippingAddress),
+                itemsPrice,
+                taxPrice,
+                shippingPrice,
+                promoCode,
+                discountAmount,
+                deliverySlot,
+                orderNotes,
+                giftMessage
+            ]
         );
         const newOrder = await req.db.get('SELECT * FROM orders WHERE id = ?', [result.lastID]);
         res.status(201).json(normalizeOrder(newOrder));

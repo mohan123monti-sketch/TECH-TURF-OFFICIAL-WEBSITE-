@@ -4,6 +4,15 @@
 let products = [];
 let editingProductId = null;
 const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+const apiOrigin = new URL(apiBase).origin;
+
+function normalizeProductImageUrl(url) {
+    if (!url) return '';
+    const value = String(url).trim().replace(/\\/g, '/');
+    if (!value) return '';
+    if (/^data:image\//i.test(value) || /^https?:\/\//i.test(value) || value.startsWith('//')) return value;
+    return value.startsWith('/') ? `${apiOrigin}${value}` : `${apiOrigin}/${value}`;
+}
 
 async function loadProducts() {
     const token = localStorage.getItem('tt_token');
@@ -37,7 +46,7 @@ function renderProducts() {
         <tr class="hover:bg-gray-700/30 transition-colors">
             <td class="p-4 flex items-center gap-3">
                 <div class="w-10 h-10 rounded bg-gray-700 overflow-hidden">
-                    ${product.imageUrl || product.image_url ? `<img src="${product.imageUrl || product.image_url}" onerror="this.onerror=null;this.src='/public/images/space-bg.png'" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gray-600 flex items-center justify-center text-xs text-gray-400">N/A</div>'}
+                    ${product.imageUrl || product.image_url ? `<img src="${normalizeProductImageUrl(product.imageUrl || product.image_url)}" onerror="this.onerror=null;this.src='/public/images/space-bg.png'" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gray-600 flex items-center justify-center text-xs text-gray-400">N/A</div>'}
                 </div>
                 <span class="font-medium">${product.name}</span>
                 <span class="ml-2 px-2 py-0.5 rounded-md bg-white/5 text-[9px] font-black uppercase text-[#d2670e] border border-[#d2670e]/20">${product.branch || 'Tech Turf'}</span>
@@ -124,7 +133,7 @@ async function saveProduct(event) {
 
             if (uploadResponse.ok) {
                 const uploadData = await uploadResponse.json();
-                imageUrl = uploadData.imageUrl || uploadData.url || imageUrl;
+                imageUrl = normalizeProductImageUrl(uploadData.imageUrl || uploadData.url || imageUrl);
             } else {
                 window.showToast('Failed to upload image', 'error');
                 signinButton.disabled = false;
@@ -147,8 +156,8 @@ async function saveProduct(event) {
         stock: parseInt(form.stock.value),
         category: form.category.value,
         branch: form.branch.value,
-        imageUrl: imageUrl,
-        image_url: imageUrl
+        imageUrl: normalizeProductImageUrl(imageUrl),
+        image_url: normalizeProductImageUrl(imageUrl)
     };
 
     try {

@@ -1,3 +1,20 @@
+import fs from 'fs';
+import path from 'path';
+
+const normalizeImageUrl = (value) => {
+    if (!value) return '';
+    return String(value).trim().replace(/\\/g, '/');
+};
+
+const isLocalUploadUrl = (value) => {
+    const normalized = normalizeImageUrl(value);
+    return normalized.startsWith('/uploads/') || normalized.startsWith('uploads/');
+};
+
+const resolveLocalUploadPath = (value) => {
+    const normalized = normalizeImageUrl(value).replace(/^\//, '');
+    return normalized ? path.resolve(process.cwd(), normalized) : '';
+};
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
@@ -44,6 +61,14 @@ const selectPrimaryPayment = async (db, userId) => {
 
 const selectUserCart = async (db, userId) => {
     return db.get('SELECT * FROM user_carts WHERE user_id = ?', [userId]);
+};
+
+const selectUserWishlist = async (db, userId) => {
+    return db.get('SELECT * FROM user_wishlists WHERE user_id = ?', [userId]);
+};
+
+const selectUserCompare = async (db, userId) => {
+    return db.get('SELECT * FROM user_compares WHERE user_id = ?', [userId]);
 };
 
 const generateToken = (id, role) => {
@@ -660,6 +685,70 @@ export const saveUserCart = async (req, res) => {
     }
 };
 
+// @desc    Get saved wishlist
+// @route   GET /api/users/wishlist
+export const getUserWishlist = async (req, res) => {
+    const db = req.db;
+    try {
+        const wishlistRow = await selectUserWishlist(db, req.user.id);
+        const items = wishlistRow?.items ? JSON.parse(wishlistRow.items) : [];
+        res.json({ items });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Save wishlist
+// @route   PUT /api/users/wishlist
+export const saveUserWishlist = async (req, res) => {
+    const db = req.db;
+    try {
+        const items = Array.isArray(req.body?.items) ? req.body.items : [];
+        await db.run(
+            `INSERT INTO user_wishlists (user_id, items, updated_at)
+             VALUES (?, ?, CURRENT_TIMESTAMP)
+             ON CONFLICT(user_id) DO UPDATE SET items = excluded.items, updated_at = CURRENT_TIMESTAMP`,
+            [req.user.id, JSON.stringify(items)]
+        );
+
+        res.json({ success: true, items });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get saved compare list
+// @route   GET /api/users/compare
+export const getUserCompare = async (req, res) => {
+    const db = req.db;
+    try {
+        const compareRow = await selectUserCompare(db, req.user.id);
+        const items = compareRow?.items ? JSON.parse(compareRow.items) : [];
+        res.json({ items });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Save compare list
+// @route   PUT /api/users/compare
+export const saveUserCompare = async (req, res) => {
+    const db = req.db;
+    try {
+        const items = Array.isArray(req.body?.items) ? req.body.items : [];
+        await db.run(
+            `INSERT INTO user_compares (user_id, items, updated_at)
+             VALUES (?, ?, CURRENT_TIMESTAMP)
+             ON CONFLICT(user_id) DO UPDATE SET items = excluded.items, updated_at = CURRENT_TIMESTAMP`,
+            [req.user.id, JSON.stringify(items)]
+        );
+
+        res.json({ success: true, items });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // @desc    Get public team members for website About page
 // @route   GET /api/auth/team
 export const getPublicTeam = async (req, res) => {
@@ -722,6 +811,31 @@ export const deleteUser = async (req, res) => {
         if (parseInt(req.params.id) === req.user.id) {
             return res.status(400).json({ message: 'You cannot delete your own admin account.' });
         }
+
+        const user = await db.get('SELECT id, avatar FROM users WHERE id = ?', [req.params.id]);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (isLocalUploadUrl(user.avatar)) {
+            const filePath = resolveLocalUploadPath(user.avatar);
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+
+            await db.run(
+                `DELETE FROM media
+                 WHERE REPLACE(filepath, '\\', '/') = ?
+                    OR REPLACE(filepath, '\\', '/') = ?
+                    OR REPLACE(filepath, '\\', '/') = ?`,
+                [
+                    normalizeImageUrl(user.avatar).replace(/^\//, ''),
+                    normalizeImageUrl(user.avatar),
+                    filePath.replace(/\\/g, '/')
+                ]
+            );
+        }
+
         await db.run('DELETE FROM users WHERE id = ?', [req.params.id]);
         res.json({ message: 'User deleted successfully' });
     } catch (error) {

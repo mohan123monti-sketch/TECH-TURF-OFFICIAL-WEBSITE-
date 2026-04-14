@@ -41,12 +41,11 @@
             const grid = document.getElementById('wishlist-grid');
             const clearBtn = document.getElementById('clear-wishlist');
 
-            const wishlistIds = JSON.parse(localStorage.getItem('tt_wishlist') || '[]').map(String);
             const products = await window.fetchProducts();
             const productMap = new Map(products.map(p => [String(p._id || p.id), p]));
 
             const render = () => {
-                const ids = JSON.parse(localStorage.getItem('tt_wishlist') || '[]').map(String);
+                const ids = (window.getWishlistIds ? window.getWishlistIds() : []).map(String);
                 const items = ids.map(id => productMap.get(id)).filter(Boolean);
 
                 if (items.length === 0) {
@@ -82,8 +81,8 @@
                 grid.querySelectorAll('.remove-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         const id = btn.dataset.id;
-                        const next = JSON.parse(localStorage.getItem('tt_wishlist') || '[]').map(String).filter(x => x !== id);
-                        localStorage.setItem('tt_wishlist', JSON.stringify(next));
+                        const next = (window.getWishlistIds ? window.getWishlistIds() : []).map(String).filter(x => x !== id);
+                        if (window.saveWishlistIds) window.saveWishlistIds(next);
                         if (window.updateWishlistDisplay) window.updateWishlistDisplay();
                         render();
                     });
@@ -102,7 +101,7 @@
             };
 
             clearBtn.addEventListener('click', () => {
-                localStorage.setItem('tt_wishlist', JSON.stringify([]));
+                if (window.saveWishlistIds) window.saveWishlistIds([]);
                 if (window.updateWishlistDisplay) window.updateWishlistDisplay();
                 render();
             });
