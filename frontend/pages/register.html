@@ -18,21 +18,24 @@
   <style>
     body {
       background-color: #000;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      min-height: 100dvh;
+      padding: clamp(16px, 3.5vh, 40px) 12px;
     }
 
     /* 3D Container */
     #canvas-container {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
+      height: 100dvh;
       z-index: 1;
       background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
     }
@@ -42,12 +45,12 @@
       z-index: 10;
       width: 100%;
       max-width: 440px;
-      padding: 24px;
+      padding: clamp(10px, 2vw, 24px);
       perspective: 2000px;
     }
 
     .auth-card {
-      padding: 48px;
+      padding: clamp(26px, 5vw, 48px);
       transform-style: preserve-3d;
       transition: transform 0.6s var(--transition-curve);
     }
@@ -170,6 +173,31 @@
       letter-spacing: 2px;
       margin-bottom: 32px;
     }
+
+    .auth-title {
+      font-size: clamp(2.3rem, 7.5vw, 4.5rem);
+    }
+
+    @media (max-width: 640px) {
+      .auth-container {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-height: 760px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .auth-container {
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+
+      .auth-card {
+        padding: 24px 18px;
+      }
+    }
   </style>
 </head>
 
@@ -186,7 +214,7 @@
         Identity Initiation Protocol
       </div>
 
-      <h1 class="text-6xl md:text-7xl font-black tracking-tighter text-white uppercase leading-none mb-4">
+      <h1 class="auth-title font-black tracking-tighter text-white uppercase leading-none mb-4">
         New<br><span class="text-white/20">Identity</span>
       </h1>
       <p class="text-white/40 text-center mb-16 text-[10px] font-black tracking-[0.4em] uppercase mt-4">

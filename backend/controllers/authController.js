@@ -13,6 +13,35 @@ export const getGoogleConfig = (req, res) => {
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
+const buildSafeName = (name, email) => {
+    const cleanName = (name || '').trim();
+    if (cleanName) return cleanName;
+
+    const localPart = String(email || '').split('@')[0].trim();
+    if (localPart) return localPart;
+
+    return 'User';
+};
+
+const toNullIfEmpty = (value) => {
+    const trimmed = typeof value === 'string' ? value.trim() : value;
+    return trimmed ? trimmed : null;
+};
+
+const selectPrimaryAddress = async (db, userId) => {
+    return db.get(
+        'SELECT * FROM user_addresses WHERE user_id = ? ORDER BY isDefault DESC, created_at DESC LIMIT 1',
+        [userId]
+    );
+};
+
+const selectPrimaryPayment = async (db, userId) => {
+    return db.get(
+        'SELECT * FROM user_payment_details WHERE user_id = ? ORDER BY updated_at DESC, created_at DESC LIMIT 1',
+        [userId]
+    );
+};
+
 const generateToken = (id, role) => {
     return jwt.sign({ id, role }, JWT_SECRET, { expiresIn: '7d' });
 };
@@ -22,6 +51,8 @@ const generateToken = (id, role) => {
 export const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
     const db = req.db;
+    const safeName = buildSafeName(name, email);
+    const safeUsername = buildSafeName(name, email).toLowerCase().replace(/\s+/g, '.');
 
     try {
         const userExists = await db.get('SELECT * FROM users WHERE email = ?', [email]);
@@ -32,8 +63,8 @@ export const registerUser = async (req, res) => {
         const backupCodes = Array.from({ length: 5 }, () => crypto.randomBytes(4).toString('hex')).join(',');
 
         const result = await db.run(
-            'INSERT INTO users (name, email, password, backup_codes) VALUES (?, ?, ?, ?)',
-            [name, email, hashedPassword, backupCodes]
+            'INSERT INTO users (name, username, email, password, backup_codes) VALUES (?, ?, ?, ?, ?)',
+            [safeName, safeUsername, email, hashedPassword, backupCodes]
         );
 
         const newUser = await db.get('SELECT id, name, email, role FROM users WHERE id = ?', [result.lastID]);
@@ -81,7 +112,7 @@ export const loginUser = async (req, res) => {
             name: user.name, 
             email: user.email, 
             role: user.role,
-            isAdmin: user.role === 'admin'
+            isAdmin: ['admin', 'superadmin'].includes(user.role)
         };
         res.json({
             ...userData,
@@ -106,14 +137,16 @@ export const googleLogin = async (req, res) => {
             audience: process.env.GOOGLE_CLIENT_ID
         });
         const { sub: google_id, email, name, picture } = ticket.getPayload();
+        const safeName = buildSafeName(name, email);
+        const safeUsername = buildSafeName(name, email).toLowerCase().replace(/\s+/g, '.');
 
         let user = await db.get('SELECT * FROM users WHERE google_id = ? OR email = ?', [google_id, email]);
 
         if (!user) {
             const backupCodes = Array.from({ length: 5 }, () => crypto.randomBytes(4).toString('hex')).join(',');
             const result = await db.run(
-                'INSERT INTO users (name, email, google_id, backup_codes) VALUES (?, ?, ?, ?)',
-                [name, email, google_id, backupCodes]
+                'INSERT INTO users (name, username, email, google_id, backup_codes) VALUES (?, ?, ?, ?, ?)',
+                [safeName, safeUsername, email, google_id, backupCodes]
             );
             user = await db.get('SELECT * FROM users WHERE id = ?', [result.lastID]);
         } else if (!user.google_id) {
@@ -136,7 +169,7 @@ export const googleLogin = async (req, res) => {
             name: user.name, 
             email: user.email, 
             role: user.role,
-            isAdmin: user.role === 'admin'
+            isAdmin: ['admin', 'superadmin'].includes(user.role)
         };
         res.json({
             ...userData,
@@ -178,7 +211,7 @@ export const verifyTwoStep = async (req, res) => {
             name: user.name, 
             email: user.email, 
             role: user.role,
-            isAdmin: user.role === 'admin'
+            isAdmin: ['admin', 'superadmin'].includes(user.role)
         };
         res.json({
             ...userData,
@@ -259,6 +292,361 @@ export const getMe = async (req, res) => {
             user: userData,
             data: { user: userData }
         });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get current user profile (frontend compatibility)
+// @route   GET /api/users/profile
+export const getUserProfile = async (req, res) => {
+    const db = req.db;
+    try {
+        const user = await db.get('SELECT id, name, username, email, role, avatar, phone, company_name, created_at FROM users WHERE id = ?', [req.user.id]);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const address = await selectPrimaryAddress(db, user.id);
+        const payment = await selectPrimaryPayment(db, user.id);
+
+        res.json({
+            _id: String(user.id),
+            id: user.id,
+            fullName: user.name,
+            name: user.name,
+            username: user.username || user.name,
+            accountUsername: user.username,
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar,
+            phone: user.phone,
+            companyName: user.company_name,
+            createdAt: user.created_at,
+            created_at: user.created_at,
+            address: address ? {
+                _id: String(address.id),
+                id: address.id,
+                label: address.label,
+                addressLine1: address.address,
+                addressLine2: address.addressLine2,
+                address: address.address,
+                city: address.city,
+                state: address.state,
+                postalCode: address.postalCode,
+                country: address.country,
+                phone: address.phone,
+                company: address.company,
+                gstin: address.gstin,
+                isDefault: !!address.isDefault
+            } : null,
+            payment: payment ? {
+                _id: String(payment.id),
+                id: payment.id,
+                paymentMethod: payment.paymentMethod,
+                billingName: payment.billingName,
+                billingAddressLine1: payment.billingAddress1,
+                billingAddressLine2: payment.billingAddress2,
+                billingAddress: payment.billingAddress1,
+                billingCity: payment.billingCity,
+                billingState: payment.billingState,
+                billingPincode: payment.billingPincode,
+                billingCountry: payment.billingCountry
+            } : null
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Update current user profile
+// @route   PUT /api/users/profile
+export const updateUserProfile = async (req, res) => {
+    const db = req.db;
+    try {
+        const {
+            fullName,
+            name,
+            username,
+            avatar,
+            bio,
+            phone,
+            companyName,
+            password,
+            confirmPassword,
+            addressLine1,
+            addressLine2,
+            city,
+            state,
+            pincode,
+            country,
+            paymentMethod,
+            billingName,
+            billingAddressLine1,
+            billingAddressLine2,
+            billingCity,
+            billingState,
+            billingPincode,
+            billingCountry
+        } = req.body || {};
+
+        const nextName = buildSafeName(fullName || name || username, req.user.email);
+        const nextUsername = toNullIfEmpty(username);
+        const nextPhone = toNullIfEmpty(phone);
+        const nextCompanyName = toNullIfEmpty(companyName);
+
+        if ((password || confirmPassword) && password !== confirmPassword) {
+            return res.status(400).json({ message: 'Passwords do not match' });
+        }
+
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await db.run(
+                'UPDATE users SET name = ?, username = ?, avatar = COALESCE(?, avatar), bio = COALESCE(?, bio), phone = ?, company_name = ?, password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                [nextName, nextUsername, avatar || null, bio || null, nextPhone, nextCompanyName, hashedPassword, req.user.id]
+            );
+        } else {
+            await db.run(
+                'UPDATE users SET name = ?, username = ?, avatar = COALESCE(?, avatar), bio = COALESCE(?, bio), phone = ?, company_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                [nextName, nextUsername, avatar || null, bio || null, nextPhone, nextCompanyName, req.user.id]
+            );
+        }
+
+        const addressProvided = [addressLine1, city, state, pincode, country, addressLine2].some((value) => String(value || '').trim());
+        if (addressProvided) {
+            const existingAddress = await db.get(
+                'SELECT id FROM user_addresses WHERE user_id = ? ORDER BY isDefault DESC, created_at DESC LIMIT 1',
+                [req.user.id]
+            );
+            const normalizedAddressLine1 = toNullIfEmpty(addressLine1);
+            const normalizedCity = toNullIfEmpty(city);
+            const normalizedState = toNullIfEmpty(state);
+            const normalizedPincode = toNullIfEmpty(pincode);
+            const normalizedCountry = toNullIfEmpty(country) || 'India';
+            const normalizedAddressLine2 = toNullIfEmpty(addressLine2);
+
+            if (!normalizedAddressLine1 || !normalizedCity || !normalizedState || !normalizedPincode) {
+                return res.status(400).json({ message: 'Address line 1, city, state, and pincode are required' });
+            }
+
+            if (existingAddress) {
+                await db.run(
+                    `UPDATE user_addresses
+                     SET label = ?, address = ?, addressLine2 = ?, city = ?, state = ?, postalCode = ?, country = ?, updated_at = CURRENT_TIMESTAMP
+                     WHERE id = ? AND user_id = ?`,
+                    ['Primary', normalizedAddressLine1, normalizedAddressLine2, normalizedCity, normalizedState, normalizedPincode, normalizedCountry, existingAddress.id, req.user.id]
+                );
+            } else {
+                await db.run(
+                    `INSERT INTO user_addresses (
+                        user_id, label, address, addressLine2, city, state, postalCode, country, isDefault
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+                    [req.user.id, 'Primary', normalizedAddressLine1, normalizedAddressLine2, normalizedCity, normalizedState, normalizedPincode, normalizedCountry]
+                );
+            }
+        }
+
+        const paymentProvided = [paymentMethod, billingName, billingAddressLine1, billingCity, billingState, billingPincode, billingCountry, billingAddressLine2].some((value) => String(value || '').trim());
+        if (paymentProvided) {
+            const existingPayment = await db.get(
+                'SELECT id FROM user_payment_details WHERE user_id = ? ORDER BY updated_at DESC, created_at DESC LIMIT 1',
+                [req.user.id]
+            );
+
+            const normalizedPaymentMethod = toNullIfEmpty(paymentMethod) || 'COD';
+            const normalizedBillingName = toNullIfEmpty(billingName) || nextName;
+            const normalizedBillingAddress1 = toNullIfEmpty(billingAddressLine1);
+            const normalizedBillingAddress2 = toNullIfEmpty(billingAddressLine2);
+            const normalizedBillingCity = toNullIfEmpty(billingCity);
+            const normalizedBillingState = toNullIfEmpty(billingState);
+            const normalizedBillingPincode = toNullIfEmpty(billingPincode);
+            const normalizedBillingCountry = toNullIfEmpty(billingCountry) || 'India';
+
+            if (existingPayment) {
+                await db.run(
+                    `UPDATE user_payment_details
+                     SET paymentMethod = ?, billingName = ?, billingAddress1 = ?, billingAddress2 = ?, billingCity = ?, billingState = ?, billingPincode = ?, billingCountry = ?, updated_at = CURRENT_TIMESTAMP
+                     WHERE id = ? AND user_id = ?`,
+                    [normalizedPaymentMethod, normalizedBillingName, normalizedBillingAddress1, normalizedBillingAddress2, normalizedBillingCity, normalizedBillingState, normalizedBillingPincode, normalizedBillingCountry, existingPayment.id, req.user.id]
+                );
+            } else {
+                await db.run(
+                    `INSERT INTO user_payment_details (
+                        user_id, paymentMethod, billingName, billingAddress1, billingAddress2, billingCity, billingState, billingPincode, billingCountry
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [req.user.id, normalizedPaymentMethod, normalizedBillingName, normalizedBillingAddress1, normalizedBillingAddress2, normalizedBillingCity, normalizedBillingState, normalizedBillingPincode, normalizedBillingCountry]
+                );
+            }
+        }
+
+        const updated = await db.get('SELECT id, name, username, email, role, avatar, bio, phone, company_name, created_at FROM users WHERE id = ?', [req.user.id]);
+        const savedAddress = await selectPrimaryAddress(db, req.user.id);
+        const savedPayment = await selectPrimaryPayment(db, req.user.id);
+        res.json({
+            _id: String(updated.id),
+            id: updated.id,
+            fullName: updated.name,
+            username: updated.username || updated.name,
+            name: updated.name,
+            email: updated.email,
+            role: updated.role,
+            avatar: updated.avatar,
+            bio: updated.bio,
+            phone: updated.phone,
+            companyName: updated.company_name,
+            createdAt: updated.created_at,
+            created_at: updated.created_at,
+            address: savedAddress ? {
+                _id: String(savedAddress.id),
+                id: savedAddress.id,
+                label: savedAddress.label,
+                addressLine1: savedAddress.address,
+                addressLine2: savedAddress.addressLine2,
+                address: savedAddress.address,
+                city: savedAddress.city,
+                state: savedAddress.state,
+                postalCode: savedAddress.postalCode,
+                country: savedAddress.country,
+                phone: savedAddress.phone,
+                company: savedAddress.company,
+                gstin: savedAddress.gstin,
+                isDefault: !!savedAddress.isDefault
+            } : null,
+            payment: savedPayment ? {
+                _id: String(savedPayment.id),
+                id: savedPayment.id,
+                paymentMethod: savedPayment.paymentMethod,
+                billingName: savedPayment.billingName,
+                billingAddressLine1: savedPayment.billingAddress1,
+                billingAddressLine2: savedPayment.billingAddress2,
+                billingAddress: savedPayment.billingAddress1,
+                billingCity: savedPayment.billingCity,
+                billingState: savedPayment.billingState,
+                billingPincode: savedPayment.billingPincode,
+                billingCountry: savedPayment.billingCountry
+            } : null
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get saved user addresses
+// @route   GET /api/users/addresses
+export const getUserAddresses = async (req, res) => {
+    const db = req.db;
+    try {
+        const rows = await db.all(
+            'SELECT * FROM user_addresses WHERE user_id = ? ORDER BY isDefault DESC, created_at DESC',
+            [req.user.id]
+        );
+
+        const addresses = rows.map((a) => ({
+            _id: String(a.id),
+            id: a.id,
+            label: a.label,
+            address: a.address,
+            addressLine1: a.address,
+            addressLine2: a.addressLine2,
+            city: a.city,
+            state: a.state,
+            postalCode: a.postalCode,
+            country: a.country,
+            phone: a.phone,
+            company: a.company,
+            gstin: a.gstin,
+            isDefault: !!a.isDefault,
+            createdAt: a.created_at,
+            updatedAt: a.updated_at
+        }));
+
+        res.json({ addresses });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Save a user address
+// @route   POST /api/users/addresses
+export const addUserAddress = async (req, res) => {
+    const db = req.db;
+    try {
+        const {
+            label = 'Saved',
+            address = '',
+            addressLine1 = '',
+            addressLine2 = '',
+            city = '',
+            state = '',
+            postalCode = '',
+            country = 'India',
+            phone = '',
+            company = '',
+            gstin = '',
+            isDefault = false
+        } = req.body || {};
+
+        const normalizedAddress = (addressLine1 || address || '').trim();
+        if (!normalizedAddress || !city || !state || !postalCode) {
+            return res.status(400).json({ message: 'address, city, state, and postalCode are required' });
+        }
+
+        if (isDefault) {
+            await db.run('UPDATE user_addresses SET isDefault = 0 WHERE user_id = ?', [req.user.id]);
+        }
+
+        const result = await db.run(
+            `INSERT INTO user_addresses (
+                user_id, label, address, addressLine2, city, state, postalCode, country, phone, company, gstin, isDefault
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [req.user.id, label, normalizedAddress, toNullIfEmpty(addressLine2), city, state, postalCode, country, phone, company, gstin, isDefault ? 1 : 0]
+        );
+
+        const row = await db.get('SELECT * FROM user_addresses WHERE id = ?', [result.lastID]);
+        res.status(201).json({
+            _id: String(row.id),
+            id: row.id,
+            label: row.label,
+            address: row.address,
+            addressLine1: row.address,
+            addressLine2: row.addressLine2,
+            city: row.city,
+            state: row.state,
+            postalCode: row.postalCode,
+            country: row.country,
+            phone: row.phone,
+            company: row.company,
+            gstin: row.gstin,
+            isDefault: !!row.isDefault,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get public team members for website About page
+// @route   GET /api/auth/team
+export const getPublicTeam = async (req, res) => {
+    const db = req.db;
+    try {
+        const team = await db.all(
+            `SELECT id, name, role, avatar, created_at
+             FROM users
+             WHERE role != 'user'
+             ORDER BY
+                CASE role
+                    WHEN 'superadmin' THEN 1
+                    WHEN 'admin' THEN 2
+                    WHEN 'content_manager' THEN 3
+                    WHEN 'product_manager' THEN 4
+                    WHEN 'support_agent' THEN 5
+                    ELSE 6
+                END,
+                created_at ASC
+             LIMIT 9`
+        );
+
+        res.json(team);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -64,7 +64,7 @@ const parseJwtPayload = (jwtToken) => {
 };
 
 const userPayload = parseJwtPayload(token);
-const isAdminUser = userPayload?.role === 'admin';
+const isAdminUser = ['admin', 'superadmin'].includes(userPayload?.role);
 
 const appendLog = (text) => {
     const now = new Date().toLocaleTimeString();

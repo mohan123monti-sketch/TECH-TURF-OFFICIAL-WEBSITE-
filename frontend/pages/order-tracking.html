@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking - Tech Turf</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+
+<body data-page="orders.html" class="text-white" data-3d-enabled="true">
+    <div id="three-container"></div>
+    <div id="header-container"></div>
+
+    <main class="relative z-10 pt-52 md:pt-56 pb-24 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-10 text-center">
+                <h1 class="tt-page-hero-title font-black uppercase tracking-tighter">Order<br><span class="text-white/30">Tracking</span></h1>
+                <p class="text-white/60">Track your order lifecycle from processing to delivery.</p>
+            </div>
+
+            <div class="iphone-glass p-6 md:p-8 rounded-3xl border border-white/10 mb-10">
+                <form id="track-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input id="order-id" type="number" min="1" required placeholder="Order ID"
+                        class="md:col-span-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10">
+                    <button class="magnetic-btn bg-white text-black rounded-xl font-black uppercase text-xs tracking-widest py-3">Track</button>
+                </form>
+            </div>
+
+            <div id="tracking-card" class="iphone-glass p-6 md:p-8 rounded-3xl border border-white/10 hidden">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-8">
+                    <h2 class="text-2xl font-black uppercase tracking-tight">Tracking Timeline</h2>
+                    <span id="tracking-status-pill" class="px-3 py-1 rounded-full text-xs uppercase tracking-widest bg-white/10 text-white/80">status</span>
+                </div>
+
+                <div id="tracking-meta" class="text-sm text-white/70 mb-8"></div>
+
+                <div id="timeline" class="space-y-4"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        const phases = ['pending', 'processing', 'shipped', 'out for delivery', 'delivered'];
+
+        function normalizeStatus(status, isDelivered) {
+            const s = String(status || '').toLowerCase();
+            if (isDelivered) return 'delivered';
+            if (s.includes('deliver')) return 'delivered';
+            if (s.includes('out')) return 'out for delivery';
+            if (s.includes('ship')) return 'shipped';
+            if (s.includes('process')) return 'processing';
+            return 'pending';
+        }
+
+        function renderTimeline(currentPhase) {
+            const timeline = document.getElementById('timeline');
+            const currentIndex = phases.indexOf(currentPhase);
+            timeline.innerHTML = phases.map((phase, idx) => {
+                const done = idx <= currentIndex;
+                return `
+                    <div class="flex items-center gap-4 p-3 rounded-xl ${done ? 'bg-green-500/10 border border-green-500/20' : 'bg-white/5 border border-white/10'}">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center ${done ? 'bg-green-500 text-black' : 'bg-white/10 text-white/60'}">
+                            ${done ? '<i data-lucide="check" class="w-4 h-4"></i>' : idx + 1}
+                        </div>
+                        <div class="uppercase tracking-widest text-xs ${done ? 'text-green-300' : 'text-white/60'}">${phase}</div>
+                    </div>
+                `;
+            }).join('');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function fetchOrder(orderId) {
+            const res = await fetch(`${window.API_BASE_URL}/orders/${orderId}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Order not found');
+            return data;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('track-form');
+            const card = document.getElementById('tracking-card');
+            const meta = document.getElementById('tracking-meta');
+            const statusPill = document.getElementById('tracking-status-pill');
+
+            const queryId = new URLSearchParams(window.location.search).get('id');
+            if (queryId) document.getElementById('order-id').value = queryId;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('order-id').value;
+                try {
+                    const order = await fetchOrder(id);
+                    const phase = normalizeStatus(order.status, order.isDelivered);
+                    card.classList.remove('hidden');
+                    statusPill.textContent = phase;
+                    meta.textContent = `Order #${order.id} • Total: ${order.totalPrice || 0} • Payment: ${order.paymentMethod || 'N/A'}`;
+                    renderTimeline(phase);
+                } catch (err) {
+                    card.classList.add('hidden');
+                    window.showMessage('error', err.message || 'Unable to track order');
+                }
+            });
+
+            if (queryId) form.dispatchEvent(new Event('submit'));
+        });
+    </script>
+</body>
+
+</html>

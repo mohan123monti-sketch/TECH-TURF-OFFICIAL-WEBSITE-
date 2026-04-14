@@ -2,11 +2,12 @@
 // Note: API_BASE_URL and window.showToast are provided by admin-layout.js
 
 let orders = [];
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 async function loadOrders() {
     const token = localStorage.getItem('tt_token');
     try {
-        const response = await fetch(`${window.API_BASE_URL}/orders`, {
+        const response = await fetch(`${apiBase}/orders`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         orders = await response.json();
@@ -63,7 +64,7 @@ function renderOrders() {
 async function updateOrderStatus(orderId, newStatus) {
     const token = localStorage.getItem('tt_token');
     try {
-        const response = await fetch(`${window.API_BASE_URL}/orders/${orderId}/status`, {
+        const response = await fetch(`${apiBase}/orders/${orderId}/status`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -91,6 +92,38 @@ async function updateOrderStatus(orderId, newStatus) {
 
 let currentViewingOrderId = null;
 
+function exportOrders() {
+    if (!Array.isArray(orders) || orders.length === 0) {
+        window.showToast('No orders to export', 'info');
+        return;
+    }
+
+    const rows = [
+        ['Order ID', 'Customer', 'Email', 'Date', 'Total', 'Status', 'Payment Method'],
+        ...orders.map(order => [
+            String(order.id || ''),
+            String(order.userName || 'Guest'),
+            String(order.userEmail || 'N/A'),
+            String(order.created_at || ''),
+            String(Number(order.totalPrice || 0).toFixed(2)),
+            String(order.status || (order.isDelivered ? 'Delivered' : 'Pending')),
+            String(order.paymentMethod || 'COD')
+        ])
+    ];
+
+    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tech-turf-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    window.showToast('Orders exported successfully', 'success');
+}
+
 function viewOrder(orderId) {
     const order = orders.find(o => String(o.id) === String(orderId));
     if (!order) return;
@@ -113,7 +146,7 @@ function viewOrder(orderId) {
             <div class="flex items-center justify-between p-3 bg-gray-700/20 rounded-xl border border-white/5">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-lg bg-gray-800 overflow-hidden">
-                        <img src="${item.image || item.imageUrl || 'https://placehold.co/100'}" class="w-full h-full object-cover">
+                        <img src="${item.image || item.imageUrl || '/public/images/space-bg.png'}" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <p class="font-bold text-white">${item.name}</p>

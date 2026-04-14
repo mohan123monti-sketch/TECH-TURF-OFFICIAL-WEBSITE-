@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadDashboardStats() {
         try {
-            const response = await fetch(`${window.API_BASE_URL}/admin/stats/dashboard`, {
+            const response = await fetch(`${window.API_BASE_URL}/stats/dashboard`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!obj) return;
 
         if (isCurrency) {
-            obj.textContent = `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            obj.textContent = `INR ${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         } else {
             obj.textContent = Number(value).toLocaleString();
         }

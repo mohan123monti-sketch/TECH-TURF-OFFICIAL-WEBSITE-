@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Returns & Refund Request - Tech Turf</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+
+<body data-page="orders.html" class="text-white" data-3d-enabled="true">
+    <div id="three-container"></div>
+    <div id="header-container"></div>
+
+    <main class="relative z-10 pt-52 md:pt-56 pb-24 px-4">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="tt-page-hero-title font-black uppercase tracking-tighter">Returns &<br><span class="text-white/30">Refunds</span></h1>
+            </div>
+
+            <div class="iphone-glass tt-fluid-panel border border-white/10 shadow-3xl">
+                <form id="refund-form" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Order ID</label>
+                            <input id="orderId" type="number" min="1" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Email</label>
+                            <input id="email" type="email" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Reason</label>
+                            <select id="reason" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                                <option>Damaged item</option>
+                                <option>Wrong item delivered</option>
+                                <option>Missing parts</option>
+                                <option>No longer needed</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Refund Preference</label>
+                            <select id="preference" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                                <option>Original payment method</option>
+                                <option>Store credit</option>
+                                <option>Replacement</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Evidence Image URL (Optional)</label>
+                        <input id="imageUrl" type="url" placeholder="https://..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Details</label>
+                        <textarea id="details" rows="5" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none"></textarea>
+                    </div>
+
+                    <button id="submit-btn" class="w-full magnetic-btn bg-white text-black py-3 rounded-xl font-black uppercase tracking-wider hover:bg-gray-200 transition-all">
+                        Submit Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('refund-form');
+            const btn = document.getElementById('submit-btn');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const payload = {
+                    orderId: document.getElementById('orderId').value,
+                    email: document.getElementById('email').value.trim(),
+                    reason: document.getElementById('reason').value,
+                    preference: document.getElementById('preference').value,
+                    imageUrl: document.getElementById('imageUrl').value.trim(),
+                    details: document.getElementById('details').value.trim()
+                };
+
+                const subject = `[Refund Request] Order #${payload.orderId}`;
+                const message = [
+                    `Reason: ${payload.reason}`,
+                    `Refund Preference: ${payload.preference}`,
+                    payload.imageUrl ? `Evidence: ${payload.imageUrl}` : 'Evidence: N/A',
+                    `Details: ${payload.details}`
+                ].join('\n');
+
+                const old = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = 'Submitting...';
+
+                try {
+                    const res = await fetch(`${window.API_BASE_URL}/tickets`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            subject,
+                            message,
+                            priority: 'high',
+                            userEmail: payload.email
+                        })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Request failed');
+
+                    window.showMessage('success', `Refund request submitted. Ticket #${data.id}`);
+                    setTimeout(() => {
+                        window.location.href = `ticket-status.html?email=${encodeURIComponent(payload.email)}&id=${data.id}`;
+                    }, 900);
+                } catch (err) {
+                    window.showMessage('error', err.message || 'Unable to submit request');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = old;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

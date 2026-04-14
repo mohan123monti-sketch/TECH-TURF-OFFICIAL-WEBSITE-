@@ -31,8 +31,28 @@ window.showToast = function (message, type = 'info') {
     }, 3000);
 }
 
+window.showMessage = window.showToast;
+window.getAuthToken = function () {
+    return localStorage.getItem('tt_token') || localStorage.getItem('token');
+};
+
 // Make API_BASE_URL global
 window.API_BASE_URL = API_BASE_URL;
+
+function parseJwtPayload(jwtToken) {
+    if (!jwtToken || jwtToken.split('.').length < 2) return null;
+    try {
+        const payload = jwtToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const decoded = atob(payload);
+        return JSON.parse(decoded);
+    } catch {
+        return null;
+    }
+}
+
+function isPrivilegedAdminRole(role) {
+    return ['admin', 'superadmin'].includes(role);
+}
 
 function ensureSEO() {
     if (typeof window.applySEO === 'function') {
@@ -63,6 +83,14 @@ function checkAuth() {
         window.location.href = '/pages/login.html';
         return null;
     }
+
+    const tokenPayload = parseJwtPayload(token);
+    if (!isPrivilegedAdminRole(tokenPayload?.role)) {
+        console.log('[AUTH CHECK] Token is not an admin token.');
+        window.location.href = '/pages/login.html';
+        return null;
+    }
+
     console.log('[AUTH CHECK] Token found:', token.substring(0, 20) + '...');
     // In a real app, we would verify the token/role with the backend here
     return token;
@@ -83,8 +111,7 @@ function renderSidebar() {
         { name: 'Launches', icon: 'rocket', href: 'launches.html' },
         { name: 'Content', icon: 'file-text', href: 'content.html' },
         { name: 'Support', icon: 'life-buoy', href: 'support.html' },
-        { name: 'Business CRM', icon: 'briefcase', href: 'http://localhost:5173' },
-            { name: 'Business CRM', icon: 'briefcase', href: 'http://localhost:3100' },
+        { name: 'Business CRM', icon: 'briefcase', href: 'http://localhost:3100' },
         { name: 'Settings', icon: 'settings', href: 'settings.html' },
     ];
 

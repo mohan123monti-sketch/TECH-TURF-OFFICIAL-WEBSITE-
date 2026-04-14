@@ -34,30 +34,31 @@
         <div id="three-container" class="absolute inset-0 h-screen z-0"></div>
 
         <!-- HERO SECTION -->
-                <div class="hero-logo-container reveal-hidden">
+         <section class="hero-diagonal-section">
+             <!-- LEFT SIDE: Logo -->
+             <div class="hero-diagonal-left tilt-3d">
+                 <div class="hero-logo-container reveal-hidden parallax-layer" data-speed="0.18">
                     <img src="/assets/logos/tech-turf.png" alt="Tech Turf Corporate Logo" class="logo-hero">
-                </div>
+                 </div>
+             </div>
+             
+             <!-- RIGHT SIDE: Text Content -->
+             <div class="hero-diagonal-right tilt-3d">
+                 <h1 class="text-7xl md:text-9xl font-black tracking-tighter leading-[0.95] reveal-hidden parallax-layer relative"
+                     data-speed="0.5">
+                     <!-- Blur Mask for Text Readability -->
+                     <div class="absolute inset-0 bg-white/10 blur-xl -z-10 rounded-full scale-125 opacity-40"></div>
 
-                <h1 class="text-7xl md:text-9xl font-black tracking-tighter leading-[0.95] reveal-hidden parallax-layer relative"
-                    data-speed="0.5">
-                    <!-- Blur Mask for Text Readability -->
-                    <div class="absolute inset-0 bg-white/10 blur-xl -z-10 rounded-full scale-125 opacity-40"></div>
+                     <span class="block hero-welcome font-poppins font-bold">WELCOME TO</span>
 
-                    <span class="block hero-welcome font-poppins font-bold">WELCOME TO</span>
+                     <span class="hero-brand-wrapper mt-2">
+                         <span class="hero-brand text-5xl md:text-[6.5rem] uppercase font-black font-poppins">TECH
+                             TURF</span>
+                     </span>
+                 </h1>
 
-                    <span class="hero-brand-wrapper mt-2">
-                        <span class="hero-brand text-5xl md:text-[6.5rem] uppercase font-black font-poppins">TECH
-                            TURF</span>
-                    </span>
-                </h1>
-
-                <p class="text-[12px] font-mono text-[#5A5A5A] uppercase tracking-[0.3em] mt-10 hero-tagline font-medium"
-                    style="transition-delay: 0.2s;">
-                    Autonomous Innovation â€¢ Space Systems â€¢ Digital Excellence
-                </p>
-
-
-            </div>
+             </div>
+         </section>
 
             <!-- Scroll Indicator -->
             <a href="#divisions"
@@ -114,7 +115,7 @@
                     <div class="relative z-10 flip-card-inner">
                         <div
                             class="w-24 h-24 rounded-[1.5rem] icon-box flex items-center justify-center mb-10 transition-all duration-700">
-                            <i data-lucide="rocket" class="w-10 h-10"></i>
+                            <img src="/assets/logos/quinta.png" alt="Quinta logo" class="division-card-logo">
                         </div>
                         <h3 class="text-3xl font-bold mb-6 tracking-tight text-[#0B3C8C]">Quinta</h3>
                         <p class="text-[#5A5A5A] text-sm leading-relaxed font-medium">
@@ -134,7 +135,7 @@
                     <div class="relative z-10 flip-card-inner">
                         <div
                             class="w-24 h-24 rounded-[1.5rem] icon-box flex items-center justify-center mb-10 transition-all duration-700">
-                            <i data-lucide="zap" class="w-10 h-10"></i>
+                            <img src="/assets/logos/trend-hive.png" alt="Trend Hive logo" class="division-card-logo">
                         </div>
                         <h3 class="text-3xl font-bold mb-6 tracking-tight text-[#0B3C8C]">Trend Hive</h3>
                         <p class="text-[#5A5A5A] text-sm leading-relaxed font-medium">
@@ -154,7 +155,7 @@
                     <div class="relative z-10 flip-card-inner">
                         <div
                             class="w-24 h-24 rounded-[1.5rem] icon-box flex items-center justify-center mb-10 transition-all duration-700">
-                            <i data-lucide="code-2" class="w-10 h-10"></i>
+                            <img src="/assets/logos/click-sphere.png" alt="Click Sphere logo" class="division-card-logo">
                         </div>
                         <h3 class="text-3xl font-bold mb-6 tracking-tight text-[#0B3C8C]">Click Sphere</h3>
                         <p class="text-[#5A5A5A] text-sm leading-relaxed font-medium">
@@ -193,15 +194,15 @@
                     ).slice(0, 3);
 
                     if (posts.length === 0) {
-                        container.innerHTML = '<p class="text-gray-500 col-span-full text-center py-12">New innovations coming soon...</p>';
-                        // Still trigger scroll reveal for the placeholder
+                        container.innerHTML = '<p class="text-gray-500 col-span-full text-center py-12">No announcements published yet.</p>';
+                        // Still trigger scroll reveal for the empty state
                         if (window.handleScrollReveal) window.handleScrollReveal();
                         return;
                     }
 
                     container.innerHTML = posts.map((post, index) => {
                         const isLarge = index === 0;
-                        const imageUrl = post.imageUrl || `https://placehold.co/800x600/1e293b/e5e7eb?text=${encodeURIComponent(post.title)}`;
+                        const imageUrl = post.imageUrl || '/public/images/space-bg.png';
 
                         if (isLarge) {
                             return `
@@ -267,7 +268,7 @@
 
                     // Only show first 4 products
                     container.innerHTML = products.slice(0, 4).map((product, index) => {
-                        const imageUrl = product.imageUrl || `https://placehold.co/600x400/1e293b/e5e7eb?text=${encodeURIComponent(product.name)}`;
+                        const imageUrl = product.imageUrl || '/public/images/space-bg.png';
                         const safeName = String(product.name || '').replace(/'/g, "\\'");
                         const safeImageUrl = String(imageUrl).replace(/'/g, "\\'");
                         const safeBranch = String(product.branch || product.category || 'Tech Turf').replace(/'/g, "\\'");
@@ -284,7 +285,7 @@
                                     <h3 class="text-xl font-black text-white mb-2 line-clamp-1 uppercase tracking-tight">${product.name}</h3>
                                     <p class="text-gray-400 text-xs font-medium mb-6 line-clamp-2 leading-relaxed opacity-70">${product.description}</p>
                                     <div class="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
-                                        <span class="text-2xl font-black text-white">â‚¹${product.price}</span>
+                                        <span class="text-2xl font-black text-white">INR ${product.price}</span>
                                         <button onclick="window.addToCart({id: '${safeId}', name: '${safeName}', price: ${product.price}, imageUrl: '${safeImageUrl}', branch: '${safeBranch}'})" class="w-12 h-12 iphone-glass rounded-2xl flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-500 border border-white/10 shadow-lg">
                                             <i data-lucide="shopping-cart" class="w-5 h-5"></i>
                                         </button>

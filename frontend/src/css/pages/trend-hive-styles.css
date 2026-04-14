@@ -11,6 +11,52 @@
 
 .trend-hive-branding {
     background-color: var(--th-dark);
+    --domain-band: linear-gradient(90deg, #f26522 0%, #e8791f 40%, #9d3fe8 100%);
+    --domain-top: rgba(110, 33, 168, 0.45);
+}
+
+.trend-hive-branding main.relative.z-10 {
+    padding-top: 5.25rem !important;
+}
+
+/* --- Hero Palette (Trend Hive logo-matched) --- */
+.trend-hive-branding .hero-diagonal-left {
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.62) 0%, rgba(8, 8, 8, 0.85) 100%);
+    clip-path: none !important;
+    border-right: 1px solid rgba(240, 139, 65, 0.2);
+}
+
+.trend-hive-branding .hero-diagonal-right {
+    background: radial-gradient(circle at 20% 20%, rgba(242, 101, 34, 0.18), transparent 40%),
+        radial-gradient(circle at 78% 68%, rgba(217, 70, 239, 0.2), transparent 48%),
+        linear-gradient(145deg, #0b0b0b 0%, #11070d 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.trend-hive-branding .th-text-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #d946ef 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px rgba(217, 70, 239, 0.25));
+}
+
+.trend-hive-branding .hero-logo-container {
+    width: min(82%, 560px);
+    background: linear-gradient(145deg, #ffffff 0%, #fff8f4 100%);
+    border: 1px solid rgba(242, 101, 34, 0.24);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
+}
+
+.trend-hive-branding .hero-logo-container .logo-hero {
+    width: 100%;
+    height: auto;
+    max-height: 420px;
+    margin-bottom: 0;
+    filter: none;
 }
 
 /* --- Hero Typography --- */
@@ -99,4 +145,31 @@
 /* --- Magenta Glow --- */
 .bg-magenta-500 {
     background-color: #ec4899;
+}
+
+@media (max-width: 1024px) {
+    .trend-hive-branding .hero-logo-container {
+        width: min(90%, 460px);
+        padding: 20px;
+    }
+
+    .trend-hive-branding .hero-logo-container .logo-hero {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 640px) {
+    .trend-hive-branding .hero-logo-container {
+        width: min(94%, 380px);
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .trend-hive-branding .hero-logo-container .logo-hero {
+        max-height: 220px;
+    }
+
+    .trend-hive-branding .th-text-gradient {
+        filter: none;
+    }
 }

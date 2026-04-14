@@ -27,6 +27,23 @@ body {
     user-select: none;
 }
 
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+}
+
 /* --- iPhone Glass Core Class --- */
 .iphone-glass {
     background: var(--glass-bg);
@@ -153,8 +170,20 @@ body.page-transition-out .page-transition-overlay {
 /* --- MAGNETIC BUTTONS --- */
 .magnetic-btn {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
     transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
+}
+
+.tt-form-button {
+    min-height: 3.5rem;
+    padding-top: 0.875rem;
+    padding-bottom: 0.875rem;
 }
 
 /* --- HOLOGRAPHIC TILT CARDS --- */
@@ -294,6 +323,8 @@ body.page-transition-out .page-transition-overlay {
 #site-header {
     border-radius: 9999px;
     margin-top: 1.5rem;
+    z-index: 300;
+    max-width: min(80rem, calc(100vw - 1rem));
 }
 
 #site-header.menu-open {
@@ -812,10 +843,10 @@ body.page-transition-out .page-transition-overlay {
 }
 
 .logo-hero {
-    height: 100px;
+    height: 400px;
     margin-bottom: 2rem;
     object-fit: contain;
-    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 20px 40px rgb(0, 0, 0));
     animation: float 6s ease-in-out infinite;
 }
 
@@ -823,5 +854,150 @@ body.page-transition-out .page-transition-overlay {
     display: flex;
     justify-content: center;
     width: 100%;
+    align-items: center;
+    height: 100%;
     margin-bottom: 1rem;
-}
+}
+
+/* Fluid helpers for static pages with large hero headings */
+.tt-page-hero-title {
+    display: block;
+    margin-top: clamp(1.25rem, 4vh, 2.75rem);
+    font-size: clamp(2.2rem, 9vw, 7rem);
+    line-height: 0.9;
+}
+
+.tt-fluid-panel {
+    padding: clamp(1.25rem, 4vw, 4.75rem);
+    border-radius: clamp(1.5rem, 4.5vw, 4rem);
+}
+
+/* --- Diagonal Split Hero Section --- */
+#three-container {
+    display: none !important;
+}
+
+.hero-diagonal-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+    height: 100dvh;
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hero-diagonal-section::before,
+.hero-diagonal-section::after {
+    display: none;
+}
+
+/* Left side - Logo with diagonal cut */
+.hero-diagonal-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8));
+    clip-path: polygon(0 0, 90% 0, 60% 100%, 0 100%);
+}
+
+/* Right side - Text content  */
+.hero-diagonal-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 4rem;
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9));
+}
+
+/* Responsive - Stack vertically on smaller screens */
+@media (max-width: 768px) {
+    .hero-diagonal-section {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: auto;
+    }
+
+    .logo-hero {
+        height: 120px;
+    }
+
+    .hero-diagonal-left {
+        order: 1;
+        clip-path: none;
+        padding: 2rem 1rem;
+        min-height: 400px;
+    }
+
+    .hero-diagonal-right {
+        order: 2;
+        padding: 2rem 1rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    #site-header {
+        margin-top: 0.75rem;
+        max-width: calc(100vw - 0.75rem);
+    }
+
+    .hero-diagonal-right {
+        padding: 2rem clamp(1rem, 4vw, 2.25rem);
+    }
+}
+
+@media (max-height: 820px) {
+    .hero-diagonal-section {
+        height: auto;
+        min-height: auto;
+        padding-top: clamp(120px, 15vh, 160px);
+        padding-bottom: 40px;
+    }
+
+    .hero-diagonal-left,
+    .hero-diagonal-right {
+        min-height: 340px;
+    }
+
+    .logo-hero {
+        height: clamp(120px, 24vh, 240px);
+    }
+}
+
+@media (max-width: 540px) {
+    #site-header {
+        margin-top: 0.4rem;
+        max-width: calc(100vw - 0.5rem);
+    }
+
+    .hero-diagonal-left,
+    .hero-diagonal-right {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+    }
+
+    .hero-diagonal-left {
+        min-height: 260px;
+    }
+
+    .hero-diagonal-right {
+        min-height: 280px;
+    }
+
+    .logo-hero {
+        height: clamp(96px, 20vh, 160px);
+    }
+}
+
+@media (min-width: 1600px) {
+    .hero-diagonal-right {
+        padding-left: clamp(4rem, 6vw, 8rem);
+        padding-right: clamp(4rem, 6vw, 8rem);
+    }
+}

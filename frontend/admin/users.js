@@ -9,11 +9,17 @@ async function loadUsers() {
         const response = await fetch(`${window.API_BASE_URL}/users`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        users = await response.json();
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed to load users (${response.status})`);
+        }
+
+        const data = await response.json();
+        users = Array.isArray(data) ? data : (data.users || data.items || []);
         renderUsers();
     } catch (error) {
         console.error('Error loading users:', error);
-        window.showToast('Failed to load users', 'error');
+        window.showToast(error.message || 'Failed to load users', 'error');
     }
 }
 
@@ -96,6 +102,7 @@ async function updateUserRole(userId, role) {
 
         if (response.ok) {
             window.showToast(`Role for user updated to ${role}`, 'success');
+            loadUsers();
         } else {
             const errorData = await response.json();
             console.error('Error updating role:', errorData);
@@ -155,10 +162,17 @@ async function inviteUser(event) {
     }
 }
 
-// Mock function for editing user (would open a modal, for now just logs)
 function editUser(id) {
-    console.info(`[ACTION] Placeholder for editing user ID: ${id}.`);
-    window.showToast(`Edit user feature is a placeholder. User ID ${id} details are in the console.`, 'info');
+    const currentUser = users.find(user => String(user.id) === String(id));
+    if (!currentUser) {
+        window.showToast('User not found', 'error');
+        return;
+    }
+
+    const nextRole = prompt('Enter a new role for this user:', currentUser.role || 'user');
+    if (!nextRole) return;
+
+    updateUserRole(id, nextRole.trim());
 }
 
 document.addEventListener('DOMContentLoaded', loadUsers);

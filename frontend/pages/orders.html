@@ -28,6 +28,27 @@
                     Transactions</p>
             </header>
 
+            <section class="mb-10 reveal-hidden" style="transition-delay: 0.08s;">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="order-tracking.html" class="iphone-glass p-4 rounded-2xl border border-white/10 hover:border-orange-400/40 transition-all">
+                        <p class="text-[10px] font-black tracking-[0.2em] uppercase text-white/40 mb-1">Tracking</p>
+                        <h3 class="text-xs font-black uppercase tracking-wider">Order Timeline</h3>
+                    </a>
+                    <a href="support-ticket.html" class="iphone-glass p-4 rounded-2xl border border-white/10 hover:border-orange-400/40 transition-all">
+                        <p class="text-[10px] font-black tracking-[0.2em] uppercase text-white/40 mb-1">Support</p>
+                        <h3 class="text-xs font-black uppercase tracking-wider">Raise Ticket</h3>
+                    </a>
+                    <a href="ticket-status.html" class="iphone-glass p-4 rounded-2xl border border-white/10 hover:border-orange-400/40 transition-all">
+                        <p class="text-[10px] font-black tracking-[0.2em] uppercase text-white/40 mb-1">Status</p>
+                        <h3 class="text-xs font-black uppercase tracking-wider">Ticket History</h3>
+                    </a>
+                    <a href="returns-refund.html" class="iphone-glass p-4 rounded-2xl border border-white/10 hover:border-orange-400/40 transition-all">
+                        <p class="text-[10px] font-black tracking-[0.2em] uppercase text-white/40 mb-1">Refund</p>
+                        <h3 class="text-xs font-black uppercase tracking-wider">Return Request</h3>
+                    </a>
+                </div>
+            </section>
+
             <div id="orders-container" class="space-y-12">
                 <!-- Orders will be injected here -->
                 <div class="text-center py-40">
@@ -111,7 +132,7 @@
                             <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover border border-white/10">
                             <div class="flex-1">
                                 <h4 class="text-white text-sm font-black tracking-widest uppercase">${item.name}</h4>
-                                <p class="text-[10px] text-white/30 font-black tracking-widest mt-1">QTY: ${item.qty} | â‚¹${item.price.toFixed(2)} Each</p>
+                                <p class="text-[10px] text-white/30 font-black tracking-widest mt-1">QTY: ${item.qty} | INR ${item.price.toFixed(2)} Each</p>
                             </div>
                         </div>
                     `).join('');
@@ -148,7 +169,7 @@
                             </div>
                             <div class="text-center md:text-right">
                                 <p class="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Total Resource Value</p>
-                                <span class="text-3xl font-black text-white">â‚¹${order.totalPrice.toFixed(2)}</span>
+                                <span class="text-3xl font-black text-white">INR ${order.totalPrice.toFixed(2)}</span>
                             </div>
                         </div>
                     `;

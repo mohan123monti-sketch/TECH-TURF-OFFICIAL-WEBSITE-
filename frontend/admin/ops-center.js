@@ -19,7 +19,7 @@ const parseJwtPayload = (jwtToken) => {
 };
 
 const tokenPayload = parseJwtPayload(token);
-const isAdminUser = tokenPayload?.role === 'admin';
+const isAdminUser = ['admin', 'superadmin'].includes(tokenPayload?.role);
 
 const el = {
     cpuUsage: document.getElementById('cpuUsage'),

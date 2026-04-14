@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Status - Tech Turf</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+
+<body data-page="support.html" class="text-white" data-3d-enabled="true">
+    <div id="three-container"></div>
+    <div id="header-container"></div>
+
+    <main class="relative z-10 pt-52 md:pt-56 pb-24 px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-10">
+                <h1 class="tt-page-hero-title font-black uppercase tracking-tighter">Ticket<br><span class="text-white/30">Status</span></h1>
+            </div>
+
+            <div class="iphone-glass p-6 rounded-2xl border border-white/10 mb-8">
+                <form id="filter-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input id="email" type="email" placeholder="Filter by email" class="md:col-span-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                    <button class="magnetic-btn bg-white text-black rounded-xl font-black uppercase text-xs tracking-widest py-3">Load Tickets</button>
+                </form>
+            </div>
+
+            <div id="tickets-list" class="space-y-4"></div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        function statusColor(status) {
+            const s = String(status || '').toLowerCase();
+            if (s.includes('close') || s.includes('resolved')) return 'bg-green-500/20 text-green-300 border-green-500/30';
+            if (s.includes('progress')) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+            if (s.includes('open') || s.includes('new')) return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
+            return 'bg-white/10 text-white/70 border-white/20';
+        }
+
+        async function loadTickets(emailFilter = '', idFilter = '') {
+            const list = document.getElementById('tickets-list');
+            list.innerHTML = '<div class="text-white/50">Loading tickets...</div>';
+
+            try {
+                const res = await fetch(`${window.API_BASE_URL}/tickets`);
+                const tickets = await res.json();
+                if (!res.ok) throw new Error('Unable to fetch tickets');
+
+                const filtered = (tickets || []).filter(t => {
+                    const emailOk = !emailFilter || String(t.userEmail || '').toLowerCase() === emailFilter.toLowerCase();
+                    const idOk = !idFilter || String(t.id) === String(idFilter);
+                    return emailOk && idOk;
+                });
+
+                if (filtered.length === 0) {
+                    list.innerHTML = '<div class="iphone-glass p-6 rounded-2xl border border-white/10 text-white/60">No tickets found for the selected filters.</div>';
+                    return;
+                }
+
+                list.innerHTML = filtered.map(t => `
+                    <div class="iphone-glass p-6 rounded-2xl border border-white/10">
+                        <div class="flex flex-wrap justify-between gap-3 mb-3">
+                            <h3 class="font-black text-lg">#${t.id} • ${t.subject || 'Support Request'}</h3>
+                            <span class="px-3 py-1 border rounded-full text-xs uppercase tracking-wider ${statusColor(t.status)}">${t.status || 'open'}</span>
+                        </div>
+                        <p class="text-sm text-white/60 mb-2">Priority: ${(t.priority || 'medium').toUpperCase()} • ${t.userEmail || 'N/A'}</p>
+                        <p class="text-white/80">${t.message || ''}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = '';
+                window.showMessage('error', err.message || 'Failed to load tickets');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const query = new URLSearchParams(window.location.search);
+            const email = query.get('email') || '';
+            const id = query.get('id') || '';
+            const emailInput = document.getElementById('email');
+            emailInput.value = email;
+
+            const form = document.getElementById('filter-form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                loadTickets(emailInput.value.trim(), id);
+            });
+
+            loadTickets(email, id);
+        });
+    </script>
+</body>
+
+</html>

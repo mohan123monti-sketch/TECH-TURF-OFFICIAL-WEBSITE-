@@ -1,14 +1,14 @@
-                    <button onclick="editLaunch('${launch.id}')" class="p-2 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition-colors">
 // Launches Page Logic
 // Note: API_BASE_URL and showToast are provided by admin-layout.js
 
 let launches = [];
 let editingLaunchId = null;
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 async function loadLaunches() {
     const token = localStorage.getItem('tt_token');
     try {
-        const response = await fetch(`${window.API_BASE_URL}/launches`, {
+        const response = await fetch(`${apiBase}/launches`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         launches = await response.json();
@@ -47,7 +47,7 @@ function renderLaunches() {
                     <h3 class="text-xl font-bold text-white">${launch.missionName}</h3>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="editLaunch('${launch._id}')" class="p-2 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition-colors">
+                    <button onclick="editLaunch('${launch.id || launch._id}')" class="p-2 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition-colors">
                         <i data-lucide="edit-2" class="w-4 h-4"></i>
                     </button>
                      <!-- Optional: Add delete button here if API supports it -->
@@ -91,8 +91,7 @@ function openLaunchModal(launchId = null) {
     editingLaunchId = launchId;
 
     if (launchId) {
-        const launch = launches.find(l => l._id === launchId);
-            const launch = launches.find(l => l.id == launchId);
+        const launch = launches.find(l => String(l.id || l._id) === String(launchId));
         title.textContent = 'Edit Mission';
         form.missionName.value = launch.missionName;
         // Format date for input type="date"
@@ -133,8 +132,8 @@ async function saveLaunch(event) {
 
     try {
         const url = editingLaunchId
-            ? `${window.API_BASE_URL}/launches/${editingLaunchId}`
-            : `${window.API_BASE_URL}/launches`;
+            ? `${apiBase}/launches/${editingLaunchId}`
+            : `${apiBase}/launches`;
         const method = editingLaunchId ? 'PUT' : 'POST';
 
         const response = await fetch(url, {

@@ -53,11 +53,11 @@
                 return `
                     <div class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
                         <div class="aspect-square bg-black/20">
-                            <img src="${product.imageUrl || (product.images && product.images[0]) || 'https://via.placeholder.com/300'}" alt="${product.name}" class="w-full h-full object-cover">
+                            <img src="${product.imageUrl || (product.images && product.images[0]) || '/public/images/space-bg.png'}" alt="${product.name}" class="w-full h-full object-cover">
                         </div>
                         <div class="p-6 space-y-3">
                             <h3 class="text-xl font-black text-white">${product.name}</h3>
-                            <p class="text-[#d2670e] font-mono font-bold">â‚¹${product.price}</p>
+                            <p class="text-[#d2670e] font-mono font-bold">INR ${product.price}</p>
                             <p class="text-xs text-white/50">Brand: ${product.brand || 'Tech Turf'}</p>
                             <p class="text-xs text-white/50">ETA: ${Number(product.deliveryEtaDays || 3)} days</p>
                             <p class="text-xs text-white/50">Rating: ${(Number(product.ratingAvg || 0)).toFixed(1)} (${Number(product.ratingCount || 0)} reviews)</p>

@@ -57,11 +57,6 @@
             description: 'Contact Tech Turf to start a new project or connect with our divisions.',
             keywords: 'Tech Turf contact, support, inquiry'
         },
-        'estimator.html': {
-            title: 'Tech Turf Project Estimator',
-            description: 'Estimate project scope and cost with the Tech Turf valuation protocol.',
-            keywords: 'Tech Turf estimator, project cost, valuation'
-        },
         'quinta.html': {
             title: 'Quinta - Aerospace Division',
             description: 'Quinta is the Tech Turf aerospace division focused on propulsion, avionics, and flight systems.',

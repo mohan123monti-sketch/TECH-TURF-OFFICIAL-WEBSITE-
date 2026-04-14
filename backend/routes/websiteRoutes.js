@@ -4,9 +4,10 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { getAllProducts, createProduct, updateProduct, deleteProduct } from '../controllers/productController.js';
-import { getAllOrders, getOrderById, updateOrderStatus, deleteOrder } from '../controllers/orderController.js';
+import { getAllOrders, getMyOrders, getOrderById, createOrder, updateOrderStatus, deleteOrder } from '../controllers/orderController.js';
 import { getAllPromos, createPromo, updatePromo, deletePromo, validatePromo } from '../controllers/promoController.js';
 import { getAllAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement } from '../controllers/announcementController.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -33,7 +34,9 @@ router.delete('/products/:id', deleteProduct);
 
 // Orders
 router.get('/orders', getAllOrders);
+router.get('/orders/myorders', protect, getMyOrders);
 router.get('/orders/:id', getOrderById);
+router.post('/orders', protect, createOrder);
 router.put('/orders/:id/status', updateOrderStatus);
 router.delete('/orders/:id', deleteOrder);
 
@@ -103,8 +106,20 @@ router.post('/upload/multi', (req, res) => {
 // Blog Posts
 router.get('/blog', async (req, res) => {
     try {
-        const posts = await req.db.all('SELECT * FROM blog_posts ORDER BY created_at DESC');
+        const { category } = req.query;
+        const posts = category
+            ? await req.db.all('SELECT * FROM blog_posts WHERE category = ? ORDER BY created_at DESC', [category])
+            : await req.db.all('SELECT * FROM blog_posts ORDER BY created_at DESC');
         res.json(posts);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+router.get('/blog/:id', async (req, res) => {
+    try {
+        const post = await req.db.get('SELECT * FROM blog_posts WHERE id = ?', [req.params.id]);
+        if (!post) return res.status(404).json({ message: 'Post not found' });
+        res.json(post);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -230,6 +245,32 @@ router.delete('/tickets/:id', async (req, res) => {
     try {
         await req.db.run('DELETE FROM tickets WHERE id = ?', [req.params.id]);
         res.json({ message: 'Ticket deleted' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Generic form submission bridge for website pages
+router.post('/forms/submit', async (req, res) => {
+    try {
+        const { formType, firstName, lastName, email, subject, message } = req.body || {};
+        if (!email) return res.status(400).json({ message: 'Email is required' });
+
+        const safeSubject = subject || `${formType || 'contact'} submission`;
+        const safeMessage = [
+            `Form: ${formType || 'general'}`,
+            `Name: ${[firstName, lastName].filter(Boolean).join(' ') || 'N/A'}`,
+            `Email: ${email}`,
+            `Message: ${message || ''}`
+        ].join('\n');
+
+        const result = await req.db.run(
+            'INSERT INTO tickets (subject, message, priority, userEmail) VALUES (?, ?, ?, ?)',
+            [safeSubject, safeMessage, 'medium', email]
+        );
+
+        const ticket = await req.db.get('SELECT * FROM tickets WHERE id = ?', [result.lastID]);
+        res.status(201).json({ success: true, message: 'Form submitted successfully', ticket });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -18,54 +18,20 @@
 <body data-page="Shop" class="shop-branding">
     <div id="header-container"></div>
 
-    <section class="shop-hero">
-        <div class="shop-container reveal-hidden">
-            <div class="hero-logo-container reveal-hidden">
-                <img src="/assets/logos/tech-turf.png" alt="Tech Turf" class="logo-hero">
-            </div>
-            <h1 class="reveal-hidden">Advanced Tech <br>Marketplace</h1>
-            <p class="text-gray-400 text-lg mb-10 tracking-[0.3em] uppercase reveal-hidden">Strategic Hardware & Global
-                Engineering Nodes</p>
-            <div class="reveal-hidden" style="transition-delay: 0.2s;">
-                <button class="cta-btn magnetic-btn"
-                    onclick="document.getElementById('product-grid-start').scrollIntoView({behavior: 'smooth'})">
-                    <span>Initialize Supply Chain</span>
-                    <i data-lucide="arrow-down" class="w-5 h-5"></i>
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- 🛒 FEATURED PRODUCTS (High-Performance Assets) -->
+    <!-- Featured Products -->
     <section id="featured-section" class="py-16 relative">
         <div class="shop-container relative z-10">
-            <div class="flex justify-between items-end mb-10 reveal-hidden">
+            <div class="section-head reveal-hidden">
                 <div>
-                    <span class="text-orange-500 font-mono tracking-widest text-xs uppercase mb-2 block">Premium
-                        Selection</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
-                        High-Performance <span class="shop-text-gradient">Assets</span></h2>
+                    <span class="text-orange-500 font-mono tracking-widest text-xs uppercase mb-2 block">Premium Selection</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">High-Performance <span class="shop-text-gradient">Assets</span></h2>
                 </div>
             </div>
 
-            <!-- Featured Grid -->
             <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Featured items will be injected here -->
                 <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
                 <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
                 <div class="animate-pulse bg-white/5 h-[450px] rounded-[2.5rem] iphone-glass"></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="category-strip" id="product-grid-start">
-        <div class="shop-container">
-            <div class="category-list">
-                <button class="category-btn active" data-category="all">All Modules</button>
-                <button class="category-btn" data-category="Tech Turf">Tech Turf</button>
-                <button class="category-btn" data-category="Quinta">Quinta</button>
-                <button class="category-btn" data-category="Trend Hive">Trend Hive</button>
-                <button class="category-btn" data-category="Click Sphere">Click Sphere</button>
             </div>
         </div>
     </section>
@@ -73,7 +39,8 @@
     <section class="product-section">
         <div class="shop-container">
 
-            <div class="mb-8 grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div class="filters-shell mb-8">
+                <div class="mb-8 grid grid-cols-1 lg:grid-cols-4 gap-4">
                 <div class="lg:col-span-2">
                     <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Search</label>
                     <input id="search-input" type="text" placeholder="Search products"
@@ -99,9 +66,9 @@
                             class="w-1/2 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:bg-white/10 transition-all outline-none">
                     </div>
                 </div>
-            </div>
+                </div>
 
-            <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Brand</label>
                     <select id="brand-select"
@@ -136,9 +103,10 @@
                         In stock only
                     </label>
                 </div>
-            </div>
+                </div>
 
-            <div class="mb-10 flex flex-wrap items-center gap-4">
+                <div class="mb-2 flex flex-wrap items-center gap-4 justify-between">
+                    <div class="flex flex-wrap items-center gap-4">
                 <label class="inline-flex items-center gap-2 text-xs text-gray-400 uppercase tracking-widest">
                     <input id="wishlist-only" type="checkbox" class="accent-orange-500">
                     Wishlist only
@@ -147,24 +115,30 @@
                     class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 uppercase tracking-widest hover:bg-white/10 transition-all">
                     Clear Filters
                 </button>
+                    </div>
+                    <span class="text-xs text-white/40 uppercase tracking-widest">Live Product Feed</span>
+                </div>
             </div>
 
             <div id="products-grid" class="product-grid"></div>
             <div id="pagination" class="mt-10 flex items-center justify-between text-xs text-white/60 uppercase tracking-widest"></div>
+
+            <section id="recent-section" class="mt-16 hidden">
+                <div class="section-head mb-8">
+                    <div>
+                        <span class="text-orange-500 font-mono tracking-widest text-xs uppercase mb-2 block">Quick Access</span>
+                        <h3 class="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter">Recently Viewed</h3>
+                    </div>
+                </div>
+                <div id="recent-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </section>
         </div>
     </section>
 
-    <section class="status-strip py-6 border-t border-white/5 bg-black/20">
-        <div class="shop-container flex justify-between items-center text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
-            <div class="status-item flex items-center gap-2">
-                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                <span>Node Status: Core Online</span>
-            </div>
-            <div class="status-item">
-                <span id="product-count">Loading Manifest...</span>
-            </div>
-        </div>
-    </section>
+    <div id="compare-bar" class="hidden fixed bottom-24 right-6 z-[120] bg-black/70 border border-white/15 rounded-2xl px-4 py-3 backdrop-blur-xl flex items-center gap-3">
+        <span id="compare-count" class="text-xs text-white/80 uppercase tracking-widest">Compare (0)</span>
+        <button id="compare-go" class="px-3 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold uppercase tracking-wide disabled:opacity-40">Open Compare</button>
+    </div>
 
     <div id="footer-container"></div>
 
@@ -255,7 +229,7 @@
                         </button>
                     </div>
                     <div class="aspect-square bg-black/20 relative overflow-hidden">
-                        <img src="${product.imageUrl || (product.images && product.images[0]) || 'https://via.placeholder.com/300'}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="${product.imageUrl || (product.images && product.images[0]) || '/public/images/space-bg.png'}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-6">
                             <button
                                 ${stockCount > 0 ? '' : 'disabled'}
@@ -503,7 +477,8 @@
                 wishlistOnlyInput.checked = false;
                 state.category = 'all';
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                document.querySelector('.category-btn[data-category="all"]').classList.add('active');
+                const allCategoryBtn = document.querySelector('.category-btn[data-category="all"]');
+                if (allCategoryBtn) allCategoryBtn.classList.add('active');
                 handleFilterChange();
             });
 

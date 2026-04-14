@@ -120,6 +120,15 @@ document.addEventListener('DOMContentLoaded', () => {
         starPos[i * 3 + 2] = r * Math.cos(phi);
     }
     starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.02,
+        transparent: true,
+        opacity: 0.45,
+        depthWrite: false
+    });
+    const stars = new THREE.Points(starGeom, starMaterial);
+    scene.add(stars);
     // --- ANIMATION ---
 
     // --- ANIMATION ---

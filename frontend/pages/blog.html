@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog & News - Tech Turf</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+
+<body data-page="blog.html" class="text-white" data-3d-enabled="true">
+    <div id="three-container"></div>
+    <div id="header-container"></div>
+
+    <main class="relative z-10 pb-24 px-4" style="padding-top: 18rem;">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-14">
+                <h1 class="tt-page-hero-title font-black uppercase tracking-tighter">Blog &<br><span class="text-white/30">News</span></h1>
+                <p class="text-white/60">Latest announcements, launches, and technology insights from Tech Turf.</p>
+            </div>
+
+            <div class="mb-8 max-w-xl mx-auto">
+                <input id="search" type="text" placeholder="Search posts..."
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10">
+            </div>
+
+            <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        let allPosts = [];
+
+        function safeDate(value) {
+            const d = value ? new Date(value) : null;
+            return d && !isNaN(d) ? d.toLocaleDateString() : 'N/A';
+        }
+
+        function render(posts) {
+            const grid = document.getElementById('posts-grid');
+            if (!posts.length) {
+                grid.innerHTML = '<div class="col-span-full iphone-glass p-6 rounded-2xl border border-white/10 text-white/60">No posts found.</div>';
+                return;
+            }
+
+            grid.innerHTML = posts.map((post) => {
+                const id = post.id || post._id;
+                const image = post.imageUrl || '/public/images/space-bg.png';
+                const preview = String(post.content || '').slice(0, 120);
+                return `
+                    <a href="post-details.html?id=${id}" class="iphone-glass rounded-3xl border border-white/10 overflow-hidden hover:border-orange-400/40 transition-all group">
+                        <div class="h-48 overflow-hidden">
+                            <img src="${image}" alt="${post.title || ''}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        </div>
+                        <div class="p-6">
+                            <p class="text-xs uppercase tracking-widest text-white/50 mb-2">${post.category || 'General'} • ${safeDate(post.created_at || post.createdAt)}</p>
+                            <h3 class="text-xl font-black uppercase tracking-tight mb-3">${post.title || 'Untitled'}</h3>
+                            <p class="text-sm text-white/60">${preview}${preview.length >= 120 ? '...' : ''}</p>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        async function loadPosts() {
+            const grid = document.getElementById('posts-grid');
+            grid.innerHTML = '<div class="col-span-full text-white/50">Loading posts...</div>';
+
+            try {
+                const res = await fetch(`${window.API_BASE_URL}/blog`);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to load posts');
+                allPosts = Array.isArray(data) ? data : [];
+                render(allPosts);
+            } catch (err) {
+                grid.innerHTML = '';
+                window.showMessage('error', err.message || 'Unable to load blog posts');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const search = document.getElementById('search');
+            search.addEventListener('input', () => {
+                const q = search.value.trim().toLowerCase();
+                const filtered = allPosts.filter(p =>
+                    String(p.title || '').toLowerCase().includes(q) ||
+                    String(p.content || '').toLowerCase().includes(q) ||
+                    String(p.category || '').toLowerCase().includes(q)
+                );
+                render(filtered);
+            });
+
+            loadPosts();
+        });
+    </script>
+</body>
+
+</html>

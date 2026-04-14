@@ -75,11 +75,6 @@ const frontendHealthCheck = {
                 elements: ['#post-content', '#post-title', '#post-body', '#post-tags']
             },
             {
-                path: '/pages/estimator.html',
-                name: 'Estimator',
-                elements: ['#estimator-form', '#total-price', '#submit-button']
-            },
-            {
                 path: '/pages/compare.html',
                 name: 'Product Compare',
                 elements: ['#compare-grid']

@@ -1,15 +1,16 @@
 let allAnnouncements = [];
 let editingAnnouncementId = null;
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 async function loadAnnouncements() {
-    const token = window.getAuthToken?.();
+    const token = window.getAuthToken?.() || localStorage.getItem('tt_token') || localStorage.getItem('token');
     if (!token) {
         window.location.href = 'login.html';
         return;
     }
 
     try {
-        const response = await fetch(`${window.API_BASE_URL || '/api'}/announcements`, {
+        const response = await fetch(`${apiBase}/announcements`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -18,8 +19,8 @@ async function loadAnnouncements() {
             return;
         }
 
-        const { announcements } = await response.json();
-        allAnnouncements = announcements || [];
+        const data = await response.json();
+        allAnnouncements = Array.isArray(data) ? data : (data.announcements || data.items || []);
         filterAnnouncements();
 
     } catch (error) {
@@ -76,6 +77,7 @@ function renderAnnouncements(announcements) {
         const typeColor = typeColors[announcement.type] || typeColors.info;
         const priorityClass = priorityColors[announcement.priority] || priorityColors.medium;
         const statusClass = statusColors[announcement.status] || statusColors.active;
+        const announcementId = announcement._id || announcement.id;
 
         return `
             <div class="iphone-glass border ${typeColor} rounded-[2rem] p-6 hover:border-white/20 transition-all">
@@ -94,7 +96,7 @@ function renderAnnouncements(announcements) {
                         <div class="flex items-center gap-4 text-xs text-gray-500">
                             <div class="flex items-center gap-1">
                                 <i data-lucide="calendar" class="w-3 h-3"></i>
-                                ${new Date(announcement.createdAt).toLocaleDateString()}
+                                ${new Date(announcement.createdAt || announcement.created_at).toLocaleDateString()}
                             </div>
                             ${announcement.startDate ? `
                                 <div class="flex items-center gap-1">
@@ -111,11 +113,11 @@ function renderAnnouncements(announcements) {
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="editAnnouncement('${announcement._id}')"
+                        <button onclick="editAnnouncement('${announcementId}')"
                             class="p-2 hover:bg-white/10 rounded-lg transition-all">
                             <i data-lucide="edit" class="w-5 h-5 text-blue-400"></i>
                         </button>
-                        <button onclick="deleteAnnouncement('${announcement._id}')"
+                        <button onclick="deleteAnnouncement('${announcementId}')"
                             class="p-2 hover:bg-white/10 rounded-lg transition-all">
                             <i data-lucide="trash-2" class="w-5 h-5 text-red-400"></i>
                         </button>
@@ -132,6 +134,10 @@ function openCreateModal() {
     editingAnnouncementId = null;
     document.getElementById('modal-title').textContent = 'New Announcement';
     document.getElementById('announcement-form').reset();
+    const priorityField = document.getElementById('announcement-priority');
+    if (priorityField) priorityField.value = 'medium';
+        const notifyUsersField = document.getElementById('notify-users');
+        if (notifyUsersField) notifyUsersField.checked = true;
     document.getElementById('announcement-modal').classList.remove('hidden');
 }
 
@@ -142,7 +148,7 @@ function closeCreateModal() {
 }
 
 async function editAnnouncement(announcementId) {
-    const announcement = allAnnouncements.find(a => a._id === announcementId);
+    const announcement = allAnnouncements.find(a => String(a._id || a.id) === String(announcementId));
     if (!announcement) return;
 
     editingAnnouncementId = announcementId;
@@ -150,8 +156,10 @@ async function editAnnouncement(announcementId) {
     document.getElementById('announcement-title').value = announcement.title;
     document.getElementById('announcement-content').value = announcement.content;
     document.getElementById('announcement-type').value = announcement.type || 'info';
-    document.getElementById('announcement-priority').value = announcement.priority || 'medium';
-    document.getElementById('notify-users').checked = announcement.notifyUsers !== false;
+    const priorityField = document.getElementById('announcement-priority');
+    if (priorityField) priorityField.value = announcement.priority || 'medium';
+    const notifyUsersField = document.getElementById('notify-users');
+        if (notifyUsersField) notifyUsersField.checked = announcement.status ? announcement.status !== 'archived' : announcement.notifyUsers !== false;
 
     if (announcement.startDate) {
         document.getElementById('start-datetime').value = new Date(announcement.startDate).toISOString().slice(0, 16);
@@ -166,15 +174,16 @@ async function editAnnouncement(announcementId) {
 document.getElementById('announcement-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const token = window.getAuthToken?.();
+    const token = window.getAuthToken?.() || localStorage.getItem('tt_token') || localStorage.getItem('token');
     if (!token) return;
 
     const announcementData = {
         title: document.getElementById('announcement-title').value,
         content: document.getElementById('announcement-content').value,
         type: document.getElementById('announcement-type').value,
-        priority: document.getElementById('announcement-priority').value,
-        notifyUsers: document.getElementById('notify-users').checked,
+        priority: document.getElementById('announcement-priority')?.value || 'medium',
+        notifyUsers: document.getElementById('notify-users')?.checked ?? true,
+            status: document.getElementById('notify-users')?.checked ? 'active' : 'archived',
         startDate: document.getElementById('start-datetime').value ? new Date(document.getElementById('start-datetime').value) : null,
         endDate: document.getElementById('end-datetime').value ? new Date(document.getElementById('end-datetime').value) : null
     };
@@ -183,7 +192,7 @@ document.getElementById('announcement-form')?.addEventListener('submit', async (
         let response;
         if (editingAnnouncementId) {
             // Update existing
-            response = await fetch(`${window.API_BASE_URL || '/api'}/announcements/${editingAnnouncementId}`, {
+            response = await fetch(`${apiBase}/announcements/${editingAnnouncementId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -193,7 +202,7 @@ document.getElementById('announcement-form')?.addEventListener('submit', async (
             });
         } else {
             // Create new
-            response = await fetch(`${window.API_BASE_URL || '/api'}/announcements`, {
+            response = await fetch(`${apiBase}/announcements`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -225,7 +234,7 @@ async function deleteAnnouncement(announcementId) {
     if (!token) return;
 
     try {
-        const response = await fetch(`${window.API_BASE_URL || '/api'}/announcements/${announcementId}`, {
+        const response = await fetch(`${apiBase}/announcements/${announcementId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });

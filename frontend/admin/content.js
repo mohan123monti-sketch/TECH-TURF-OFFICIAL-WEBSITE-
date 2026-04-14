@@ -3,14 +3,16 @@
 
 let posts = [];
 let editingPostId = null;
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 async function loadPosts() {
     const token = localStorage.getItem('tt_token');
     try {
-        const response = await fetch(`${window.API_BASE_URL}/blog`, {
+        const response = await fetch(`${apiBase}/blog`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        posts = await response.json();
+        const data = await response.json();
+        posts = Array.isArray(data) ? data : (data.posts || data.items || []);
         renderPosts();
     } catch (error) {
         console.error('Error loading posts:', error);
@@ -30,7 +32,7 @@ function renderPosts() {
     container.innerHTML = posts.map(post => `
         <div class="iphone-glass rounded-[2rem] overflow-hidden group transition-all duration-500">
             <div class="h-48 bg-white/5 relative overflow-hidden">
-                ${post.imageUrl ? `<img src="${post.imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/300x192/475569/cbd5e1?text=Image+N/A'" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">` : `
+                ${post.imageUrl ? `<img src="${post.imageUrl}" onerror="this.onerror=null;this.src='/public/images/space-bg.png'" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">` : `
                     <div class="absolute inset-0 flex items-center justify-center text-gray-400">No Image</div>
                 `}
                 <div class="absolute top-4 left-4">
@@ -41,17 +43,14 @@ function renderPosts() {
             </div>
             <div class="p-6">
                 <h3 class="text-lg font-bold text-white mb-2 line-clamp-1">${post.title}</h3>
-                <p class="text-sm text-gray-400 mb-6 line-clamp-2 leading-relaxed">${post.content.substring(0, 100)}...</p>
+                <p class="text-sm text-gray-400 mb-6 line-clamp-2 leading-relaxed">${String(post.content || '').substring(0, 100)}...</p>
                 <div class="flex justify-between items-center pt-4 border-t border-white/5">
-                    <span class="text-xs text-gray-500">${new Date(post.createdAt).toLocaleDateString()}</span>
-                                        <span class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString()}</span>
+                    <span class="text-xs text-gray-500">${new Date(post.createdAt || post.created_at || Date.now()).toLocaleDateString()}</span>
                     <div class="flex space-x-2">
-                        <button onclick="editPost('${post._id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
-                                                    <button onclick="editPost('${post.id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                        <button onclick="editPost('${post._id || post.id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
                             <i data-lucide="edit-3" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="deletePost('${post._id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition-all">
-                                                    <button onclick="deletePost('${post.id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition-all">
+                        <button onclick="deletePost('${post._id || post.id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition-all">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -71,8 +70,7 @@ function openPostModal(postId = null) {
     editingPostId = postId;
 
     if (postId) {
-        const post = posts.find(p => p._id === postId);
-            const post = posts.find(p => p.id == postId);
+        const post = posts.find(p => String(p._id || p.id) === String(postId));
         title.textContent = 'Edit Blog Post';
         form.title.value = post.title;
         form.category.value = post.category || '';
@@ -119,12 +117,11 @@ async function savePost(event) {
     if (fileInput.files.length > 0) {
         const formData = new FormData();
         for (let i = 0; i < fileInput.files.length; i++) {
-            formData.append('images', fileInput.files[i]);
-                    formData.append('files', fileInput.files[i]);
+            formData.append('files', fileInput.files[i]);
         }
 
         try {
-            const uploadResponse = await fetch(`${window.API_BASE_URL}/upload/multi`, {
+            const uploadResponse = await fetch(`${apiBase}/upload/multi`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
@@ -162,8 +159,8 @@ async function savePost(event) {
 
     try {
         const url = editingPostId
-            ? `${window.API_BASE_URL}/blog/${editingPostId}`
-            : `${window.API_BASE_URL}/blog`;
+            ? `${apiBase}/blog/${editingPostId}`
+            : `${apiBase}/blog`;
         const method = editingPostId ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -227,7 +224,7 @@ async function deletePost(id) {
 
     const token = localStorage.getItem('tt_token');
     try {
-        const response = await fetch(`${window.API_BASE_URL}/blog/${id}`, {
+        const response = await fetch(`${apiBase}/blog/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });

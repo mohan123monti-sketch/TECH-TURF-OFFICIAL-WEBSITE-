@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist - Tech Turf</title>
+
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="/src/js/features/shop-logic.js"></script>
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+
+<body data-page="Wishlist" class="shop-branding">
+    <div id="header-container"></div>
+
+    <main class="relative z-10 pt-20 min-h-screen">
+        <section class="py-16 px-4 max-w-7xl mx-auto">
+            <div class="mb-10 reveal-hidden">
+                <span class="text-orange-500 font-mono tracking-widest text-xs uppercase block mb-2">Personal Shelf</span>
+                <h1 class="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Your Wishlist</h1>
+                <p class="text-white/50 mt-4 max-w-2xl">Saved items from all Tech Turf divisions. Keep this list to compare and purchase later.</p>
+            </div>
+
+            <div class="mb-8 flex flex-wrap items-center gap-3 reveal-hidden">
+                <a href="/pages/shopping.html" class="transition-link px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/80 uppercase tracking-widest hover:bg-white/10">Back to Shop</a>
+                <button id="clear-wishlist" class="px-4 py-2 rounded-xl bg-orange-600 text-white text-xs font-semibold uppercase tracking-widest hover:bg-orange-500">Clear Wishlist</button>
+            </div>
+
+            <div id="wishlist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </section>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const grid = document.getElementById('wishlist-grid');
+            const clearBtn = document.getElementById('clear-wishlist');
+
+            const wishlistIds = JSON.parse(localStorage.getItem('tt_wishlist') || '[]').map(String);
+            const products = await window.fetchProducts();
+            const productMap = new Map(products.map(p => [String(p._id || p.id), p]));
+
+            const render = () => {
+                const ids = JSON.parse(localStorage.getItem('tt_wishlist') || '[]').map(String);
+                const items = ids.map(id => productMap.get(id)).filter(Boolean);
+
+                if (items.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full text-center py-16 border border-white/10 rounded-2xl bg-white/5"><p class="text-white/70 text-lg">No wishlist items yet.</p><p class="text-white/40 mt-2">Add products from the shop to see them here.</p></div>';
+                    return;
+                }
+
+                grid.innerHTML = items.map((product) => {
+                    const id = String(product._id || product.id || '');
+                    const image = product.imageUrl || (product.images && product.images[0]) || '/public/images/space-bg.png';
+
+                    return `
+                        <article class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-orange-500/40 transition-all">
+                            <div class="aspect-square bg-black/20">
+                                <img src="${image}" alt="${product.name}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-white text-2xl font-bold mb-2">${product.name}</h3>
+                                <p class="text-white/50 text-sm mb-4 line-clamp-2">${product.description || ''}</p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-orange-400 font-bold">₹${product.price || 0}</span>
+                                    <span class="text-white/40 text-xs uppercase tracking-widest">${product.brand || 'Tech Turf'}</span>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button class="remove-btn flex-1 px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-semibold uppercase tracking-widest hover:bg-white/20" data-id="${id}">Remove</button>
+                                    <button class="add-cart-btn flex-1 px-4 py-2 rounded-xl bg-orange-600 text-white text-xs font-semibold uppercase tracking-widest hover:bg-orange-500" data-id="${id}">Add to Cart</button>
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+
+                grid.querySelectorAll('.remove-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const next = JSON.parse(localStorage.getItem('tt_wishlist') || '[]').map(String).filter(x => x !== id);
+                        localStorage.setItem('tt_wishlist', JSON.stringify(next));
+                        if (window.updateWishlistDisplay) window.updateWishlistDisplay();
+                        render();
+                    });
+                });
+
+                grid.querySelectorAll('.add-cart-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const product = productMap.get(id);
+                        if (!product) return;
+                        window.addToCart(product);
+                    });
+                });
+
+                if (window.lucide) lucide.createIcons();
+            };
+
+            clearBtn.addEventListener('click', () => {
+                localStorage.setItem('tt_wishlist', JSON.stringify([]));
+                if (window.updateWishlistDisplay) window.updateWishlistDisplay();
+                render();
+            });
+
+            render();
+        });
+    </script>
+</body>
+
+</html>

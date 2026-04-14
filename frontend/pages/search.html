@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Search - Tech Turf</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+
+<body data-page="search.html" class="text-white" data-3d-enabled="true">
+    <div id="three-container"></div>
+    <div id="header-container"></div>
+
+    <main class="relative z-10 pb-24 px-4" style="padding-top: 18rem;">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-10">
+                <h1 class="tt-page-hero-title font-black uppercase tracking-tighter">Global<br><span class="text-white/30">Search</span></h1>
+            </div>
+
+            <div class="iphone-glass p-6 rounded-2xl border border-white/10 mb-8">
+                <form id="search-form" class="flex flex-col md:flex-row md:items-center gap-3">
+                    <input id="q" type="text" placeholder="Search products, projects, and posts..."
+                        class="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10">
+                    <button type="submit" class="magnetic-btn tt-form-button bg-white text-black px-5 rounded-xl font-black uppercase text-xs tracking-widest md:flex-shrink-0">Search</button>
+                </form>
+            </div>
+
+            <div id="results" class="space-y-8"></div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        function scoreMatch(text, q) {
+            const t = String(text || '').toLowerCase();
+            if (t === q) return 5;
+            if (t.startsWith(q)) return 4;
+            if (t.includes(q)) return 3;
+            return 0;
+        }
+
+        function card(title, body, link) {
+            return `
+                <a href="${link}" class="block iphone-glass p-5 rounded-2xl border border-white/10 hover:border-orange-400/40 transition-all">
+                    <h4 class="font-black uppercase tracking-tight mb-2">${title}</h4>
+                    <p class="text-sm text-white/60">${body}</p>
+                </a>
+            `;
+        }
+
+        async function fetchJson(url) {
+            const res = await fetch(url);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || `Request failed: ${url}`);
+            return data;
+        }
+
+        async function runSearch(qRaw) {
+            const q = qRaw.trim().toLowerCase();
+            const out = document.getElementById('results');
+            if (!q) {
+                out.innerHTML = '<div class="text-white/50">Enter a search term to see results.</div>';
+                return;
+            }
+
+            out.innerHTML = '<div class="text-white/50">Searching...</div>';
+
+            try {
+                const [products, projects, posts] = await Promise.all([
+                    fetchJson(`${window.API_BASE_URL}/products`),
+                    fetchJson(`${window.API_BASE_URL}/projects`),
+                    fetchJson(`${window.API_BASE_URL}/blog`)
+                ]);
+
+                const productResults = (products || [])
+                    .map(p => ({ ...p, s: Math.max(scoreMatch(p.name, q), scoreMatch(p.description, q), scoreMatch(p.category, q)) }))
+                    .filter(p => p.s > 0)
+                    .sort((a, b) => b.s - a.s)
+                    .slice(0, 8);
+
+                const projectResults = (projects || [])
+                    .map(p => ({ ...p, s: Math.max(scoreMatch(p.name, q), scoreMatch(p.description, q), scoreMatch(p.status, q)) }))
+                    .filter(p => p.s > 0)
+                    .sort((a, b) => b.s - a.s)
+                    .slice(0, 8);
+
+                const postResults = (posts || [])
+                    .map(p => ({ ...p, s: Math.max(scoreMatch(p.title, q), scoreMatch(p.content, q), scoreMatch(p.category, q)) }))
+                    .filter(p => p.s > 0)
+                    .sort((a, b) => b.s - a.s)
+                    .slice(0, 8);
+
+                out.innerHTML = `
+                    <section>
+                        <h3 class="text-2xl font-black uppercase tracking-tight mb-4">Products (${productResults.length})</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${productResults.map(p => card(p.name || 'Product', p.description || 'No description', `product_details.html?id=${p.id || p._id || ''}`)).join('') || '<p class="text-white/50">No product matches.</p>'}
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="text-2xl font-black uppercase tracking-tight mb-4">Projects (${projectResults.length})</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${projectResults.map(p => card(p.name || 'Project', p.description || 'No description', `projects.html`)).join('') || '<p class="text-white/50">No project matches.</p>'}
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="text-2xl font-black uppercase tracking-tight mb-4">Blog Posts (${postResults.length})</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${postResults.map(p => card(p.title || 'Post', String(p.content || '').slice(0, 120), `post-details.html?id=${p.id || p._id || ''}`)).join('') || '<p class="text-white/50">No blog matches.</p>'}
+                        </div>
+                    </section>
+                `;
+            } catch (err) {
+                out.innerHTML = '';
+                window.showMessage('error', err.message || 'Global search failed');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('q');
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('q') || '';
+            if (q) input.value = q;
+
+            document.getElementById('search-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const val = input.value.trim();
+                const next = new URL(window.location.href);
+                if (val) next.searchParams.set('q', val); else next.searchParams.delete('q');
+                history.replaceState(null, '', next.toString());
+                runSearch(val);
+            });
+
+            runSearch(input.value);
+        });
+    </script>
+</body>
+
+</html>

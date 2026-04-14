@@ -101,7 +101,7 @@
                         <!-- Content here -->
                     </div>
 
-                    <!-- ðŸ–¼ï¸ MULTI-IMAGE GALLERY -->
+                    <!-- MULTI-IMAGE GALLERY -->
                     <div id="post-gallery" class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 hidden mb-16">
                         <!-- Additional images will load here -->
                     </div>
@@ -178,7 +178,7 @@
             });
 
             const image = document.getElementById('post-image');
-            image.src = post.imageUrl || `https://placehold.co/1200x600/1e293b/e5e7eb?text=${encodeURIComponent(post.title)}`;
+            image.src = post.imageUrl || '/public/images/space-bg.png';
             image.alt = post.title;
 
             // Handle Multiline Content

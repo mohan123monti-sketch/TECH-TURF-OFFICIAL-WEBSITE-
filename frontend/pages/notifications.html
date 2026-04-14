@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications Center - Tech Turf</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+
+<body data-page="account.html" class="text-white" data-3d-enabled="true">
+    <div id="three-container"></div>
+    <div id="header-container"></div>
+
+    <main class="relative z-10 pb-24 px-4" style="padding-top: 18rem;">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-10">
+                <h1 class="tt-page-hero-title font-black uppercase tracking-tighter">Notifications<br><span class="text-white/30">Center</span></h1>
+                <p class="text-white/60">Announcements, order events, and support updates in one place.</p>
+            </div>
+
+            <div class="iphone-glass p-6 rounded-2xl border border-white/10 mb-8">
+                <form id="pref-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <input id="email" type="email" placeholder="Optional: your email for ticket updates"
+                        class="md:col-span-2 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                    <button type="submit" class="magnetic-btn tt-form-button bg-white text-black rounded-xl font-black uppercase text-xs tracking-widest">Refresh</button>
+                </form>
+            </div>
+
+            <div id="feed" class="space-y-4"></div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        function item(type, title, body, ts = '') {
+            return `
+                <article class="iphone-glass p-5 rounded-2xl border border-white/10">
+                    <p class="text-[10px] uppercase tracking-widest text-white/50 mb-2">${type}${ts ? ` • ${ts}` : ''}</p>
+                    <h3 class="font-black uppercase tracking-tight mb-2">${title}</h3>
+                    <p class="text-sm text-white/60">${body}</p>
+                </article>
+            `;
+        }
+
+        async function fetchSafe(url, options = {}) {
+            try {
+                const res = await fetch(url, options);
+                const data = await res.json();
+                if (!res.ok) return [];
+                return Array.isArray(data) ? data : [];
+            } catch {
+                return [];
+            }
+        }
+
+        async function loadNotifications(email = '') {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '<div class="text-white/50">Loading notifications...</div>';
+
+            const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : '';
+
+            const announcementsPromise = fetchSafe(`${window.API_BASE_URL}/announcements`);
+            const ordersPromise = token
+                ? fetchSafe(`${window.API_BASE_URL}/orders/myorders`, { headers: { Authorization: `Bearer ${token}` } })
+                : Promise.resolve([]);
+            const ticketsPromise = (token && email)
+                ? fetchSafe(`${window.API_BASE_URL}/tickets`)
+                : Promise.resolve([]);
+
+            const [announcements, orders, tickets] = await Promise.all([
+                announcementsPromise,
+                ordersPromise,
+                ticketsPromise
+            ]);
+
+            const notes = [];
+
+            announcements.slice(0, 8).forEach(a => {
+                notes.push(item('Announcement', a.title || 'System announcement', String(a.content || '').slice(0, 150), a.created_at ? new Date(a.created_at).toLocaleDateString() : ''));
+            });
+
+            orders.slice(0, 6).forEach(o => {
+                notes.push(item('Order Update', `Order #${o.id} • ${o.status || 'pending'}`, `Payment: ${o.paymentMethod || 'N/A'} • Total: ${o.totalPrice || 0}`, o.created_at ? new Date(o.created_at).toLocaleDateString() : ''));
+            });
+
+            const filteredTickets = email ? tickets.filter(t => String(t.userEmail || '').toLowerCase() === email.toLowerCase()) : [];
+            filteredTickets.slice(0, 8).forEach(t => {
+                notes.push(item('Support Ticket', `Ticket #${t.id} • ${t.status || 'open'}`, t.subject || 'Support update', t.updated_at ? new Date(t.updated_at).toLocaleDateString() : ''));
+            });
+
+            if (!notes.length) {
+                feed.innerHTML = '<div class="iphone-glass p-6 rounded-2xl border border-white/10 text-white/60">No notifications available right now.</div>';
+                return;
+            }
+
+            feed.innerHTML = notes.join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const savedEmail = params.get('email') || localStorage.getItem('tt_notify_email') || '';
+            const emailInput = document.getElementById('email');
+            emailInput.value = savedEmail;
+
+            document.getElementById('pref-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const val = emailInput.value.trim();
+                if (val) localStorage.setItem('tt_notify_email', val);
+                else localStorage.removeItem('tt_notify_email');
+                loadNotifications(val);
+            });
+
+            loadNotifications(savedEmail);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,8 +1,11 @@
 // Admin Dashboard JavaScript
-const API_BASE = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || '/api';
+const API_BASE = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 let currentTab = 'dashboard';
 let charts = {};
+let currentEditingProduct = null;
+let currentEditingPromo = null;
+let currentOrdersCache = [];
 
 // Initialize with token check and retry logic
 document.addEventListener('DOMContentLoaded', () => {
@@ -89,16 +92,10 @@ async function loadDashboardData() {
             throw new Error('Session expired. Please login again.');
         }
         
-        // Try new endpoint first, fall back to old endpoint
-        let statsRes = await fetch(`${API_BASE}/admin/stats`, {
+        // Fetch dashboard stats from the real stats endpoint
+        let statsRes = await fetch(`${API_BASE}/stats/dashboard`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
-        if (statsRes.status === 404) {
-            statsRes = await fetch(`${API_BASE}/orders`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-        }
         
         if (statsRes.status === 401) {
             throw new Error('Session expired. Please login again.');
@@ -107,19 +104,14 @@ async function loadDashboardData() {
         if (!statsRes.ok) throw new Error(`HTTP ${statsRes.status}: Failed to fetch stats`);
         const stats = await statsRes.json();
         
-        // Fetch orders
-        let ordersRes = await fetch(`${API_BASE}/admin/orders`, {
+        // Fetch orders directly from the website API
+        let ordersRes = await fetch(`${API_BASE}/orders`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        if (ordersRes.status === 404) {
-            ordersRes = await fetch(`${API_BASE}/orders`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-        }
-        
         if (!ordersRes.ok) throw new Error(`HTTP ${ordersRes.status}: Failed to fetch orders`);
         const orders = await ordersRes.json();
+        currentOrdersCache = Array.isArray(orders) ? orders : [];
         
         // Fetch products (no auth needed)
         const productsRes = await fetch(`${API_BASE}/products`);
@@ -194,7 +186,7 @@ function loadRecentOrders(orders) {
         row.innerHTML = `
             <td class="py-3 px-4 text-sm">${order._id.slice(-8)}</td>
             <td class="py-3 px-4 text-sm">${order.user?.email || 'Guest'}</td>
-            <td class="py-3 px-4 text-sm">₹${order.totalPrice?.toFixed(0) || 0}</td>
+            <td class="py-3 px-4 text-sm">INR ${order.totalPrice?.toFixed(0) || 0}</td>
             <td class="py-3 px-4">
                 <span class="status-${order.status?.toLowerCase() || 'pending'}">
                     ${order.status || 'Pending'}
@@ -217,16 +209,9 @@ async function loadOrders() {
             throw new Error('Session expired. Please login again.');
         }
         
-        // Try new endpoint first, fall back to old endpoint
-        let res = await fetch(`${API_BASE}/admin/orders`, {
+        let res = await fetch(`${API_BASE}/orders`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
-        if (res.status === 404) {
-            res = await fetch(`${API_BASE}/orders`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-        }
         
         if (res.status === 401) {
             localStorage.removeItem('tt_token');
@@ -256,7 +241,7 @@ async function loadOrders() {
             row.innerHTML = `
                 <td class="py-3 px-4 text-sm">${order._id.slice(-8)}</td>
                 <td class="py-3 px-4 text-sm">${order.user?.email || 'N/A'}</td>
-                <td class="py-3 px-4 text-sm">₹${order.totalPrice?.toFixed(0) || 0}</td>
+                <td class="py-3 px-4 text-sm">INR ${order.totalPrice?.toFixed(0) || 0}</td>
                 <td class="py-3 px-4">
                     <span class="status-${order.status?.toLowerCase() || 'pending'}">
                         ${order.status || 'Pending'}
@@ -284,6 +269,7 @@ async function loadInventory() {
     try {
         const res = await fetch(`${API_BASE}/products`);
         const products = await res.json();
+        window.__adminProductsCache = Array.isArray(products) ? products : [];
         
         const grid = document.getElementById('inventoryGrid');
         if (!grid) {
@@ -296,12 +282,15 @@ async function loadInventory() {
             const card = document.createElement('div');
             card.className = 'bg-white rounded-lg p-4 shadow hover:shadow-lg';
             card.innerHTML = `
-                <img src="${product.imageUrl || '/placeholder.jpg'}" alt="${product.name}" class="w-full h-40 object-cover rounded mb-3">
+                <img src="${product.imageUrl || '/public/images/space-bg.png'}" alt="${product.name}" class="w-full h-40 object-cover rounded mb-3">
                 <h4 class="font-semibold text-sm">${product.name}</h4>
-                <p class="text-gray-600 text-xs">₹${product.price}</p>
+                <p class="text-gray-600 text-xs">INR ${product.price}</p>
                 <div class="mt-2 flex justify-between items-center">
                     <span class="text-xs ${product.stock > 5 ? 'text-green-600' : 'text-red-600'}">Stock: ${product.stock}</span>
-                    <button onclick="editProduct('${product._id}')" class="text-orange-600 text-xs hover:underline">Edit</button>
+                    <div class="flex items-center gap-3">
+                        <button onclick="editProduct('${product._id}')" class="text-orange-600 text-xs hover:underline">Edit</button>
+                        <button onclick="deleteProduct('${product._id}')" class="text-red-600 text-xs hover:underline">Delete</button>
+                    </div>
                 </div>
             `;
             grid.appendChild(card);
@@ -395,6 +384,7 @@ async function loadPromos() {
         
         if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch promos`);
         const promos = await res.json();
+        window.__adminPromosCache = Array.isArray(promos) ? promos : [];
         
         const tbody = document.getElementById('promosBody');
         if (!tbody) {
@@ -415,9 +405,9 @@ async function loadPromos() {
             
             row.innerHTML = `
                 <td class="py-3 px-4 text-sm font-semibold">${promo.code}</td>
-                <td class="py-3 px-4 text-sm">${promo.type === 'percent' ? '%' : '₹'}</td>
+                <td class="py-3 px-4 text-sm">${promo.type === 'percent' ? '%' : 'INR'}</td>
                 <td class="py-3 px-4 text-sm">${promo.value}</td>
-                <td class="py-3 px-4 text-sm">₹${promo.minOrderValue || 0}</td>
+                <td class="py-3 px-4 text-sm">INR ${promo.minOrderValue || 0}</td>
                 <td class="py-3 px-4 text-xs">${startDate} - ${endDate}</td>
                 <td class="py-3 px-4">
                     <button onclick="editPromo('${promo._id}')" class="text-blue-600 text-xs hover:underline">Edit</button>
@@ -443,10 +433,10 @@ function setupCharts() {
         charts.revenue = new Chart(revenueCtx, {
             type: 'line',
             data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                labels: [],
                 datasets: [{
-                    label: 'Revenue (₹)',
-                    data: [5000, 8000, 6500, 9000, 11000, 13000, 10000],
+                    label: 'Revenue (INR)',
+                    data: [],
                     borderColor: '#f97316',
                     backgroundColor: 'rgba(249, 115, 22, 0.1)',
                     tension: 0.4
@@ -466,9 +456,9 @@ function setupCharts() {
         charts.status = new Chart(statusCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Pending', 'Processing', 'Delivered', 'Cancelled'],
+                labels: [],
                 datasets: [{
-                    data: [12, 19, 28, 5],
+                    data: [],
                     backgroundColor: ['#fbbf24', '#3b82f6', '#10b981', '#ef4444']
                 }]
             },
@@ -485,10 +475,10 @@ function setupCharts() {
         charts.daily = new Chart(dailyCtx, {
             type: 'bar',
             data: {
-                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                labels: [],
                 datasets: [{
-                    label: 'Daily Sales (₹)',
-                    data: [2000, 3500, 2800, 4200, 5100, 6000, 4500],
+                    label: 'Daily Sales (INR)',
+                    data: [],
                     backgroundColor: '#f97316'
                 }]
             },
@@ -548,31 +538,124 @@ function updateCharts(orders) {
 
 // Modal Functions
 function showAddProductModal() {
-    alert('Add Product Modal - To be implemented');
+    currentEditingProduct = null;
+    const form = document.getElementById('productForm');
+    if (form) form.reset();
+    const title = document.getElementById('productModalTitle');
+    if (title) title.textContent = 'New Product';
+    openModal('productModal');
 }
 
 function showAddPromoModal() {
-    alert('Add Promo Modal - To be implemented');
+    currentEditingPromo = null;
+    const form = document.getElementById('promoForm');
+    if (form) form.reset();
+    const active = document.getElementById('promoActive');
+    if (active) active.checked = true;
+    const title = document.getElementById('promoModalTitle');
+    if (title) title.textContent = 'New Promo';
+    openModal('promoModal');
 }
 
 // Action Functions
 function viewOrder(orderId) {
-    console.log('View order:', orderId);
-    alert(`Order ${orderId.slice(-8)} details - To be implemented`);
+    const order = currentOrdersCache.find(item => String(item._id || item.id) === String(orderId));
+    if (!order) {
+        alert('Order not found');
+        return;
+    }
+
+    alert(`Order ${String(order._id || order.id).slice(-8)} | INR ${Number(order.totalPrice || 0).toFixed(2)} | ${order.status || 'Pending'}`);
 }
 
 function editOrder(orderId) {
-    alert('Edit order - To be implemented');
+    const order = currentOrdersCache.find(item => String(item._id || item.id) === String(orderId));
+    if (!order) {
+        alert('Order not found');
+        return;
+    }
+
+    const nextStatus = prompt('Update order status (Pending, Processing, Shipped, Delivered, Cancelled):', order.status || 'Pending');
+    if (!nextStatus) return;
+
+    const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
+    fetch(`${API_BASE}/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: nextStatus })
+    }).then(res => {
+        if (!res.ok) throw new Error('Failed to update order');
+        return res.json();
+    }).then(() => {
+        loadOrders();
+        alert('Order updated successfully');
+    }).catch(err => {
+        console.error('Edit order error:', err);
+        alert(err.message);
+    });
 }
 
 function deleteOrder(orderId) {
     if (confirm('Delete this order?')) {
-        console.log('Delete order:', orderId);
+        const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
+        fetch(`${API_BASE}/orders/${orderId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        }).then(res => {
+            if (!res.ok) throw new Error('Failed to delete order');
+            loadOrders();
+            loadDashboardData();
+            alert('Order deleted successfully');
+        }).catch(err => {
+            console.error('Delete order error:', err);
+            alert(err.message);
+        });
     }
 }
 
 function editProduct(productId) {
-    alert('Edit product - To be implemented');
+    const product = (window.__adminProductsCache || []).find(item => String(item._id || item.id) === String(productId));
+    if (!product) {
+        alert('Product not found');
+        return;
+    }
+
+    currentEditingProduct = productId;
+    const title = document.getElementById('productModalTitle');
+    if (title) title.textContent = 'Edit Product';
+    document.getElementById('productName').value = product.name || '';
+    document.getElementById('productDescription').value = product.description || '';
+    document.getElementById('productPrice').value = product.price ?? '';
+    document.getElementById('productStock').value = product.stock ?? 0;
+    document.getElementById('productCategory').value = product.category || '';
+    document.getElementById('productStatus').value = product.status || 'active';
+    document.getElementById('productImageUrl').value = product.image_url || product.imageUrl || '';
+    openModal('productModal');
+}
+
+function deleteProduct(productId) {
+    if (!confirm('Delete this product?')) return;
+
+    const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
+    fetch(`${API_BASE}/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    }).then(res => {
+        if (!res.ok) throw new Error('Failed to delete product');
+        loadInventory();
+        loadDashboardData();
+        alert('Product deleted successfully');
+    }).catch(err => {
+        console.error('Delete product error:', err);
+        alert(err.message);
+    });
 }
 
 function filterProducts() {
@@ -589,17 +672,231 @@ function filterProducts() {
 }
 
 function editPromo(promoId) {
-    alert('Edit promo - To be implemented');
+    const promo = (window.__adminPromosCache || []).find(item => String(item._id || item.id) === String(promoId));
+    if (!promo) {
+        alert('Promo not found');
+        return;
+    }
+
+    currentEditingPromo = promoId;
+    const title = document.getElementById('promoModalTitle');
+    if (title) title.textContent = 'Edit Promo';
+    document.getElementById('promoCode').value = promo.code || '';
+    document.getElementById('promoType').value = promo.type || 'percent';
+    document.getElementById('promoValue').value = promo.value ?? '';
+    document.getElementById('promoMinOrder').value = promo.minOrder ?? promo.minOrderValue ?? 0;
+    document.getElementById('promoExpiryDate').value = promo.expiryDate ? new Date(promo.expiryDate).toISOString().slice(0, 16) : '';
+    document.getElementById('promoActive').checked = Boolean(promo.isActive);
+    openModal('promoModal');
 }
 
 function deletePromo(promoId) {
     if (confirm('Delete this promo?')) {
-        console.log('Delete promo:', promoId);
+        const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
+        fetch(`${API_BASE}/promos/${promoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        }).then(res => {
+            if (!res.ok) throw new Error('Failed to delete promo');
+            loadPromos();
+            alert('Promo deleted successfully');
+        }).catch(err => {
+            console.error('Delete promo error:', err);
+            alert(err.message);
+        });
     }
 }
 
 function exportOrders() {
-    alert('Export orders - To be implemented');
+    const orders = Array.isArray(currentOrdersCache) ? currentOrdersCache : [];
+    if (orders.length === 0) {
+        alert('No orders to export');
+        return;
+    }
+
+    const rows = [
+        ['Order ID', 'Customer', 'Email', 'Date', 'Total', 'Status', 'Payment Method'],
+        ...orders.map(order => [
+            String(order._id || order.id || ''),
+            String(order.userName || order.user?.name || 'Guest'),
+            String(order.userEmail || order.user?.email || ''),
+            String(order.createdAt || order.created_at || ''),
+            String(Number(order.totalPrice || 0).toFixed(2)),
+            String(order.status || 'Pending'),
+            String(order.paymentMethod || 'COD')
+        ])
+    ];
+
+    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tech-turf-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function closeProductModal() {
+    currentEditingProduct = null;
+    closeModal('productModal');
+    const fileInput = document.getElementById('productImageFile');
+    const previewContainer = document.getElementById('productImagePreviewContainer');
+    const preview = document.getElementById('productImagePreview');
+    if (fileInput) fileInput.value = '';
+    if (previewContainer) previewContainer.classList.add('hidden');
+    if (preview) preview.src = '';
+}
+
+function closePromoModal() {
+    currentEditingPromo = null;
+    closeModal('promoModal');
+}
+
+async function saveProduct(event) {
+    event.preventDefault();
+
+    const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
+    const isEdit = Boolean(currentEditingProduct);
+    const fileInput = document.getElementById('productImageFile');
+    const payload = {
+        name: document.getElementById('productName').value.trim(),
+        description: document.getElementById('productDescription').value.trim(),
+        price: Number(document.getElementById('productPrice').value),
+        stock: Number(document.getElementById('productStock').value),
+        category: document.getElementById('productCategory').value.trim(),
+        image_url: document.getElementById('productImageUrl').value.trim(),
+        status: document.getElementById('productStatus').value
+    };
+
+    const selectedFile = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+    if (selectedFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', selectedFile);
+
+        const uploadResponse = await fetch(`${API_BASE}/media/upload`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: uploadFormData
+        });
+
+        if (!uploadResponse.ok) {
+            const error = await uploadResponse.json().catch(() => ({}));
+            throw new Error(error.message || 'Failed to upload product image');
+        }
+
+        const uploadData = await uploadResponse.json();
+        const uploadedImageUrl = uploadData.imageUrl || uploadData.url || uploadData.filepath || '';
+        payload.image_url = uploadedImageUrl;
+        payload.imageUrl = uploadedImageUrl;
+    } else if (payload.image_url) {
+        payload.imageUrl = payload.image_url;
+    }
+
+    const url = currentEditingProduct ? `${API_BASE}/products/${currentEditingProduct}` : `${API_BASE}/products`;
+    const method = currentEditingProduct ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+        method,
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || 'Failed to save product');
+    }
+
+    await res.json();
+    closeProductModal();
+    await loadInventory();
+    alert(isEdit ? 'Product updated successfully' : 'Product created successfully');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('productImageFile');
+    const previewContainer = document.getElementById('productImagePreviewContainer');
+    const preview = document.getElementById('productImagePreview');
+
+    if (fileInput && previewContainer && preview) {
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) {
+                preview.src = '';
+                previewContainer.classList.add('hidden');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                preview.src = event.target?.result || '';
+                previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+});
+
+async function savePromo(event) {
+    event.preventDefault();
+
+    const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
+    const isEdit = Boolean(currentEditingPromo);
+    const payload = {
+        code: document.getElementById('promoCode').value.trim().toUpperCase(),
+        type: document.getElementById('promoType').value,
+        value: Number(document.getElementById('promoValue').value),
+        minOrder: Number(document.getElementById('promoMinOrder').value),
+        expiryDate: document.getElementById('promoExpiryDate').value || null,
+        isActive: document.getElementById('promoActive').checked
+    };
+
+    const url = currentEditingPromo ? `${API_BASE}/promos/${currentEditingPromo}` : `${API_BASE}/promos`;
+    const method = currentEditingPromo ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+        method,
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || 'Failed to save promo');
+    }
+
+    await res.json();
+    closePromoModal();
+    await loadPromos();
+    alert(isEdit ? 'Promo updated successfully' : 'Promo created successfully');
 }
 
 function logout() {
@@ -624,7 +921,7 @@ async function loadMedia() {
             throw new Error('Session expired. Please login again.');
         }
         
-        const res = await fetch(`${API_BASE}/media/list`, {
+        const res = await fetch(`${API_BASE}/media`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -638,29 +935,30 @@ async function loadMedia() {
         
         if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch media`);
         const data = await res.json();
+        const files = Array.isArray(data) ? data : (data.files || data.media || []);
         
         const grid = document.getElementById('mediaGrid');
         if (!grid) return;
         
         grid.innerHTML = '';
         
-        if (!data.files || data.files.length === 0) {
+        if (files.length === 0) {
             grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">No images uploaded yet</div>';
             return;
         }
         
-        data.files.forEach(file => {
+        files.forEach(file => {
             const card = document.createElement('div');
             card.className = 'relative group bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow';
             card.innerHTML = `
-                <img src="${file.path}" alt="${file.filename}" class="w-full h-40 object-cover">
+                <img src="${file.path || file.filepath || file.url || ''}" alt="${file.filename}" class="w-full h-40 object-cover">
                 <div class="p-2">
                     <p class="text-xs text-gray-600 truncate" title="${file.filename}">${file.filename}</p>
                     <p class="text-xs text-gray-400">${(file.size / 1024).toFixed(1)} KB</p>
                 </div>
                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <button onclick="copyImageUrl('${file.path}')" class="bg-white text-gray-800 px-3 py-1 rounded mr-2 text-xs hover:bg-gray-100">Copy URL</button>
-                    <button onclick="deleteImage('${file.filename}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">Delete</button>
+                    <button onclick="copyImageUrl('${file.path || file.filepath || file.url || ''}')" class="bg-white text-gray-800 px-3 py-1 rounded mr-2 text-xs hover:bg-gray-100">Copy URL</button>
+                    <button onclick="deleteImage('${file.id || file._id || ''}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">Delete</button>
                 </div>
             `;
             grid.appendChild(card);
@@ -713,7 +1011,7 @@ async function uploadImages() {
     
     const formData = new FormData();
     for (let file of files) {
-        formData.append('images', file);
+        formData.append('files', file);
     }
     
     const progressDiv = document.getElementById('uploadProgress');
@@ -723,7 +1021,7 @@ async function uploadImages() {
     progressDiv.classList.remove('hidden');
     
     try {
-        const res = await fetch(`${API_BASE}/media/upload-multiple`, {
+        const res = await fetch(`${API_BASE}/upload/multi`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -752,7 +1050,7 @@ async function uploadImages() {
 
 // Copy Image URL
 function copyImageUrl(url) {
-    const fullUrl = window.location.origin + url;
+    const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
     navigator.clipboard.writeText(fullUrl).then(() => {
         alert('URL copied to clipboard!');
     }).catch(err => {
@@ -762,13 +1060,13 @@ function copyImageUrl(url) {
 }
 
 // Delete Image
-async function deleteImage(filename) {
+async function deleteImage(id) {
     if (!confirm('Delete this image?')) return;
     
     try {
         const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
         
-        const res = await fetch(`${API_BASE}/media/${filename}`, {
+        const res = await fetch(`${API_BASE}/media/${id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -810,7 +1108,7 @@ async function loadAnnouncements() {
             throw new Error('Session expired. Please login again.');
         }
         
-        const res = await fetch(`${API_BASE}/announcements/all`, {
+        const res = await fetch(`${API_BASE}/announcements`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -824,18 +1122,19 @@ async function loadAnnouncements() {
         
         if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch announcements`);
         const announcements = await res.json();
+        const items = Array.isArray(announcements) ? announcements : (announcements.announcements || announcements.items || []);
         
         const tbody = document.getElementById('announcementsBody');
         if (!tbody) return;
         
         tbody.innerHTML = '';
         
-        if (!Array.isArray(announcements) || announcements.length === 0) {
+        if (items.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8">No announcements found</td></tr>';
             return;
         }
         
-        announcements.forEach(announcement => {
+        items.forEach(announcement => {
             const row = document.createElement('tr');
             const startDate = new Date(announcement.startDate).toLocaleDateString();
             const endDate = announcement.endDate ? new Date(announcement.endDate).toLocaleDateString() : 'No end';
@@ -911,14 +1210,15 @@ async function editAnnouncement(id) {
     try {
         const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
         
-        const res = await fetch(`${API_BASE}/announcements/all`, {
+        const res = await fetch(`${API_BASE}/announcements`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (!res.ok) throw new Error('Failed to fetch announcement');
         const announcements = await res.json();
-        
-        const announcement = announcements.find(a => a._id === id);
+        const items = Array.isArray(announcements) ? announcements : (announcements.announcements || announcements.items || []);
+
+        const announcement = items.find(a => String(a.id || a._id) === String(id));
         if (!announcement) throw new Error('Announcement not found');
         
         currentEditingAnnouncement = id;
@@ -979,8 +1279,8 @@ async function toggleAnnouncement(id) {
     try {
         const token = localStorage.getItem('tt_token') || localStorage.getItem('token');
         
-        const res = await fetch(`${API_BASE}/announcements/${id}/toggle`, {
-            method: 'PATCH',
+        const res = await fetch(`${API_BASE}/announcements/${id}`, {
+            method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -1041,6 +1341,30 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 console.error('Save error:', err);
                 alert('Failed to save announcement');
+            }
+        });
+    }
+
+    const productForm = document.getElementById('productForm');
+    if (productForm) {
+        productForm.addEventListener('submit', async (e) => {
+            try {
+                await saveProduct(e);
+            } catch (err) {
+                console.error('Save product error:', err);
+                alert(err.message);
+            }
+        });
+    }
+
+    const promoForm = document.getElementById('promoForm');
+    if (promoForm) {
+        promoForm.addEventListener('submit', async (e) => {
+            try {
+                await savePromo(e);
+            } catch (err) {
+                console.error('Save promo error:', err);
+                alert(err.message);
             }
         });
     }

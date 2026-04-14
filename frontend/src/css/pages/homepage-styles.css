@@ -2,13 +2,153 @@
 
 /* 1. GLOBAL THEME (Dark Mode for 3D Contrast) */
 body.homepage-branding {
-    background-color: #000000 !important;
+    background: radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.05), transparent 42%),
+        radial-gradient(circle at 82% 14%, rgba(242, 101, 34, 0.14), transparent 36%),
+        linear-gradient(180deg, #030303 0%, #070707 48%, #0a0a0a 100%) !important;
     color: #FFFFFF !important;
     overflow-x: hidden;
+    --domain-band: linear-gradient(90deg, #0b3c8c 0%, #142f74 65%, #0a1333 100%);
+    --domain-top: rgba(8, 28, 73, 0.45);
 }
 
 html {
-    background-color: #000000 !important;
+    background-color: #050505 !important;
+}
+
+body.homepage-branding .hero-diagonal-left {
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.65) 0%, rgba(8, 8, 8, 0.82) 100%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    clip-path: none !important;
+}
+
+body.homepage-branding .hero-diagonal-right {
+    background: linear-gradient(145deg, #0b0b0b 0%, #050505 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+body.homepage-branding main.relative.z-10 {
+    padding-top: 5rem !important;
+}
+
+body.homepage-branding .hero-diagonal-left,
+body.homepage-branding .hero-diagonal-right {
+    justify-content: flex-start;
+    padding-top: 96px;
+}
+
+body.homepage-branding .hero-logo-container {
+    width: min(82%, 560px);
+    background: linear-gradient(145deg, #ffffff 0%, #f7faff 100%);
+    border: 1px solid rgba(11, 60, 140, 0.2);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
+    clip-path: none;
+    transform-style: preserve-3d;
+    animation: ttLogoFloat 7.5s ease-in-out infinite;
+}
+
+body.homepage-branding .hero-logo-container .logo-hero {
+    width: 100%;
+    height: auto;
+    max-height: 420px;
+    margin-bottom: 0;
+    filter: none;
+}
+
+body.homepage-branding .hero-diagonal-right::before {
+    content: "";
+    position: absolute;
+    inset: -30% -10%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08), transparent 36%),
+        radial-gradient(circle at 72% 66%, rgba(242, 101, 34, 0.12), transparent 42%);
+    animation: ttHeroGlowShift 14s ease-in-out infinite;
+    pointer-events: none;
+}
+
+body.homepage-branding .hero-diagonal-right::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -35%;
+    width: 38%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+    transform: skewX(-20deg);
+    animation: ttHeroSheen 9s ease-in-out infinite;
+    pointer-events: none;
+}
+
+body.homepage-branding .hero-diagonal-left,
+body.homepage-branding .hero-diagonal-right {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.homepage-branding .hero-diagonal-left:hover,
+body.homepage-branding .hero-diagonal-right:hover {
+    box-shadow: 0 28px 60px rgba(4, 17, 43, 0.4);
+}
+
+body.homepage-branding .hero-brand {
+    animation: ttTitlePulse 6.5s ease-in-out infinite;
+}
+
+@keyframes ttLogoFloat {
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes ttHeroGlowShift {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: translate3d(2%, -2%, 0) scale(1.04);
+        opacity: 1;
+    }
+}
+
+@keyframes ttHeroSheen {
+    0%,
+    68% {
+        left: -38%;
+        opacity: 0;
+    }
+
+    72% {
+        opacity: 0.55;
+    }
+
+    88% {
+        left: 120%;
+        opacity: 0;
+    }
+
+    100% {
+        left: 120%;
+        opacity: 0;
+    }
+}
+
+@keyframes ttTitlePulse {
+    0%,
+    100% {
+        text-shadow: 0 0 40px rgba(11, 60, 140, 0.55);
+    }
+
+    50% {
+        text-shadow: 0 0 48px rgba(242, 101, 34, 0.25), 0 0 42px rgba(11, 60, 140, 0.45);
+    }
 }
 
 /* 2. LIQUID UI CARDS (iPhone Aesthetic) */
@@ -58,7 +198,7 @@ body.homepage-branding .spotlight-group:hover {
 body.homepage-branding h1,
 body.homepage-branding h2 {
     color: #FFFFFF !important;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 10px 30px rgba(7, 22, 58, 0.5);
 }
 
 body.homepage-branding h3 {
@@ -74,13 +214,17 @@ body.homepage-branding p {
 /* Hero Accents */
 body.homepage-branding .hero-brand {
     color: #FFFFFF !important;
-    text-shadow: 0 0 40px rgba(11, 60, 140, 0.5) !important;
+    text-shadow: 0 0 40px rgba(11, 60, 140, 0.55) !important;
 }
 
 body.homepage-branding .hero-tagline {
     color: #F26522 !important;
     /* Ignite Orange Tagline */
     font-weight: 700 !important;
+}
+
+body.homepage-branding .hero-welcome {
+    color: #d9e6ff !important;
 }
 
 /* 4. LIQUID CURSOR (Refractive Lens) */
@@ -101,16 +245,73 @@ body.homepage-branding .hero-tagline {
 
 /* Buttons */
 body.homepage-branding .magnetic-btn {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(11, 60, 140, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
     color: #FFFFFF !important;
     backdrop-filter: blur(10px) !important;
 }
 
 body.homepage-branding .magnetic-btn:hover {
-    background: #FFFFFF !important;
-    color: #000000 !important;
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.3) !important;
+    background: #F26522 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 30px rgba(242, 101, 34, 0.45) !important;
+}
+
+@media (max-width: 768px) {
+    body.homepage-branding main.relative.z-10 {
+        padding-top: 4.25rem !important;
+    }
+
+    body.homepage-branding .hero-diagonal-left,
+    body.homepage-branding .hero-diagonal-right {
+        padding-top: 56px;
+    }
+
+    body.homepage-branding .hero-logo-container {
+        width: min(94%, 460px);
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    body.homepage-branding .hero-logo-container .logo-hero {
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 540px) {
+    body.homepage-branding main.relative.z-10 {
+        padding-top: 3.8rem !important;
+    }
+
+    body.homepage-branding .hero-diagonal-left,
+    body.homepage-branding .hero-diagonal-right {
+        padding-top: 32px;
+    }
+
+    body.homepage-branding .hero-tagline {
+        letter-spacing: 0.16em !important;
+        font-size: 0.72rem !important;
+    }
+
+    body.homepage-branding .division-card-logo {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+@media (min-width: 1440px) {
+    body.homepage-branding .hero-logo-container {
+        width: min(72%, 620px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.homepage-branding .hero-logo-container,
+    body.homepage-branding .hero-brand,
+    body.homepage-branding .hero-diagonal-right::before,
+    body.homepage-branding .hero-diagonal-right::after {
+        animation: none !important;
+    }
 }
 
 /* Tech Pills */
@@ -125,6 +326,13 @@ body.homepage-branding .icon-box {
     background: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: #F26522 !important;
+}
+
+body.homepage-branding .division-card-logo {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
 }
 
 /* 6. UTILITY OVERRIDES */

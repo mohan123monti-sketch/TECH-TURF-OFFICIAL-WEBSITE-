@@ -181,6 +181,17 @@ window.addEventListener('orderUpdated', (event) => {
     window.showMessage('info', status ? `Order status updated: ${status}` : 'Order status updated.');
 });
 
+function isAuthRoute() {
+    const file = (window.location.pathname.split('/').pop() || '').toLowerCase();
+    return [
+        'login.html',
+        'signin.html',
+        'register.html',
+        'forgot-password.html',
+        'reset-password.html'
+    ].includes(file);
+}
+
 function handleLogout() {
     if (typeof window.firebaseAuthLogout === 'function') {
         window.firebaseAuthLogout();
@@ -213,7 +224,10 @@ function generateHeader() {
 
 function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
     const authLinks = isUserLoggedIn ?
-        `<a href="/pages/account.html" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm border border-transparent hover:border-white/10">
+        `<a href="/admin/master-admin.html" class="transition-link text-white/70 hover:text-orange-400 px-3 py-2 rounded-lg transition-colors font-medium text-sm border border-transparent hover:border-orange-400/30">
+               <i data-lucide="lock" class="w-5 h-5 inline-block mr-1 align-sub"></i> Admin
+           </a>
+           <a href="/pages/account.html" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm border border-transparent hover:border-white/10">
                <i data-lucide="user" class="w-5 h-5 inline-block mr-1 align-sub"></i> Account
            </a>
            <button onclick="window.handleLogout()" class="magnetic-btn transition-link px-4 py-2 bg-red-600/70 text-white font-semibold rounded-lg hover:bg-red-500 transition-all text-sm">
@@ -226,20 +240,33 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
 
     let logoSrc = '/assets/logos/tech-turf.png';
     let brandName = 'Tech Turf';
-    let shortBrand = 'TT';
+
+    const getActiveTabStyle = (pageFile) => {
+        if (pageFile === 'quinta.html') {
+            return 'background: rgba(14, 116, 144, 0.28); border: 1px solid rgba(34, 211, 238, 0.42); color: #d9fbff;';
+        }
+        if (pageFile === 'trend_hive.html') {
+            return 'background: rgba(242, 101, 34, 0.28); border: 1px solid rgba(251, 146, 60, 0.45); color: #fff2e8;';
+        }
+        if (pageFile === 'click_sphere.html') {
+            return 'background: rgba(34, 197, 94, 0.24); border: 1px solid rgba(74, 222, 128, 0.45); color: #eafff0;';
+        }
+        if (pageFile === 'shopping.html') {
+            return 'background: rgba(242, 101, 34, 0.22); border: 1px solid rgba(251, 146, 60, 0.4); color: #fff2e8;';
+        }
+        // Tech Turf / default
+        return 'background: rgba(37, 99, 235, 0.28); border: 1px solid rgba(96, 165, 250, 0.45); color: #e8f1ff;';
+    };
 
     if (currentPageFile === 'click_sphere.html') {
         logoSrc = '/assets/logos/click-sphere.png';
         brandName = 'Click Sphere';
-        shortBrand = 'CS';
     } else if (currentPageFile === 'quinta.html') {
         logoSrc = '/assets/logos/quinta.png';
         brandName = 'Quinta';
-        shortBrand = 'Q';
     } else if (currentPageFile === 'trend_hive.html') {
         logoSrc = '/assets/logos/trend-hive.png';
         brandName = 'Trend Hive';
-        shortBrand = 'TH';
     }
 
     const navHTML = `
@@ -247,17 +274,17 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                <div class="flex justify-between items-center h-16">
                    <a href="/index.html" class="flex-shrink-0 flex items-center transition-link group">
-                       <img src="${logoSrc}" alt="${brandName} Logo" class="logo-nav mr-2">
-                       <span class="text-xl font-bold tracking-wider text-white hidden sm:block uppercase">${brandName}</span>
-                       <span class="text-xl font-bold tracking-wider text-white sm:hidden">${shortBrand}</span>
+                       <img src="${logoSrc}" alt="${brandName} Logo" class="logo-nav">
                    </a>
    
                    <div class="hidden md:flex md:items-center space-x-1">
                        ${divisions.map(d => `
+                           ${(() => { const isActive = d.href.split('/').pop() === currentPageFile; const activeStyle = isActive ? getActiveTabStyle(d.href.split('/').pop()) : ''; return `
                            <a href="${d.href}" class="transition-link text-white/70 hover:text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm
-                           ${d.href.split('/').pop() === currentPageFile ? 'bg-orange-600/20 text-white' : ''}">
+                           ${isActive ? 'text-white' : ''}" style="${activeStyle}">
                                ${d.name}
                            </a>
+                           `; })()}
                        `).join('')}
                    </div>
                    
@@ -278,10 +305,12 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
            <div class="md:hidden absolute w-full bg-[#05080f]/95 border-b border-white/5 shadow-2xl" id="mobile-menu" style="display: none;">
                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                    ${divisions.map(d => `
+                       ${(() => { const isActive = d.href.split('/').pop() === currentPageFile; const activeStyle = isActive ? getActiveTabStyle(d.href.split('/').pop()) : ''; return `
                        <a href="${d.href}" class="transition-link block text-white/70 hover:text-white px-3 py-2 rounded-md font-medium
-                       ${d.href.split('/').pop() === currentPageFile ? 'bg-orange-600/20 text-white' : ''}">
+                       ${isActive ? 'text-white' : ''}" style="${activeStyle}">
                            ${d.name}
                        </a>
+                       `; })()}
                    `).join('')}
                    <div class="pt-4 border-t border-white/10 space-y-2" id="mobile-auth-container">
                        ${authLinks.replace(/magnetic-btn/g, 'magnetic-btn w-full justify-center').replace(/px-\d+ py-\d+/g, 'px-4 py-3 block text-center')}
@@ -336,33 +365,11 @@ window.updateAuthUI = function (user) {
 function generateFooter() {
     const footerHTML = `
        <footer class="relative z-10 border-t border-white/5 pt-12 pb-8 bg-[#05080f]/90">
-           <!-- Global Status Strip -->
-            <section class="border-y border-white/5 py-4 mb-12 bg-white/[0.02]">
-                <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
-                    <div class="flex items-center gap-3">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span>Global Systems: Operational</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="shield-check" class="w-4 h-4 text-orange-500"></i>
-                        <span>Secure Node Connection</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="cpu" class="w-4 h-4 text-orange-500"></i>
-                        <span>TT-OS v7.2.0-ALFA</span>
-                    </div>
-                    <div class="hidden md:flex items-center gap-3">
-                        <i data-lucide="activity" class="w-4 h-4 text-orange-500"></i>
-                        <span>Latency: 14ms</span>
-                    </div>
-                </div>
-            </section>
-
            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
                    <div class="col-span-2 md:col-span-1">
-                       <a href="index.html" class="flex items-center transition-link">
-                           <img src="/public/images/logos/tech-turf.png" alt="Tech Turf Logo" class="w-8 h-8 object-contain mr-2">
+                       <a href="/index.html" class="flex items-center transition-link">
+                           <img src="/assets/logos/tech-turf.png" alt="Tech Turf Logo" class="w-8 h-8 object-contain mr-2">
                            <span class="text-xl font-bold tracking-wider text-white">TECH TURF</span>
                        </a>
                        <p class="mt-4 text-gray-400 text-sm max-w-xs">
@@ -372,102 +379,103 @@ function generateFooter() {
                    <div>
                        <h3 class="text-lg font-semibold text-white mb-4">Company</h3>
                        <ul class="space-y-3 text-sm">
-                           <li><a href="about.html" class="text-gray-400 hover:text-orange-400 transition-link">About Us</a></li>
-                           <li><a href="projects.html" class="text-gray-400 hover:text-orange-400 transition-link">Projects</a></li>
-                           <li><a href="contact.html" class="text-gray-400 hover:text-orange-400 transition-link">Contact</a></li>
+                           <li><a href="/pages/about.html" class="text-gray-400 hover:text-orange-400 transition-link">About Us</a></li>
+                           <li><a href="/pages/projects.html" class="text-gray-400 hover:text-orange-400 transition-link">Projects</a></li>
+                           <li><a href="/pages/contact.html" class="text-gray-400 hover:text-orange-400 transition-link">Contact</a></li>
                        </ul>
                    </div>
                    <div>
                        <h3 class="text-lg font-semibold text-white mb-4">Divisions</h3>
                        <ul class="space-y-3 text-sm">
-                           <li><a href="quinta.html" class="text-gray-400 hover:text-orange-400 transition-link">Quinta</a></li>
-                           <li><a href="trend_hive.html" class="text-gray-400 hover:text-orange-400 transition-link">Trend Hive</a></li>
-                           <li><a href="click_sphere.html" class="text-gray-400 hover:text-orange-400 transition-link">Click Sphere</a></li>
-                           <li><a href="shopping.html" class="text-gray-400 hover:text-orange-400 transition-link">Shop</a></li>
+                           <li><a href="/pages/quinta.html" class="text-gray-400 hover:text-orange-400 transition-link">Quinta</a></li>
+                           <li><a href="/pages/trend_hive.html" class="text-gray-400 hover:text-orange-400 transition-link">Trend Hive</a></li>
+                           <li><a href="/pages/click_sphere.html" class="text-gray-400 hover:text-orange-400 transition-link">Click Sphere</a></li>
+                           <li><a href="/pages/shopping.html" class="text-gray-400 hover:text-orange-400 transition-link">Shop</a></li>
                        </ul>
                    </div>
                    <div>
                        <h3 class="text-lg font-semibold text-white mb-4">Legal</h3>
                        <ul class="space-y-3 text-sm">
-                           <li><a href="terms_of_service.html" class="text-gray-400 hover:text-orange-400 transition-link">Terms</a></li>
-                           <li><a href="privacy_policy.html" class="text-gray-400 hover:text-orange-400 transition-link">Privacy</a></li>
+                           <li><a href="/pages/terms_of_service.html" class="text-gray-400 hover:text-orange-400 transition-link">Terms</a></li>
+                           <li><a href="/pages/privacy_policy.html" class="text-gray-400 hover:text-orange-400 transition-link">Privacy</a></li>
                        </ul>
                    </div>
                    <div>
                         <h3 class="text-lg font-semibold text-white mb-4">Connect</h3>
                         <ul class="space-y-3 text-sm">
                             <li><a href="/pages/nexus_ai.html" class="text-gray-400 hover:text-orange-400 transition-link">Nexus AI</a></li>
-                            <li><a href="/pages/estimator.html" class="text-gray-400 hover:text-orange-400 transition-link">Estimator</a></li>
+                            <li><a href="/pages/help-center.html" class="text-gray-400 hover:text-orange-400 transition-link">Help Center</a></li>
+                            <li><a href="/pages/blog.html" class="text-gray-400 hover:text-orange-400 transition-link">Blog & News</a></li>
+                            <li><a href="/pages/search.html" class="text-gray-400 hover:text-orange-400 transition-link">Global Search</a></li>
+                            <li><a href="/pages/notifications.html" class="text-gray-400 hover:text-orange-400 transition-link">Notifications</a></li>
                         </ul>
                         <p class="text-gray-400 text-sm mt-6">Coimbatore, India</p>
-                   </div>
-               </div>
-               <div class="mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] font-mono uppercase tracking-[0.2em] text-white/20">
-                   <div class="flex items-center gap-4">
-                       <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Global Systems: Operational</span>
-                       <span class="opacity-40">|</span>
-                       <span>Secure Node Connection</span>
-                   </div>
-                   <div class="flex items-center gap-4">
-                       <span>Latency: 24ms</span>
-                       <span class="opacity-40">|</span>
-                       <span>&copy; 2026 Tech Turf Collective</span>
                    </div>
                </div>
            </div>
        </footer>
        `;
-    document.getElementById('footer-container').innerHTML = footerHTML;
+    let container = document.getElementById('footer-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'footer-container';
+        document.body.appendChild(container);
+    }
+
+    container.innerHTML = footerHTML;
     if (window.lucide) lucide.createIcons();
 }
 
 function initNexusWidget() {
-    if (document.getElementById('nexus-widget')) return;
+    let widget = document.getElementById('nexus-widget');
+    if (!widget) {
+        widget = document.createElement('div');
+        widget.id = 'nexus-widget';
+        document.body.appendChild(widget);
+    }
 
-    const widget = document.createElement('div');
-    widget.id = 'nexus-widget';
-    widget.innerHTML = `
-        <div id="nexus-panel" class="fixed bottom-24 right-6 w-[360px] h-[520px] bg-[#0b1537]/95 border border-white/10 rounded-3xl shadow-3xl overflow-hidden hidden">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="bot" class="w-4 h-4 text-orange-400"></i>
-                    <span class="text-xs font-black uppercase tracking-widest text-white">Nexus AI</span>
-                </div>
-                <button id="nexus-close" class="text-white/60 hover:text-white">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-            <iframe src="/pages/nexus_ai.html" class="w-full h-full border-0" title="Nexus AI"></iframe>
-        </div>
-        <button id="nexus-toggle" class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-orange-600 text-white shadow-2xl flex items-center justify-center hover:bg-orange-500 transition-all">
-            <i data-lucide="message-circle" class="w-6 h-6"></i>
-        </button>
-    `;
+    // Reset any old widget markup/panel and rebuild a single reliable button.
+    widget.innerHTML = '';
 
-    document.body.appendChild(widget);
-    if (window.lucide) lucide.createIcons();
+    const toggle = document.createElement('button');
+    toggle.id = 'nexus-toggle';
+    toggle.type = 'button';
+    toggle.setAttribute('aria-label', 'Open Nexus AI');
+    toggle.innerHTML = '<i data-lucide="message-circle" class="w-6 h-6"></i>';
 
-    const panel = document.getElementById('nexus-panel');
-    const toggle = document.getElementById('nexus-toggle');
-    const close = document.getElementById('nexus-close');
-
-    const openPanel = () => {
-        panel.classList.remove('hidden');
-    };
-
-    const closePanel = () => {
-        panel.classList.add('hidden');
-    };
-
-    toggle.addEventListener('click', () => {
-        if (panel.classList.contains('hidden')) {
-            openPanel();
-        } else {
-            closePanel();
-        }
+    Object.assign(toggle.style, {
+        position: 'fixed',
+        right: '24px',
+        bottom: '24px',
+        width: '56px',
+        height: '56px',
+        borderRadius: '9999px',
+        border: 'none',
+        background: '#ea580c',
+        color: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        zIndex: '2147483000',
+        boxShadow: '0 18px 35px rgba(0, 0, 0, 0.45)',
+        pointerEvents: 'auto'
     });
 
-    close.addEventListener('click', closePanel);
+    toggle.addEventListener('mouseenter', () => {
+        toggle.style.background = '#f97316';
+    });
+    toggle.addEventListener('mouseleave', () => {
+        toggle.style.background = '#ea580c';
+    });
+    toggle.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        window.location.assign('/pages/nexus_ai.html');
+    });
+
+    widget.appendChild(toggle);
+    if (window.lucide) lucide.createIcons();
 }
 
 /**
@@ -838,8 +846,13 @@ function initContentProtection() {
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
-    generateHeader();
-    generateFooter();
+    const authRoute = isAuthRoute();
+
+    if (!authRoute) {
+        generateHeader();
+        generateFooter();
+    }
+
     updateCartDisplay();
 
     // Initialize scroll reveal on all pages
@@ -852,7 +865,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     handlePageTransitions();
     initContentProtection(); // Enable content protection
-    initNexusWidget();
+    if (!authRoute) {
+        initNexusWidget();
+    }
     ensureSEO();
     enableLazyLoading();
 

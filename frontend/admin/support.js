@@ -59,13 +59,13 @@ function renderTickets() {
                 <div class="flex justify-between items-center pt-4 border-t border-white/5 text-xs text-gray-500">
                     <div class="flex items-center gap-4">
                         <span class="flex items-center gap-2"><i data-lucide="user" class="w-3 h-3"></i> ${ticket.user?.username || ticket.userEmail || 'N/A'}</span>
-                        <span class="flex items-center gap-2"><i data-lucide="calendar" class="w-3 h-3"></i> ${new Date(ticket.createdAt).toLocaleDateString()}</span>
+                        <span class="flex items-center gap-2"><i data-lucide="calendar" class="w-3 h-3"></i> ${new Date(ticket.createdAt || ticket.created_at).toLocaleDateString()}</span>
                     </div>
                     <div class="flex space-x-2">
-                        <button onclick="updateTicketStatus('${ticket._id}', 'In Progress')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                        <button onclick="updateTicketStatus('${ticket.id || ticket._id}', 'In Progress')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
                             <i data-lucide="chevrons-right" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="deleteTicket('${ticket._id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition-all">
+                        <button onclick="deleteTicket('${ticket.id || ticket._id}')" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition-all">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>

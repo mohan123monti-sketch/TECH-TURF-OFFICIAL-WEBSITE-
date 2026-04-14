@@ -22,12 +22,15 @@ export async function initDatabase() {
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
+            username TEXT,
             email TEXT UNIQUE NOT NULL,
             password TEXT,
             google_id TEXT UNIQUE,
             role TEXT DEFAULT 'user',
             avatar TEXT,
             bio TEXT,
+            phone TEXT,
+            company_name TEXT,
             two_factor_enabled BOOLEAN DEFAULT 0,
             backup_codes TEXT, -- Comma separated backup codes
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -385,6 +388,41 @@ export async function initDatabase() {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
         );
 
+        CREATE TABLE IF NOT EXISTS user_addresses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            label TEXT DEFAULT 'Saved',
+            address TEXT NOT NULL,
+            addressLine2 TEXT,
+            city TEXT NOT NULL,
+            state TEXT,
+            postalCode TEXT,
+            country TEXT DEFAULT 'India',
+            phone TEXT,
+            company TEXT,
+            gstin TEXT,
+            isDefault BOOLEAN DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS user_payment_details (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            paymentMethod TEXT,
+            billingName TEXT,
+            billingAddress1 TEXT,
+            billingAddress2 TEXT,
+            billingCity TEXT,
+            billingState TEXT,
+            billingPincode TEXT,
+            billingCountry TEXT DEFAULT 'India',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
         CREATE TABLE IF NOT EXISTS promos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             code TEXT UNIQUE NOT NULL,
@@ -402,6 +440,8 @@ export async function initDatabase() {
             content TEXT NOT NULL,
             type TEXT DEFAULT 'info', -- info, success, warning, error
             status TEXT DEFAULT 'active',
+            priority TEXT DEFAULT 'medium',
+            notifyUsers BOOLEAN DEFAULT 1,
             startDate DATETIME,
             endDate DATETIME,
             pages TEXT, -- Comma separated pages
@@ -469,8 +509,14 @@ export async function initDatabase() {
     // Add safety columns for legacy support
     try { await db.run('ALTER TABLE users ADD COLUMN avatar TEXT'); } catch (e) { }
     try { await db.run('ALTER TABLE users ADD COLUMN bio TEXT'); } catch (e) { }
+    try { await db.run('ALTER TABLE users ADD COLUMN username TEXT'); } catch (e) { }
+    try { await db.run('ALTER TABLE users ADD COLUMN phone TEXT'); } catch (e) { }
+    try { await db.run('ALTER TABLE users ADD COLUMN company_name TEXT'); } catch (e) { }
     try { await db.run('ALTER TABLE users ADD COLUMN two_factor_enabled BOOLEAN DEFAULT 0'); } catch (e) { }
     try { await db.run('ALTER TABLE users ADD COLUMN backup_codes TEXT'); } catch (e) { }
+    try { await db.run('ALTER TABLE user_addresses ADD COLUMN addressLine2 TEXT'); } catch (e) { }
+    try { await db.run("ALTER TABLE announcements ADD COLUMN priority TEXT DEFAULT 'medium'"); } catch (e) { }
+    try { await db.run('ALTER TABLE announcements ADD COLUMN notifyUsers BOOLEAN DEFAULT 1'); } catch (e) { }
 
     // Seed default admin if no users exist
     const userCount = await db.get('SELECT COUNT(*) as count FROM users');

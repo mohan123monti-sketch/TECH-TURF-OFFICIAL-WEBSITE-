@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raise Support Ticket - Tech Turf</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+
+<body data-page="support.html" class="text-white" data-3d-enabled="true">
+    <div id="three-container"></div>
+    <div id="header-container"></div>
+
+    <main class="relative z-10 pt-52 md:pt-56 pb-24 px-4">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="tt-page-hero-title font-black uppercase tracking-tighter">Support<br><span class="text-white/30">Ticket</span></h1>
+            </div>
+
+            <div class="iphone-glass tt-fluid-panel border border-white/10 shadow-3xl">
+                <form id="ticket-form" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Email</label>
+                            <input id="userEmail" type="email" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Priority</label>
+                            <select id="priority" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Issue Category</label>
+                        <select id="category" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                            <option>Order Issue</option>
+                            <option>Payment Issue</option>
+                            <option>Return / Refund</option>
+                            <option>Account Access</option>
+                            <option>Product Issue</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Subject</label>
+                        <input id="subject" type="text" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-white/50 mb-2">Message</label>
+                        <textarea id="message" rows="6" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10"></textarea>
+                    </div>
+
+                    <button id="submit-btn" class="w-full magnetic-btn bg-white text-black py-3 rounded-xl font-black uppercase tracking-wider hover:bg-gray-200 transition-all">
+                        Submit Ticket
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('ticket-form');
+            const btn = document.getElementById('submit-btn');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userEmail = document.getElementById('userEmail').value.trim();
+                const priority = document.getElementById('priority').value;
+                const category = document.getElementById('category').value;
+                const subject = `[${category}] ${document.getElementById('subject').value.trim()}`;
+                const message = document.getElementById('message').value.trim();
+
+                const old = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = 'Submitting...';
+
+                try {
+                    const res = await fetch(`${window.API_BASE_URL}/tickets`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subject, message, priority, userEmail })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Failed to create ticket');
+
+                    window.showMessage('success', `Ticket created: #${data.id}`);
+                    form.reset();
+                    setTimeout(() => {
+                        window.location.href = `ticket-status.html?email=${encodeURIComponent(userEmail)}&id=${data.id}`;
+                    }, 900);
+                } catch (err) {
+                    window.showMessage('error', err.message || 'Unable to create ticket');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = old;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -3,14 +3,16 @@
 
 let products = [];
 let editingProductId = null;
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 async function loadProducts() {
     const token = localStorage.getItem('tt_token');
     try {
-        const response = await fetch(`${window.API_BASE_URL}/products`, {
+        const response = await fetch(`${apiBase}/products`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        products = await response.json();
+        const data = await response.json();
+        products = Array.isArray(data) ? data : (data.products || data.items || []);
         renderProducts();
     } catch (error) {
         console.error('Error loading products:', error);
@@ -31,13 +33,13 @@ function renderProducts() {
         <tr class="hover:bg-gray-700/30 transition-colors">
             <td class="p-4 flex items-center gap-3">
                 <div class="w-10 h-10 rounded bg-gray-700 overflow-hidden">
-                    ${product.imageUrl ? `<img src="${product.imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/40x40/374151/e2e8f0?text=IMG'" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gray-600 flex items-center justify-center text-xs text-gray-400">N/A</div>'}
+                    ${product.imageUrl || product.image_url ? `<img src="${product.imageUrl || product.image_url}" onerror="this.onerror=null;this.src='/public/images/space-bg.png'" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gray-600 flex items-center justify-center text-xs text-gray-400">N/A</div>'}
                 </div>
                 <span class="font-medium">${product.name}</span>
                 <span class="ml-2 px-2 py-0.5 rounded-md bg-white/5 text-[9px] font-black uppercase text-[#d2670e] border border-[#d2670e]/20">${product.branch || 'Tech Turf'}</span>
             </td>
             <td class="p-4 text-gray-400">${product.category || 'N/A'}</td>
-            <td class="p-4">₹${parseFloat(product.price).toFixed(2)}</td>
+            <td class="p-4">INR ${parseFloat(product.price).toFixed(2)}</td>
             <td class="p-4">
                 <span class="px-3 py-1 text-xs font-semibold rounded-full ${product.stock > 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}">
                     ${product.stock > 0 ? product.stock : 'Out of Stock'}
@@ -74,7 +76,7 @@ function openProductModal(productId = null) {
         form.stock.value = product.stock;
         form.category.value = product.category || '';
         form.branch.value = product.branch || 'Tech Turf';
-        form.imageUrl.value = product.imageUrl || '';
+        form.imageUrl.value = product.imageUrl || product.image_url || '';
     } else {
         title.textContent = 'Add New Product';
         form.reset();
@@ -107,10 +109,10 @@ async function saveProduct(event) {
     // 1. Handle File Upload if a file is selected
     if (fileInput.files.length > 0) {
         const formData = new FormData();
-        formData.append('image', fileInput.files[0]);
+        formData.append('file', fileInput.files[0]);
 
         try {
-            const uploadResponse = await fetch(`${window.API_BASE_URL}/media/upload`, {
+            const uploadResponse = await fetch(`${apiBase}/media/upload`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
@@ -118,7 +120,7 @@ async function saveProduct(event) {
 
             if (uploadResponse.ok) {
                 const uploadData = await uploadResponse.json();
-                imageUrl = uploadData.imageUrl;
+                imageUrl = uploadData.imageUrl || uploadData.url || imageUrl;
             } else {
                 window.showToast('Failed to upload image', 'error');
                 signinButton.disabled = false;
@@ -141,13 +143,14 @@ async function saveProduct(event) {
         stock: parseInt(form.stock.value),
         category: form.category.value,
         branch: form.branch.value,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        image_url: imageUrl
     };
 
     try {
         const url = editingProductId
-            ? `${window.API_BASE_URL}/products/${editingProductId}`
-            : `${window.API_BASE_URL}/products`;
+            ? `${apiBase}/products/${editingProductId}`
+            : `${apiBase}/products`;
         const method = editingProductId ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -204,7 +207,7 @@ async function deleteProduct(id) {
 
     const token = localStorage.getItem('tt_token');
     try {
-        const response = await fetch(`${window.API_BASE_URL}/products/${id}`, {
+        const response = await fetch(`${apiBase}/products/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });

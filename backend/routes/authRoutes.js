@@ -2,7 +2,8 @@ import express from 'express';
 import {
     registerUser, loginUser, googleLogin, verifyTwoStep,
     forgotPassword, resetPassword, generateBackupCodes, getMe, getGoogleConfig,
-    getAllUsers, deleteUser, updateUserRole
+    getAllUsers, deleteUser, updateUserRole, getPublicTeam,
+    getUserProfile, updateUserProfile, getUserAddresses, addUserAddress
 } from '../controllers/authController.js';
 import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
@@ -15,9 +16,13 @@ router.post('/google', googleLogin);
 router.post('/otp/verify-2step', verifyTwoStep);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+router.get('/team', getPublicTeam);
 router.post('/backup-codes', protect, generateBackupCodes);
 router.get('/me', protect, getMe);
-router.get('/profile', protect, getMe);
+router.get('/profile', protect, getUserProfile);
+router.put('/profile', protect, updateUserProfile);
+router.get('/addresses', protect, getUserAddresses);
+router.post('/addresses', protect, addUserAddress);
 
 // Admin Routes
 router.get('/', protect, adminOnly, getAllUsers);

@@ -1,6 +1,7 @@
 let allMedia = [];
 let currentPreviewMedia = null;
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
 
 async function loadMedia() {
     const token = window.getAuthToken?.();
@@ -10,7 +11,7 @@ async function loadMedia() {
     }
 
     try {
-        const response = await fetch(`${window.API_BASE_URL || '/api'}/media`, {
+        const response = await fetch(`${apiBase}/media`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -19,8 +20,8 @@ async function loadMedia() {
             return;
         }
 
-        const { media } = await response.json();
-        allMedia = media || [];
+        const data = await response.json();
+        allMedia = Array.isArray(data) ? data : (data.media || data.files || []);
         renderMedia(allMedia);
 
     } catch (error) {
@@ -44,16 +45,18 @@ function renderMedia(mediaList) {
     grid.innerHTML = mediaList.map(media => {
         const isImage = media.mimetype?.startsWith('image');
         const isVideo = media.mimetype?.startsWith('video');
+        const mediaId = media._id || media.id;
+        const mediaUrl = media.url || media.filepath || media.path || '';
 
         return `
             <div class="group relative bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all cursor-pointer"
-                onclick="previewMedia('${media._id}')">
+                onclick="previewMedia('${mediaId}')">
                 <div class="aspect-square bg-black/20 flex items-center justify-center overflow-hidden">
-                    ${isImage ? `<img src="${media.url}" alt="${media.filename}" class="w-full h-full object-cover">` : ''}
+                    ${isImage ? `<img src="${mediaUrl}" alt="${media.filename}" class="w-full h-full object-cover">` : ''}
                     ${isVideo ? `
                         <div class="relative w-full h-full bg-black/50 flex items-center justify-center">
                             <i data-lucide="play" class="w-8 h-8 text-white"></i>
-                            <video src="${media.url}" class="w-full h-full object-cover absolute inset-0 opacity-20"></video>
+                            <video src="${mediaUrl}" class="w-full h-full object-cover absolute inset-0 opacity-20"></video>
                         </div>
                     ` : ''}
                     ${!isImage && !isVideo ? `
@@ -78,18 +81,19 @@ function renderMedia(mediaList) {
 }
 
 async function previewMedia(mediaId) {
-    const media = allMedia.find(m => m._id === mediaId);
+    const media = allMedia.find(m => String(m._id || m.id) === String(mediaId));
     if (!media) return;
 
     currentPreviewMedia = media;
     const modalContent = document.getElementById('preview-content');
     const isImage = media.mimetype?.startsWith('image');
     const isVideo = media.mimetype?.startsWith('video');
+    const mediaUrl = media.url || media.filepath || media.path || '';
 
     if (isImage) {
-        modalContent.innerHTML = `<img src="${media.url}" alt="${media.filename}" class="w-full h-auto">`;
+        modalContent.innerHTML = `<img src="${mediaUrl}" alt="${media.filename}" class="w-full h-auto">`;
     } else if (isVideo) {
-        modalContent.innerHTML = `<video src="${media.url}" controls class="w-full h-auto" style="max-height: 70vh;"></video>`;
+        modalContent.innerHTML = `<video src="${mediaUrl}" controls class="w-full h-auto" style="max-height: 70vh;"></video>`;
     } else {
         modalContent.innerHTML = `
             <div class="p-12 text-center">
@@ -187,7 +191,7 @@ function removeFile(index) {
 document.getElementById('upload-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const token = window.getAuthToken?.();
+    const token = window.getAuthToken?.() || localStorage.getItem('tt_token') || localStorage.getItem('token');
     if (!token) return;
 
     const files = document.getElementById('file-input').files;
@@ -204,7 +208,7 @@ document.getElementById('upload-form')?.addEventListener('submit', async (e) => 
     formData.append('category', document.getElementById('media-category').value);
 
     try {
-        const response = await fetch(`${window.API_BASE_URL || '/api'}/media/upload`, {
+        const response = await fetch(`${apiBase}/upload/multi`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData
@@ -231,7 +235,8 @@ async function deleteMedia() {
     if (!token) return;
 
     try {
-        const response = await fetch(`${window.API_BASE_URL || '/api'}/media/${currentPreviewMedia._id}`, {
+        const mediaId = currentPreviewMedia._id || currentPreviewMedia.id;
+        const response = await fetch(`${apiBase}/media/${mediaId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -251,7 +256,7 @@ async function deleteMedia() {
 function copyMediaURL() {
     if (!currentPreviewMedia) return;
 
-    const url = currentPreviewMedia.url;
+    const url = currentPreviewMedia.url || currentPreviewMedia.filepath || currentPreviewMedia.path || '';
     navigator.clipboard.writeText(url).then(() => {
         window.showMessage?.('success', 'URL copied to clipboard');
     });
@@ -261,7 +266,7 @@ function downloadMedia() {
     if (!currentPreviewMedia) return;
 
     const link = document.createElement('a');
-    link.href = currentPreviewMedia.url;
+    link.href = currentPreviewMedia.url || currentPreviewMedia.filepath || currentPreviewMedia.path || '';
     link.download = currentPreviewMedia.filename;
     link.click();
 }

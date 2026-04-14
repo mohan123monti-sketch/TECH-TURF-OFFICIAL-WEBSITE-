@@ -29,27 +29,30 @@
     <!-- Main Content -->
     <main class="relative z-10 pt-20">
 
-        <!-- ðŸŸ¢ HERO SECTION -->
+        <!-- HERO SECTION -->
+        <section class="hero-diagonal-section relative overflow-hidden">
+            <div class="hero-diagonal-left">
                 <div class="hero-logo-container reveal-hidden">
                     <img src="/assets/logos/click-sphere.png" alt="Click Sphere Logo" class="logo-hero">
                 </div>
+            </div>
 
-                <h1 class="text-7xl md:text-[12rem] font-bold tracking-tighter leading-[0.8] reveal-hidden uppercase parallax-layer"
+            <div class="hero-diagonal-right">
+                <h1 class="text-7xl md:text-9xl font-black tracking-tighter leading-[0.85] reveal-hidden uppercase parallax-layer"
                     data-speed="0.3">
                     <span class="block text-white">CLICK</span>
-                    <span class="cs-text-gradient block font-black mt-2">SPHERE</span>
+                    <span class="cs-text-gradient block font-black">SPHERE</span>
                 </h1>
 
                 <p class="text-[12px] font-black text-white/40 uppercase tracking-[0.5em] mt-12 reveal-hidden"
                     style="transition-delay: 0.2s;">
                     Autonomous Creative Nodes & High-End Tech Solutions
                 </p>
-
-
             </div>
         </section>
+        </section>
 
-        <!-- ðŸŸ¢ ABOUT & MISSION -->
+        <!-- ABOUT & MISSION -->
         <section class="py-20 px-4 max-w-7xl mx-auto">
             <div class="grid md:grid-cols-2 gap-24 items-center mb-40">
                 <div class="reveal-hidden">
@@ -110,7 +113,7 @@
 
 
 
-        <!-- ðŸŸ¢ WING 2: PRODUCTS & TECH SERVICES -->
+        <!-- WING 2: PRODUCTS & TECH SERVICES -->
         <section class="py-20 relative">
             <div class="max-w-7xl mx-auto px-4 relative z-10">
                 <div class="mb-20 reveal-hidden text-center md:text-right">
@@ -174,7 +177,7 @@
             </div>
         </section>
 
-        <!-- ðŸŸ¢ HIGHLIGHT: SMART HUB -->
+        <!-- HIGHLIGHT: SMART HUB -->
         <section class="py-20 px-4 max-w-7xl mx-auto">
             <div class="liquid-card spotlight-group rounded-[4rem] overflow-hidden relative reveal-hidden">
                 <div class="spotlight-overlay"></div>
@@ -223,7 +226,7 @@
             </div>
         </section>
 
-        <!-- ðŸŸ¢ WORK PROCESS & WHY US -->
+        <!-- WORK PROCESS & WHY US -->
         <section class="py-24 border-y border-white/5">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="grid lg:grid-cols-2 gap-16">
@@ -239,7 +242,7 @@
                                     1</div>
                                 <div>
                                     <h4 class="font-bold text-white">Understand Requirement</h4>
-                                    <p class="text-white/40 text-sm font-medium">We study the client's needs â€” brand,
+                                    <p class="text-white/40 text-sm font-medium">We study the client's needs - brand,
                                         product, or
                                         technical.</p>
                                 </div>
@@ -324,7 +327,7 @@
             </div>
         </section>
 
-        <!-- ðŸŸ¢ ROADMAP & GALLERY -->
+        <!-- ROADMAP & GALLERY -->
         <section class="py-24 px-4 max-w-7xl mx-auto">
             <div class="text-center mb-16 reveal-hidden">
                 <h2 class="text-4xl font-bold mb-4 text-white uppercase tracking-tighter">Future <span
@@ -355,7 +358,7 @@
             </div>
         </section>
 
-        <!-- ðŸŸ¢ CONTACT -->
+        <!-- CONTACT -->
         <section id="contact" class="py-24 relative">
             <div class="max-w-4xl mx-auto px-4 text-center reveal-hidden">
                 <h2 class="text-4xl font-bold mb-6">Work With Click Sphere</h2>
@@ -391,12 +394,12 @@
                     </div>
                 </div>
 
-                <p class="mt-12 text-gray-600 text-sm">Click Sphere is a division of Tech Turf â€” Innovate â€¢ Inspire â€¢
+                <p class="mt-12 text-gray-600 text-sm">Click Sphere is a division of Tech Turf - Innovate | Inspire |
                     Ignite.</p>
             </div>
         </section>
 
-        <!-- ðŸŸ¢ DYNAMIC PORTFOLIO UPDATES -->
+        <!-- DYNAMIC PORTFOLIO UPDATES -->
         <section class="py-24 relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 relative z-10">
                 <div class="flex justify-between items-end mb-12 reveal-hidden">
@@ -441,7 +444,7 @@
                     }
 
                     container.innerHTML = posts.map((post, index) => {
-                        const imageUrl = post.imageUrl || `https://placehold.co/600x400/1e293b/e5e7eb?text=${encodeURIComponent(post.title)}`;
+                        const imageUrl = post.imageUrl || '/public/images/space-bg.png';
                         return `
                             <div onclick="window.location.href='post-details.html?id=${post._id}'" class="liquid-card spotlight-group flex flex-col group cursor-pointer reveal-hidden overflow-hidden" style="transition-delay: ${index * 0.1}s">
                                 <div class="spotlight-overlay"></div>
@@ -491,13 +494,13 @@
                     const photos = allPosts.filter(p => p.category === 'Click Sphere Gallery');
 
                     if (photos.length === 0) {
-                        container.innerHTML = '<p class="text-gray-500 col-span-full text-center py-12">New innovations coming soon.</p>';
+                        container.innerHTML = '<p class="text-gray-500 col-span-full text-center py-12">No gallery items published yet.</p>';
                         return;
                     }
 
                     container.innerHTML = photos.map((photo, index) => {
                         const isLarge = index === 0 || index === 5;
-                        const imageUrl = photo.imageUrl || `https://placehold.co/800x600/1e293b/e5e7eb?text=${encodeURIComponent(photo.title)}`;
+                        const imageUrl = photo.imageUrl || '/public/images/space-bg.png';
                         return `
                             <div onclick="window.location.href='post-details.html?id=${photo._id}'" 
                                  class="liquid-card spotlight-group rounded-xl overflow-hidden border border-white/5 relative group cursor-pointer reveal-hidden ${isLarge ? 'md:col-span-2 md:row-span-2' : ''}" 

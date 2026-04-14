@@ -1,5 +1,7 @@
 let revenueChart, ordersChart, segmentsChart;
 
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+
 async function loadAnalytics() {
     const token = window.getAuthToken?.();
     if (!token) {
@@ -9,7 +11,7 @@ async function loadAnalytics() {
 
     try {
         // Fetch dashboard stats
-        const response = await fetch(`${window.API_BASE_URL || '/api'}/stats/dashboard`, {
+        const response = await fetch(`${apiBase}/stats/dashboard`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -37,7 +39,7 @@ async function loadAnalytics() {
 
 function updateKPICards(data) {
     // Total Revenue
-    const totalRevenue = data.totalRevenue || 0;
+    const totalRevenue = data.totalRevenue || data.revenue || 0;
     document.getElementById('total-revenue').textContent = `₹${totalRevenue.toFixed(2)}`;
     document.getElementById('revenue-change').textContent = `+${data.revenueChange || 0}% from last period`;
 
@@ -47,7 +49,7 @@ function updateKPICards(data) {
     document.getElementById('orders-change').textContent = `+${data.ordersChange || 0}% from last period`;
 
     // Active Users
-    const activeUsers = data.activeUsers || 0;
+    const activeUsers = data.activeUsers || data.totalUsers || 0;
     document.getElementById('active-users').textContent = activeUsers;
     document.getElementById('users-change').textContent = `+${data.usersChange || 0}% from last period`;
 
@@ -185,7 +187,7 @@ async function loadTopProducts() {
     if (!token) return;
 
     try {
-        const response = await fetch(`${window.API_BASE_URL || '/api'}/stats/top-products?limit=5`, {
+        const response = await fetch(`${apiBase}/stats/top-products?limit=5`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -213,7 +215,7 @@ async function loadRecentOrders() {
     if (!token) return;
 
     try {
-        const response = await fetch(`${window.API_BASE_URL || '/api'}/orders?limit=5&sort=-createdAt`, {
+        const response = await fetch(`${apiBase}/orders?limit=5&sort=-createdAt`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -228,17 +230,18 @@ async function loadRecentOrders() {
                 shipped: 'text-purple-400 bg-purple-500/10',
                 delivered: 'text-green-400 bg-green-500/10'
             };
-            const statusClass = statusColors[order.orderStatus?.toLowerCase()] || 'text-gray-400 bg-gray-500/10';
+            const orderStatus = order.orderStatus || order.status || 'Unknown';
+            const statusClass = statusColors[String(orderStatus).toLowerCase()] || 'text-gray-400 bg-gray-500/10';
 
             return `
                 <div class="p-3 bg-white/5 rounded-lg">
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <p class="font-semibold text-white text-sm">Order #${order._id?.substring(0, 8) || 'N/A'}</p>
+                            <p class="font-semibold text-white text-sm">Order #${String(order._id || order.id || '').substring(0, 8) || 'N/A'}</p>
                             <p class="text-gray-400 text-xs">Customer: ${order.shippingAddress?.name || 'N/A'}</p>
                         </div>
                         <span class="text-xs px-2 py-1 rounded ${statusClass}">
-                            ${order.orderStatus || 'Unknown'}
+                            ${orderStatus}
                         </span>
                     </div>
                     <p class="text-green-400 font-bold text-sm">₹${(order.totalPrice || 0).toFixed(2)}</p>

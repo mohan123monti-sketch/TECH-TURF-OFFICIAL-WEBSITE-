@@ -11,6 +11,44 @@
 
 .quinta-branding {
     background-color: var(--quinta-dark);
+    --domain-band: linear-gradient(90deg, #0f2e73 0%, #1f4ca8 55%, #0c1e4a 100%);
+    --domain-top: rgba(9, 37, 88, 0.45);
+}
+
+.quinta-branding main.relative.z-10 {
+    padding-top: 5.25rem !important;
+}
+
+/* --- Hero Palette (Quinta logo-matched) --- */
+.quinta-branding .hero-diagonal-left {
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.62) 0%, rgba(8, 8, 8, 0.85) 100%);
+    clip-path: none !important;
+    border-right: 1px solid rgba(148, 185, 255, 0.16);
+}
+
+.quinta-branding .hero-diagonal-right {
+    background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.16), transparent 40%),
+        radial-gradient(circle at 75% 70%, rgba(34, 211, 238, 0.18), transparent 48%),
+        linear-gradient(145deg, #0b0b0b 0%, #04070f 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.quinta-branding .hero-logo-container {
+    width: min(82%, 560px);
+    background: linear-gradient(145deg, #ffffff 0%, #f4f8ff 100%);
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
+}
+
+.quinta-branding .hero-logo-container .logo-hero {
+    width: 100%;
+    height: auto;
+    max-height: 420px;
+    margin-bottom: 0;
+    filter: none;
 }
 
 /* --- Hero Typography --- */
@@ -128,4 +166,35 @@
 
 .animate-float {
     animation: float 6s ease-in-out infinite;
+}
+
+@media (max-width: 1024px) {
+    .quinta-branding .hero-logo-container {
+        width: min(90%, 460px);
+        padding: 20px;
+    }
+
+    .quinta-branding .hero-logo-container .logo-hero {
+        max-height: 300px;
+    }
+
+    .hero-subtitle {
+        letter-spacing: 0.45em;
+    }
+}
+
+@media (max-width: 640px) {
+    .quinta-branding .hero-logo-container {
+        width: min(94%, 380px);
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .quinta-branding .hero-logo-container .logo-hero {
+        max-height: 220px;
+    }
+
+    .hero-subtitle {
+        letter-spacing: 0.28em;
+    }
 }
