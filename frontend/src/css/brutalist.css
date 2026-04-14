@@ -1,0 +1,247 @@
+/* brutalist.css - Unified Swiss Editorial System */
+
+:root {
+    --brutalist-white: #FFFFFF;
+    --brutalist-black: #000000;
+    --font-heading: 'Inter', Helvetica Neue, Helvetica, Arial, sans-serif;
+    --brand-color: #E10600; /* Default Tech Turf Red */
+    --brand-gradient: none;
+    --tracking-wide: 0.3em;
+}
+
+/* Page Specific Colors */
+[data-page-brand="click-sphere"] { --brand-color: #22c55e; }
+[data-page-brand="quinta"] { --brand-color: #0f172a; }
+[data-page-brand="trend-hive"] { --brand-gradient: linear-gradient(135deg, #f97316, #a855f7); }
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: var(--brutalist-white);
+    color: var(--brutalist-black);
+    font-family: var(--font-heading);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* --- Layout Structure --- */
+.split-screen {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: var(--brutalist-white);
+}
+
+.info-zone {
+    flex: 1;
+    background: var(--brutalist-white);
+    padding: 8rem 4rem 4rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+    clip-path: polygon(0 0, 60% 0, 40% 100%, 0% 100%);
+}
+
+.focal-zone {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--brand-color);
+    background-image: var(--brand-gradient);
+    clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10vw;
+    z-index: 1;
+}
+
+/* --- Typography --- */
+h1 {
+    font-size: 8vw;
+    font-weight: 900;
+    line-height: 0.8;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+}
+
+.watermark {
+    position: absolute;
+    top: 50%;
+    left: 2%;
+    transform: translateY(-50%);
+    font-size: 20vw;
+    font-weight: 900;
+    color: var(--brutalist-black);
+    opacity: 0.05;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: -1;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+}
+
+.meta-text {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.subheading {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.4;
+    max-width: 450px;
+    margin-top: 1rem;
+}
+
+/* --- Nav Components --- */
+.minimal-nav-links {
+    position: fixed;
+    top: 3rem;
+    right: 4rem;
+    z-index: 100;
+    display: flex;
+    gap: 3rem;
+}
+
+.minimal-nav-links a {
+    text-decoration: none;
+    color: var(--brutalist-white); /* Right side is colored, usually links are there */
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    transition: opacity 0.3s;
+}
+
+.minimal-nav-links a:hover {
+    opacity: 0.6;
+}
+
+.bottom-pagination {
+    position: fixed;
+    bottom: 4rem;
+    left: 4rem;
+    z-index: 100;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+}
+
+/* --- Logo Styling --- */
+.logo-nav {
+    position: fixed;
+    top: 3rem;
+    left: 4rem;
+    height: 32px;
+    z-index: 100;
+    object-fit: contain;
+    filter: brightness(0); /* Force black on white side */
+}
+
+.logo-hero {
+    width: 25vw;
+    max-width: 400px;
+    object-fit: contain;
+    filter: brightness(0) invert(1); /* Force white on color side */
+}
+
+/* --- Content Sections --- */
+.page-content {
+    background: var(--brutalist-white);
+    padding: 8rem 4rem;
+    position: relative;
+    z-index: 100;
+}
+
+.section-title {
+    font-size: 4vw;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 4rem;
+    letter-spacing: -0.02em;
+}
+
+/* --- Buttons --- */
+.brutalist-btn {
+    display: inline-block;
+    padding: 1.25rem 3rem;
+    background: var(--brutalist-black);
+    color: var(--brutalist-white);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-top: 2rem;
+    transition: background 0.3s;
+}
+
+.brutalist-btn:hover {
+    background: #333;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .split-screen {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .info-zone {
+        clip-path: none;
+        padding: 8rem 2rem 4rem 2rem;
+        height: auto;
+        min-height: 60vh;
+    }
+    
+    .focal-zone {
+        position: relative;
+        clip-path: none;
+        height: 40vh;
+        width: 100%;
+        justify-content: center;
+        padding-right: 0;
+    }
+    
+    h1 { font-size: 15vw; }
+    .watermark { font-size: 30vw; }
+    .logo-hero { width: 60vw; }
+    
+    .minimal-nav-links {
+        top: auto;
+        bottom: 2rem;
+        right: 2rem;
+        gap: 1.5rem;
+    }
+    
+    .minimal-nav-links a {
+        color: var(--brutalist-white);
+    }
+    
+    .logo-nav {
+        top: 2rem;
+        left: 2rem;
+    }
+
+    .bottom-pagination {
+        display: none;
+    }
+}

@@ -1,0 +1,206 @@
+/* welcome.css - Swiss Brutalist Editorial System */
+
+:root {
+    --brutalist-red: #E10600;
+    --brutalist-white: #FFFFFF;
+    --brutalist-black: #000000;
+    --font-heading: 'Inter', Helvetica, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--brutalist-white);
+    color: var(--brutalist-black);
+    font-family: var(--font-heading);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- Layout Structure --- */
+.split-screen {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: var(--brutalist-white);
+}
+
+/* Left Side: Information Zone */
+.info-zone {
+    flex: 1;
+    background: var(--brutalist-white);
+    padding: 8rem 4rem 4rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+    clip-path: polygon(0 0, 60% 0, 40% 100%, 0% 100%);
+}
+
+/* Right Side: Visual Focal Zone */
+.focal-zone {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--brutalist-red);
+    clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10vw;
+    z-index: 1;
+}
+
+/* --- Typography --- */
+.watermark {
+    position: absolute;
+    top: 50%;
+    left: 2%;
+    transform: translateY(-50%);
+    font-size: 22vw;
+    font-weight: 900;
+    color: var(--brutalist-black);
+    opacity: 0.03;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: -1;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+}
+
+.metadata {
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 20;
+}
+
+.welcome-headline {
+    font-size: 14vw;
+    font-weight: 900;
+    line-height: 0.8;
+    margin-left: -0.05em; 
+    letter-spacing: -0.07em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 15;
+}
+
+.subheading {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-top: 1.5rem;
+    max-width: 400px;
+    line-height: 1.4;
+}
+
+.bottom-nav {
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+/* --- Focal Image --- */
+.focal-logo {
+    width: 30vw;
+    max-width: 450px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    position: relative;
+    z-index: 5;
+}
+
+/* --- Header Minimal Overrides --- */
+#header-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+#site-header {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    left: 4rem !important;
+    top: 2rem !important;
+    translate: 0 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+}
+
+#site-header a, #site-header button, #site-header span {
+    color: var(--brutalist-black) !important;
+    background: transparent !important;
+    border: none !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+}
+
+.logo-nav {
+    filter: brightness(0) !important; 
+}
+
+/* --- Mobile System --- */
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+    }
+    
+    .split-screen {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .info-zone {
+        clip-path: none !important;
+        padding: 8rem 2rem 4rem 2rem;
+        height: auto;
+        min-height: 60vh;
+        flex: none;
+    }
+    
+    .focal-zone {
+        position: relative !important;
+        clip-path: none !important;
+        height: 40vh;
+        width: 100%;
+        justify-content: center;
+        padding-right: 0;
+    }
+    
+    .welcome-headline {
+        font-size: 22vw;
+    }
+    
+    .watermark {
+        font-size: 28vw;
+        top: 30%;
+    }
+    
+    .focal-logo {
+        width: 60vw;
+    }
+
+    #site-header {
+        left: 2rem !important;
+        top: 2rem !important;
+    }
+}
