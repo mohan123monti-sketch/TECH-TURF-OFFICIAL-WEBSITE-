@@ -104,15 +104,21 @@ function renderSidebar() {
     const menuItems = [
         { name: 'Master Admin', icon: 'layout-grid', href: 'master-admin.html' },
         { name: 'Dashboard', icon: 'layout-dashboard', href: 'dashboard.html' },
+        { name: 'Advanced Analytics', icon: 'bar-chart-3', href: 'advanced-analytics.html' },
         { name: 'Ops Center', icon: 'server-cog', href: 'ops-center.html' },
         { name: 'Products', icon: 'package', href: 'products.html' },
+        { name: 'Enhanced Products', icon: 'package-2', href: 'enhanced-products.html' },
         { name: 'Orders', icon: 'shopping-cart', href: 'orders.html' },
+        { name: 'Branch Management', icon: 'building-2', href: 'branches.html' },
         { name: 'Users', icon: 'users', href: 'users.html' },
+        { name: 'User Groups', icon: 'users-2', href: 'user-groups.html' },
+        { name: 'Reports', icon: 'file-text', href: 'reports.html' },
         { name: 'Launches', icon: 'rocket', href: 'launches.html' },
         { name: 'Content', icon: 'file-text', href: 'content.html' },
+        { name: 'Media Library', icon: 'image', href: 'media.html' },
         { name: 'Support', icon: 'life-buoy', href: 'support.html' },
-        { name: 'Business CRM', icon: 'briefcase', href: 'http://localhost:3100' },
-        { name: 'Settings', icon: 'settings', href: 'settings.html' },
+        { name: 'System Settings', icon: 'settings', href: 'system-settings.html' },
+        { name: 'Business CRM', icon: 'briefcase', href: '#', isCRM: true },
     ];
 
     const currentPath = window.location.pathname.split('/').pop();
@@ -124,12 +130,19 @@ function renderSidebar() {
             </h1>
         </div>
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-            ${menuItems.map(item => `
-                <a href="${item.href}" class="flex items-center px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group ${currentPath === item.href ? 'iphone-glass text-white' : ''}">
-                    <i data-lucide="${item.icon}" class="w-5 h-5 mr-3 transition-colors ${currentPath === item.href ? 'text-white' : 'group-hover:text-white'}"></i>
-                    <span class="font-bold text-sm tracking-wide text-inherit">${item.name}</span>
-                </a>
-            `).join('')}
+            ${menuItems.map(item => {
+                if (item.isCRM) {
+                    return `<button onclick="openCRMFromSidebar()" class="w-full flex items-center px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
+                        <i data-lucide="${item.icon}" class="w-5 h-5 mr-3 transition-colors group-hover:text-white"></i>
+                        <span class="font-bold text-sm tracking-wide text-inherit">${item.name}</span>
+                    </button>`;
+                } else {
+                    return `<a href="${item.href}" class="flex items-center px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group ${currentPath === item.href ? 'iphone-glass text-white' : ''}">
+                        <i data-lucide="${item.icon}" class="w-5 h-5 mr-3 transition-colors ${currentPath === item.href ? 'text-white' : 'group-hover:text-white'}"></i>
+                        <span class="font-bold text-sm tracking-wide text-inherit">${item.name}</span>
+                    </a>`;
+                }
+            }).join('')}
         </nav>
         <div class="p-6 border-t border-white/5">
             <button id="logout-button" class="w-full flex items-center justify-center iphone-glass text-white font-bold py-3 rounded-xl hover:bg-white/10 transition-all border border-white/5">
@@ -155,13 +168,19 @@ function renderTopbar() {
     let title = 'Admin Dashboard';
     if (currentPath === 'master-admin.html') title = 'Master Admin Panel';
     else if (currentPath === 'ops-center.html') title = 'Unified Operations Center';
+    else if (currentPath === 'advanced-analytics.html') title = 'Advanced Analytics Dashboard';
     if (currentPath === 'products.html') title = 'Products & Inventory';
+    else if (currentPath === 'enhanced-products.html') title = 'Enhanced Products Management';
     else if (currentPath === 'orders.html') title = 'Orders & Requests';
+    else if (currentPath === 'branches.html') title = 'Branch Management';
     else if (currentPath === 'users.html') title = 'Team & Roles';
+    else if (currentPath === 'user-groups.html') title = 'User Groups & Permissions';
+    else if (currentPath === 'reports.html') title = 'Reports & Analytics';
     else if (currentPath === 'launches.html') title = 'Aerospace Launches & Logs';
     else if (currentPath === 'content.html') title = 'Content Management System';
+    else if (currentPath === 'media.html') title = 'Media Library';
     else if (currentPath === 'support.html') title = 'Support Tickets';
-    else if (currentPath === 'settings.html') title = 'System Settings';
+    else if (currentPath === 'system-settings.html') title = 'System Settings';
 
     topbar.innerHTML = `
         <h2 class="text-xl font-black text-white tracking-tight" id="page-title">${title}</h2>

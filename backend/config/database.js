@@ -589,6 +589,78 @@ export async function initDatabase() {
     try { await db.run("ALTER TABLE announcements ADD COLUMN priority TEXT DEFAULT 'medium'"); } catch (e) { }
     try { await db.run('ALTER TABLE announcements ADD COLUMN notifyUsers BOOLEAN DEFAULT 1'); } catch (e) { }
     try { await db.run("UPDATE products SET image_url = REPLACE(image_url, '\\\\', '/') WHERE image_url LIKE '%\\\\%'"); } catch (e) { }
+    try { await db.run("CREATE TABLE IF NOT EXISTS translations (id INTEGER PRIMARY KEY AUTOINCREMENT, language_code TEXT UNIQUE NOT NULL, translations TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (e) { }
+    
+    // Enhanced Products Management Tables
+    try { await db.run("ALTER TABLE products ADD COLUMN status TEXT DEFAULT 'active'"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN branch TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN sku TEXT UNIQUE"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN weight REAL"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN dimensions TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN tags TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN meta_title TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN meta_description TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN meta_keywords TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE products ADD COLUMN low_stock_threshold INTEGER DEFAULT 5"); } catch (e) { }
+    
+    // Branch Management
+    try { await db.run("CREATE TABLE IF NOT EXISTS branches (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE NOT NULL, address TEXT, phone TEXT, email TEXT, manager_id INTEGER, status TEXT DEFAULT 'active', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (manager_id) REFERENCES users(id))"); } catch (e) { }
+    
+    // Product Branch Inventory
+    try { await db.run("CREATE TABLE IF NOT EXISTS product_branch_inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER NOT NULL, branch_id INTEGER NOT NULL, stock INTEGER DEFAULT 0, low_stock_threshold INTEGER DEFAULT 5, last_restocked DATETIME, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE, FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE, UNIQUE(product_id, branch_id))"); } catch (e) { }
+    
+    // Enhanced Orders Management
+    try { await db.run("ALTER TABLE orders ADD COLUMN payment_status TEXT DEFAULT 'pending'"); } catch (e) { }
+    try { await db.run("ALTER TABLE orders ADD COLUMN tracking_number TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE orders ADD COLUMN shipping_method TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE orders ADD COLUMN shipping_address TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE orders ADD COLUMN notes TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE orders ADD COLUMN estimated_delivery DATE"); } catch (e) { }
+    try { await db.run("ALTER TABLE orders ADD COLUMN actual_delivery DATE"); } catch (e) { }
+    
+    // Order History
+    try { await db.run("CREATE TABLE IF NOT EXISTS order_history (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id INTEGER NOT NULL, user_id INTEGER, action TEXT NOT NULL, old_status TEXT, new_status TEXT, notes TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id))"); } catch (e) { }
+    
+    // Enhanced User Management
+    try { await db.run("ALTER TABLE users ADD COLUMN department TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE users ADD COLUMN position TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE users ADD COLUMN account_status TEXT DEFAULT 'active'"); } catch (e) { }
+    try { await db.run("ALTER TABLE users ADD COLUMN last_login DATETIME"); } catch (e) { }
+    try { await db.run("ALTER TABLE users ADD COLUMN phone TEXT"); } catch (e) { }
+    try { await db.run("ALTER TABLE users ADD COLUMN bio TEXT"); } catch (e) { }
+    
+    // User Groups
+    try { await db.run("CREATE TABLE IF NOT EXISTS user_groups (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE NOT NULL, description TEXT, permissions TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (e) { }
+    
+    // User Group Memberships
+    try { await db.run("CREATE TABLE IF NOT EXISTS user_group_memberships (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, group_id INTEGER NOT NULL, assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP, assigned_by INTEGER, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (group_id) REFERENCES user_groups(id) ON DELETE CASCADE, FOREIGN KEY (assigned_by) REFERENCES users(id))"); } catch (e) { }
+    
+    // Access Logs
+    try { await db.run("CREATE TABLE IF NOT EXISTS access_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, action TEXT NOT NULL, resource TEXT, ip_address TEXT, user_agent TEXT, success BOOLEAN DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id))"); } catch (e) { }
+    
+    // System Settings
+    try { await db.run("CREATE TABLE IF NOT EXISTS system_settings (id INTEGER PRIMARY KEY AUTOINCREMENT, key TEXT UNIQUE NOT NULL, value TEXT, description TEXT, category TEXT DEFAULT 'general', updated_by INTEGER, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (updated_by) REFERENCES users(id))"); } catch (e) { }
+    
+    // Email Templates
+    try { await db.run("CREATE TABLE IF NOT EXISTS email_templates (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE NOT NULL, subject TEXT, content TEXT, variables TEXT, category TEXT DEFAULT 'general', status TEXT DEFAULT 'active', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (e) { }
+    
+    // Scheduled Tasks
+    try { await db.run("CREATE TABLE IF NOT EXISTS scheduled_tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, task_type TEXT NOT NULL, schedule TEXT NOT NULL, parameters TEXT, last_run DATETIME, next_run DATETIME, status TEXT DEFAULT 'active', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (e) { }
+    
+    // Analytics Data
+    try { await db.run("CREATE TABLE IF NOT EXISTS analytics_events (id INTEGER PRIMARY KEY AUTOINCREMENT, event_type TEXT NOT NULL, user_id INTEGER, session_id TEXT, properties TEXT, ip_address TEXT, user_agent TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id))"); } catch (e) { }
+    
+    // Promo Codes
+    try { await db.run("CREATE TABLE IF NOT EXISTS promo_codes (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT UNIQUE NOT NULL, discount_type TEXT NOT NULL, discount_value REAL NOT NULL, min_order_amount REAL, max_uses INTEGER, used_count INTEGER DEFAULT 0, valid_from DATETIME, valid_until DATETIME, status TEXT DEFAULT 'active', created_by INTEGER, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (created_by) REFERENCES users(id))"); } catch (e) { }
+    
+    // Suppliers
+    try { await db.run("CREATE TABLE IF NOT EXISTS suppliers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, contact_person TEXT, email TEXT, phone TEXT, address TEXT, payment_terms TEXT, notes TEXT, status TEXT DEFAULT 'active', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (e) { }
+    
+    // Purchase Orders
+    try { await db.run("CREATE TABLE IF NOT EXISTS purchase_orders (id INTEGER PRIMARY KEY AUTOINCREMENT, supplier_id INTEGER NOT NULL, order_number TEXT UNIQUE NOT NULL, status TEXT DEFAULT 'pending', total_amount REAL, order_date DATE, expected_delivery DATE, notes TEXT, created_by INTEGER, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (supplier_id) REFERENCES suppliers(id), FOREIGN KEY (created_by) REFERENCES users(id))"); } catch (e) { }
+    
+    // Purchase Order Items
+    try { await db.run("CREATE TABLE IF NOT EXISTS purchase_order_items (id INTEGER PRIMARY KEY AUTOINCREMENT, purchase_order_id INTEGER NOT NULL, product_id INTEGER, quantity INTEGER NOT NULL, unit_price REAL NOT NULL, total_price REAL NOT NULL, received_quantity INTEGER DEFAULT 0, FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id) ON DELETE CASCADE, FOREIGN KEY (product_id) REFERENCES products(id))"); } catch (e) { }
 
     // Seed default admin if no users exist
     const userCount = await db.get('SELECT COUNT(*) as count FROM users');

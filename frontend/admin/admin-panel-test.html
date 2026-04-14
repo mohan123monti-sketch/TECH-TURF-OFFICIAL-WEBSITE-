@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel DOM Test</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        .test-result { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .test-pass { background: #10b981; color: white; }
+        .test-fail { background: #ef4444; color: white; }
+        .test-pending { background: #f59e0b; color: white; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #374151; border-radius: 8px; }
+    </style>
+</head>
+
+<body class="text-white font-sans antialiased bg-gray-900">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-white mb-8">Admin Panel DOM Test</h1>
+        
+        <div id="test-results" class="space-y-4">
+            <!-- Test results will be displayed here -->
+        </div>
+
+        <div class="mt-8">
+            <button onclick="runAllTests()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-bold">
+                Run All Tests
+            </button>
+            <button onclick="testNavigation()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold ml-2">
+                Test Navigation
+            </button>
+            <button onclick="testDashboard()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-bold ml-2">
+                Test Dashboard
+            </button>
+            <button onclick="testAPIs()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-bold ml-2">
+                Test APIs
+            </button>
+        </div>
+
+        <div class="mt-8">
+            <h2 class="text-xl font-bold text-white mb-4">Manual Verification</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="font-bold text-white mb-2">Check Navigation Sidebar</h3>
+                    <p class="text-gray-300 text-sm">Look for these new menu items:</p>
+                    <ul class="text-gray-400 text-sm mt-2 list-disc list-inside">
+                        <li>Advanced Analytics</li>
+                        <li>Enhanced Products</li>
+                        <li>Branch Management</li>
+                        <li>User Groups</li>
+                        <li>Reports</li>
+                        <li>System Settings</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="font-bold text-white mb-2">Check Dashboard</h3>
+                    <p class="text-gray-300 text-sm">Look for these enhancements:</p>
+                    <ul class="text-gray-400 text-sm mt-2 list-disc list-inside">
+                        <li>Percentage changes in KPI cards</li>
+                        <li>Mini charts (revenue & status)</li>
+                        <li>"View Details" links</li>
+                        <li>Low stock alerts</li>
+                        <li>Real-time updates</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiBase = window.API_BASE_URL || 'http://localhost:5000/api';
+        let testResults = [];
+
+        function addTestResult(testName, status, message) {
+            testResults.push({ testName, status, message });
+            updateTestDisplay();
+        }
+
+        function updateTestDisplay() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = testResults.map(result => `
+                <div class="test-section">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-white">${result.testName}</h3>
+                        <span class="test-result test-${result.status}">${result.status.toUpperCase()}</span>
+                    </div>
+                    <p class="text-gray-300 text-sm">${result.message}</p>
+                </div>
+            `).join('');
+        }
+
+        async function testNavigation() {
+            addTestResult('Navigation Test', 'pending', 'Testing navigation menu items...');
+            
+            try {
+                // Load admin layout
+                const script = document.createElement('script');
+                script.src = 'admin-layout.js';
+                document.head.appendChild(script);
+                
+                script.onload = async () => {
+                    // Check if menu items exist in the code
+                    const response = await fetch('admin-layout.js');
+                    const content = await response.text();
+                    
+                    const requiredItems = [
+                        'Advanced Analytics',
+                        'Enhanced Products', 
+                        'Branch Management',
+                        'User Groups',
+                        'Reports',
+                        'System Settings'
+                    ];
+                    
+                    let foundItems = 0;
+                    let missingItems = [];
+                    
+                    requiredItems.forEach(item => {
+                        if (content.includes(item)) {
+                            foundItems++;
+                        } else {
+                            missingItems.push(item);
+                        }
+                    });
+                    
+                    if (foundItems === requiredItems.length) {
+                        addTestResult('Navigation Menu Items', 'pass', `All ${requiredItems.length} new menu items found in admin-layout.js`);
+                    } else {
+                        addTestResult('Navigation Menu Items', 'fail', `Found ${foundItems}/${requiredItems.length} items. Missing: ${missingItems.join(', ')}`);
+                    }
+                };
+                
+                script.onerror = () => {
+                    addTestResult('Navigation Test', 'fail', 'Failed to load admin-layout.js');
+                };
+                
+            } catch (error) {
+                addTestResult('Navigation Test', 'fail', `Error: ${error.message}`);
+            }
+        }
+
+        async function testDashboard() {
+            addTestResult('Dashboard Test', 'pending', 'Testing dashboard enhancements...');
+            
+            try {
+                // Check if enhanced dashboard script exists
+                const response = await fetch('enhanced-dashboard.js');
+                if (response.ok) {
+                    const content = await response.text();
+                    
+                    const dashboardFeatures = [
+                        'initializeMiniCharts',
+                        'loadDashboardData',
+                        'updateMiniCharts',
+                        'Chart.js'
+                    ];
+                    
+                    let foundFeatures = 0;
+                    dashboardFeatures.forEach(feature => {
+                        if (content.includes(feature)) {
+                            foundFeatures++;
+                        }
+                    });
+                    
+                    if (foundFeatures >= 3) {
+                        addTestResult('Enhanced Dashboard', 'pass', `Enhanced dashboard script found with ${foundFeatures} advanced features`);
+                    } else {
+                        addTestResult('Enhanced Dashboard', 'fail', `Enhanced dashboard script incomplete (${foundFeatures}/${dashboardFeatures.length} features)`);
+                    }
+                } else {
+                    addTestResult('Enhanced Dashboard', 'fail', 'enhanced-dashboard.js not found');
+                }
+                
+                // Check main dashboard HTML
+                const indexResponse = await fetch('index.html');
+                if (indexResponse.ok) {
+                    const indexContent = await indexResponse.text();
+                    
+                    if (indexContent.includes('mini-revenue-chart') && indexContent.includes('mini-status-chart')) {
+                        addTestResult('Dashboard Charts', 'pass', 'Mini charts found in main dashboard');
+                    } else {
+                        addTestResult('Dashboard Charts', 'fail', 'Mini charts not found in main dashboard');
+                    }
+                    
+                    if (indexContent.includes('Chart.js')) {
+                        addTestResult('Chart.js Integration', 'pass', 'Chart.js properly integrated');
+                    } else {
+                        addTestResult('Chart.js Integration', 'fail', 'Chart.js not integrated');
+                    }
+                }
+                
+            } catch (error) {
+                addTestResult('Dashboard Test', 'fail', `Error: ${error.message}`);
+            }
+        }
+
+        async function testAPIs() {
+            addTestResult('API Test', 'pending', 'Testing enhanced API endpoints...');
+            
+            try {
+                // Test enhanced admin routes
+                const endpoints = [
+                    '/admin/analytics/dashboard',
+                    '/admin/branches',
+                    '/admin/user-groups',
+                    '/admin/products/enhanced',
+                    '/admin/orders/enhanced'
+                ];
+                
+                let workingEndpoints = 0;
+                let failedEndpoints = [];
+                
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(`${apiBase}${endpoint}`);
+                        if (response.status === 401) {
+                            workingEndpoints++; // Endpoint exists (401 = need auth)
+                        } else if (response.status === 404) {
+                            failedEndpoints.push(endpoint);
+                        } else {
+                            workingEndpoints++; // Endpoint exists and responds
+                        }
+                    } catch (error) {
+                        failedEndpoints.push(endpoint);
+                    }
+                }
+                
+                if (workingEndpoints === endpoints.length) {
+                    addTestResult('Enhanced APIs', 'pass', `All ${endpoints.length} enhanced API endpoints are available`);
+                } else {
+                    addTestResult('Enhanced APIs', 'fail', `${workingEndpoints}/${endpoints.length} endpoints working. Failed: ${failedEndpoints.join(', ')}`);
+                }
+                
+            } catch (error) {
+                addTestResult('API Test', 'fail', `Error: ${error.message}`);
+            }
+        }
+
+        async function testFiles() {
+            addTestResult('File Test', 'pending', 'Testing enhanced admin files...');
+            
+            const requiredFiles = [
+                'enhanced-products.html',
+                'enhanced-products.js',
+                'advanced-analytics.html',
+                'advanced-analytics.js',
+                'branches.html',
+                'branches.js',
+                'user-groups.html',
+                'user-groups.js',
+                'reports.html',
+                'enhanced-dashboard.js'
+            ];
+            
+            let foundFiles = 0;
+            let missingFiles = [];
+            
+            for (const file of requiredFiles) {
+                try {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        foundFiles++;
+                    } else {
+                        missingFiles.push(file);
+                    }
+                } catch (error) {
+                    missingFiles.push(file);
+                }
+            }
+            
+            if (foundFiles === requiredFiles.length) {
+                addTestResult('Enhanced Files', 'pass', `All ${requiredFiles.length} enhanced admin files found`);
+            } else {
+                addTestResult('Enhanced Files', 'fail', `Found ${foundFiles}/${requiredFiles.length} files. Missing: ${missingFiles.join(', ')}`);
+            }
+        }
+
+        async function testDatabase() {
+            addTestResult('Database Test', 'pending', 'Testing database schema enhancements...');
+            
+            try {
+                // Test if database has new tables
+                const response = await fetch(`${apiBase}/health`);
+                if (response.ok) {
+                    addTestResult('Database Connection', 'pass', 'Backend server is running and accessible');
+                } else {
+                    addTestResult('Database Connection', 'fail', 'Backend server not accessible');
+                }
+            } catch (error) {
+                addTestResult('Database Connection', 'fail', `Cannot connect to backend: ${error.message}`);
+            }
+        }
+
+        async function runAllTests() {
+            testResults = [];
+            addTestResult('Test Suite Started', 'pending', 'Running comprehensive admin panel tests...');
+            
+            await testFiles();
+            await testNavigation();
+            await testDashboard();
+            await testAPIs();
+            await testDatabase();
+            
+            const passedTests = testResults.filter(r => r.status === 'pass').length;
+            const totalTests = testResults.length;
+            
+            addTestResult('Test Summary', passedTests === totalTests ? 'pass' : 'fail', 
+                `Completed: ${passedTests}/${totalTests} tests passed`);
+        }
+
+        // Auto-run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

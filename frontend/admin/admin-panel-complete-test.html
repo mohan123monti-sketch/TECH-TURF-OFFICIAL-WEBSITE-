@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel Complete Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #374151; border-radius: 8px; }
+        .test-result { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .pass { background: #10b981; color: white; }
+        .fail { background: #ef4444; color: white; }
+        .pending { background: #f59e0b; color: white; }
+        .info { background: #3b82f6; color: white; }
+        body { background: #1a1a1a; color: white; }
+        button { padding: 10px 20px; margin: 5px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2563eb; }
+        button.success { background: #10b981; }
+        button.danger { background: #ef4444; }
+        .progress-bar { width: 100%; height: 20px; background: #374151; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #10b981; transition: width 0.3s ease; }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-white mb-8">Admin Panel Complete Integration Test</h1>
+        
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="flex justify-between text-sm text-gray-400 mb-2">
+                <span>Test Progress</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mb-8">
+            <button onclick="runCompleteTest()" class="success">Run Complete Test Suite</button>
+            <button onclick="testDatabase()">Test Database</button>
+            <button onclick="testAPIs()">Test APIs</button>
+            <button onclick="testFrontend()">Test Frontend</button>
+            <button onclick="initializeDatabase()">Initialize Database</button>
+            <button onclick="openAdminPanel()">Open Admin Panel</button>
+        </div>
+
+        <!-- Results -->
+        <div id="test-results" class="space-y-4">
+            <!-- Test results will be displayed here -->
+        </div>
+
+        <!-- Status Summary -->
+        <div id="status-summary" class="mt-8 p-6 border border-gray-600 rounded-lg">
+            <h2 class="text-xl font-bold text-white mb-4">Status Summary</h2>
+            <div id="summary-content" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Summary will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiBase = 'http://localhost:5000/api';
+        const adminUrl = 'http://localhost:3601/admin';
+        let testResults = [];
+        let totalTests = 0;
+        let completedTests = 0;
+
+        function updateProgress() {
+            const progress = totalTests > 0 ? (completedTests / totalTests) * 100 : 0;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = Math.round(progress) + '%';
+        }
+
+        function addTestResult(testName, status, message, details = null) {
+            testResults.push({ testName, status, message, details });
+            completedTests++;
+            updateProgress();
+            updateTestDisplay();
+            updateSummary();
+        }
+
+        function updateTestDisplay() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = testResults.map(result => `
+                <div class="test-section">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-white">${result.testName}</h3>
+                        <span class="test-result test-${result.status}">${result.status.toUpperCase()}</span>
+                    </div>
+                    <p class="text-gray-300 text-sm">${result.message}</p>
+                    ${result.details ? `<p class="text-gray-400 text-xs mt-2">${result.details}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateSummary() {
+            const passed = testResults.filter(r => r.status === 'pass').length;
+            const failed = testResults.filter(r => r.status === 'fail').length;
+            const pending = testResults.filter(r => r.status === 'pending').length;
+            
+            const summaryContent = document.getElementById('summary-content');
+            summaryContent.innerHTML = `
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-400">${passed}</div>
+                    <div class="text-sm text-gray-400">Passed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-red-400">${failed}</div>
+                    <div class="text-sm text-gray-400">Failed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-400">${pending}</div>
+                    <div class="text-sm text-gray-400">Pending</div>
+                </div>
+            `;
+        }
+
+        async function initializeDatabase() {
+            addTestResult('Database Initialization', 'pending', 'Initializing enhanced database schema...');
+            
+            try {
+                // This would typically be done via a backend endpoint
+                const response = await fetch(`${apiBase}/admin/init-database`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('tt_token')}` }
+                });
+                
+                if (response.ok) {
+                    addTestResult('Database Initialization', 'pass', 'Database schema initialized successfully');
+                } else {
+                    addTestResult('Database Initialization', 'fail', 'Database initialization failed - check backend logs');
+                }
+            } catch (error) {
+                addTestResult('Database Initialization', 'fail', `Database initialization error: ${error.message}`);
+            }
+        }
+
+        async function testDatabase() {
+            addTestResult('Database Connection', 'pending', 'Testing database connectivity...');
+            
+            try {
+                const response = await fetch(`${apiBase}/health`);
+                if (response.ok) {
+                    const health = await response.json();
+                    addTestResult('Database Connection', 'pass', 'Database is connected and healthy', `Uptime: ${health.uptime}s`);
+                } else {
+                    addTestResult('Database Connection', 'fail', 'Database connection failed');
+                }
+            } catch (error) {
+                addTestResult('Database Connection', 'fail', `Database connection error: ${error.message}`);
+            }
+
+            // Test enhanced tables
+            const tables = ['branches', 'user_groups', 'system_settings', 'analytics_events'];
+            for (const table of tables) {
+                try {
+                    const response = await fetch(`${apiBase}/admin/test-table/${table}`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('tt_token')}` }
+                    });
+                    if (response.ok) {
+                        addTestResult(`Table: ${table}`, 'pass', `Table ${table} exists and is accessible`);
+                    } else {
+                        addTestResult(`Table: ${table}`, 'fail', `Table ${table} not found or inaccessible`);
+                    }
+                } catch (error) {
+                    addTestResult(`Table: ${table}`, 'fail', `Error accessing table ${table}: ${error.message}`);
+                }
+            }
+        }
+
+        async function testAPIs() {
+            const endpoints = [
+                { name: 'Enhanced Products', url: '/admin/products/enhanced' },
+                { name: 'Enhanced Orders', url: '/admin/orders/enhanced' },
+                { name: 'Branches', url: '/admin/branches' },
+                { name: 'User Groups', url: '/admin/user-groups' },
+                { name: 'Analytics Dashboard', url: '/admin/analytics/dashboard' },
+                { name: 'System Settings', url: '/admin/system-settings' },
+                { name: 'System Health', url: '/admin/system-settings/health' }
+            ];
+
+            for (const endpoint of endpoints) {
+                addTestResult(`API: ${endpoint.name}`, 'pending', `Testing ${endpoint.name} endpoint...`);
+                
+                try {
+                    const response = await fetch(`${apiBase}${endpoint.url}`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('tt_token')}` }
+                    });
+                    
+                    if (response.status === 401) {
+                        addTestResult(`API: ${endpoint.name}`, 'pass', `Endpoint exists (authentication required)`);
+                    } else if (response.ok) {
+                        addTestResult(`API: ${endpoint.name}`, 'pass', `Endpoint working correctly`);
+                    } else if (response.status === 404) {
+                        addTestResult(`API: ${endpoint.name}`, 'fail', `Endpoint not found (404)`);
+                    } else {
+                        addTestResult(`API: ${endpoint.name}`, 'fail', `Endpoint error: ${response.status}`);
+                    }
+                } catch (error) {
+                    addTestResult(`API: ${endpoint.name}`, 'fail', `Network error: ${error.message}`);
+                }
+            }
+        }
+
+        async function testFrontend() {
+            const files = [
+                'admin-layout.js',
+                'enhanced-dashboard.js',
+                'enhanced-products.html',
+                'enhanced-products.js',
+                'advanced-analytics.html',
+                'advanced-analytics.js',
+                'branches.html',
+                'branches.js',
+                'user-groups.html',
+                'user-groups.js',
+                'system-settings.html',
+                'system-settings.js',
+                'reports.html'
+            ];
+
+            for (const file of files) {
+                addTestResult(`File: ${file}`, 'pending', `Checking ${file}...`);
+                
+                try {
+                    const response = await fetch(file, { method: 'HEAD' });
+                    if (response.ok) {
+                        addTestResult(`File: ${file}`, 'pass', `File exists and is accessible`);
+                    } else {
+                        addTestResult(`File: ${file}`, 'fail', `File not found (${response.status})`);
+                    }
+                } catch (error) {
+                    addTestResult(`File: ${file}`, 'fail', `Error accessing file: ${error.message}`);
+                }
+            }
+        }
+
+        async function runCompleteTest() {
+            testResults = [];
+            completedTests = 0;
+            totalTests = 25; // Approximate number of tests
+            
+            addTestResult('Test Suite Started', 'info', 'Running comprehensive admin panel test suite...');
+            
+            await testDatabase();
+            await testAPIs();
+            await testFrontend();
+            
+            const passed = testResults.filter(r => r.status === 'pass').length;
+            const total = testResults.length;
+            
+            addTestResult('Test Summary', passed === total ? 'pass' : 'fail', 
+                `Complete: ${passed}/${total} tests passed`, 
+                passed === total ? 'All systems operational!' : 'Some issues need attention');
+        }
+
+        function openAdminPanel() {
+            window.open(adminUrl + '/index.html', '_blank');
+        }
+
+        // Auto-run on load
+        window.onload = () => {
+            addTestResult('Test Tool Loaded', 'info', 'Admin panel test tool ready');
+            updateSummary();
+        };
+    </script>
+</body>
+</html>

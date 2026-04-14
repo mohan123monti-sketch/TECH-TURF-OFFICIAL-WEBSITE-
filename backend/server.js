@@ -24,6 +24,9 @@ import attendanceRoutes from './routes/attendance-routes.js';
 import transactionRoutes from './routes/transaction-routes.js';
 import statsRoutes from './routes/stats-routes.js';
 import websiteRoutes from './routes/website-routes.js';
+import enhancedAdminRoutes from './routes/enhanced-admin-routes.js';
+import systemSettingsRoutes from './routes/system-settings-routes.js';
+import adminIntegrationRoutes from './routes/admin-integration-routes.js';
 
 dotenv.config();
 
@@ -102,6 +105,9 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/admin/stats', statsRoutes); // Map for frontend dashboard compatibility
 app.use('/api/admin', statsRoutes); // General admin mapping
 app.use('/api', websiteRoutes); // Products, Orders, Promos, Announcements, Media
+app.use('/api/admin', enhancedAdminRoutes); // Enhanced Admin Features
+app.use('/api/admin/system-settings', systemSettingsRoutes); // System Settings
+app.use('/api/admin/integration', adminIntegrationRoutes); // Admin Integration & Testing
 app.use('/uploads', express.static('uploads'));
 
 if (SHOULD_SERVE_FRONTEND) {

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Turf - Enhanced Products Management</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="admin-layout.js" defer></script>
+    <script src="enhanced-products.js" defer></script>
+    <script src="/src/js/ai/nexus-ai.js" defer></script>
+</head>
+
+<body data-3d-enabled="true" class="text-white font-sans antialiased overflow-hidden">
+    <!-- 3D Background -->
+    <div id="three-container" class="fixed inset-0 -z-50"></div>
+
+    <div id="app-container" class="flex h-screen overflow-hidden relative z-10">
+        <aside id="sidebar-container" class="w-64 iphone-glass border-r border-white/5 hidden md:flex flex-col"></aside>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header id="topbar-container" class="h-16 iphone-glass border-b border-white/5 flex items-center justify-between px-6"></header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <!-- Enhanced Header with Analytics -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h1 class="text-2xl font-black tracking-tight">Enhanced Products</h1>
+                            <p class="text-gray-400 text-sm mt-1">Advanced inventory management with multi-branch support</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="openBulkActionsModal()" class="iphone-glass text-white px-4 py-2 rounded-xl flex items-center hover:bg-white/10 transition-all font-bold">
+                                <i data-lucide="check-square" class="w-4 h-4 mr-2"></i> Bulk Actions
+                            </button>
+                            <button onclick="openProductModal()" class="iphone-glass text-white px-6 py-2 rounded-xl flex items-center hover:bg-white/10 transition-all font-bold">
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Product
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="iphone-glass rounded-2xl p-4 border border-white/5">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-gray-400 text-xs font-bold uppercase">Total Products</h3>
+                                <i data-lucide="package" class="w-4 h-4 text-blue-500"></i>
+                            </div>
+                            <p class="text-2xl font-black text-white" id="stat-total-products">0</p>
+                            <p class="text-xs text-gray-500 mt-1">All products</p>
+                        </div>
+                        <div class="iphone-glass rounded-2xl p-4 border border-white/5">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-gray-400 text-xs font-bold uppercase">Active Products</h3>
+                                <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
+                            </div>
+                            <p class="text-2xl font-black text-white" id="stat-active-products">0</p>
+                            <p class="text-xs text-gray-500 mt-1">Currently active</p>
+                        </div>
+                        <div class="iphone-glass rounded-2xl p-4 border border-white/5">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-gray-400 text-xs font-bold uppercase">Low Stock</h3>
+                                <i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-500"></i>
+                            </div>
+                            <p class="text-2xl font-black text-white" id="stat-low-stock">0</p>
+                            <p class="text-xs text-gray-500 mt-1">Need restocking</p>
+                        </div>
+                        <div class="iphone-glass rounded-2xl p-4 border border-white/5">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-gray-400 text-xs font-bold uppercase">Out of Stock</h3>
+                                <i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i>
+                            </div>
+                            <p class="text-2xl font-black text-white" id="stat-out-of-stock">0</p>
+                            <p class="text-xs text-gray-500 mt-1">Unavailable</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="iphone-glass rounded-2xl p-4 border border-white/5 mb-6">
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <div class="flex-1 min-w-[200px]">
+                            <input type="text" id="search-products" placeholder="Search products..." 
+                                class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-2 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                        </div>
+                        <select id="filter-status" onchange="loadProducts()" class="iphone-glass border border-white/10 rounded-xl px-4 py-2 text-sm bg-white/5 text-white">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        <select id="filter-category" onchange="loadProducts()" class="iphone-glass border border-white/10 rounded-xl px-4 py-2 text-sm bg-white/5 text-white">
+                            <option value="">All Categories</option>
+                        </select>
+                        <select id="filter-branch" onchange="loadProducts()" class="iphone-glass border border-white/10 rounded-xl px-4 py-2 text-sm bg-white/5 text-white">
+                            <option value="">All Branches</option>
+                        </select>
+                        <button onclick="exportProducts()" class="iphone-glass text-white px-4 py-2 rounded-xl flex items-center hover:bg-white/10 transition-all font-bold">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Enhanced Products Table -->
+                <div class="iphone-glass rounded-[2rem] border border-white/5 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="iphone-glass text-white/50 text-[10px] uppercase tracking-[0.2em]">
+                                    <th class="p-4 font-bold">
+                                        <input type="checkbox" id="select-all-products" class="rounded border-white/20">
+                                    </th>
+                                    <th class="p-4 font-bold">Product</th>
+                                    <th class="p-4 font-bold">SKU</th>
+                                    <th class="p-4 font-bold">Category</th>
+                                    <th class="p-4 font-bold">Price</th>
+                                    <th class="p-4 font-bold">Stock</th>
+                                    <th class="p-4 font-bold">Branch</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                    <th class="p-4 font-bold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="products-tbody" class="divide-y divide-white/5 text-sm">
+                                <!-- Products will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Enhanced Product Modal -->
+    <div id="product-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="iphone-glass rounded-[2rem] p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <h3 id="modal-title" class="text-xl font-black tracking-tight text-white uppercase">Add Product</h3>
+                <button onclick="closeProductModal()" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <form id="product-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Basic Information -->
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Product Name *</label>
+                        <input type="text" name="name" required class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">SKU</label>
+                        <input type="text" name="sku" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Category</label>
+                        <select name="category" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                            <option value="">Select category</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Software">Software</option>
+                            <option value="Services">Services</option>
+                            <option value="Hardware">Hardware</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Branch</label>
+                        <select name="branch" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                            <option value="">Select branch</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Price *</label>
+                        <input type="number" name="price" step="0.01" required class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Stock *</label>
+                        <input type="number" name="stock" required class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Low Stock Threshold</label>
+                        <input type="number" name="low_stock_threshold" value="5" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Status</label>
+                        <select name="status" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Weight (kg)</label>
+                        <input type="number" name="weight" step="0.01" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2 text-sm font-bold">Dimensions (LxWxH)</label>
+                        <input type="text" name="dimensions" placeholder="e.g., 10x5x3" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-white mb-2 text-sm font-bold">Description</label>
+                    <textarea name="description" rows="4" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10"></textarea>
+                </div>
+
+                <!-- Tags -->
+                <div>
+                    <label class="block text-white mb-2 text-sm font-bold">Tags (comma-separated)</label>
+                    <input type="text" name="tags" placeholder="e.g., popular, new, sale" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                </div>
+
+                <!-- SEO Fields -->
+                <div class="border-t border-white/10 pt-6">
+                    <h4 class="text-lg font-bold text-white mb-4">SEO Optimization</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-white mb-2 text-sm font-bold">Meta Title</label>
+                            <input type="text" name="meta_title" maxlength="60" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                        </div>
+                        <div>
+                            <label class="block text-white mb-2 text-sm font-bold">Meta Keywords</label>
+                            <input type="text" name="meta_keywords" placeholder="keyword1, keyword2, keyword3" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-white mb-2 text-sm font-bold">Meta Description</label>
+                            <textarea name="meta_description" rows="3" maxlength="160" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="border-t border-white/10 pt-6">
+                    <h4 class="text-lg font-bold text-white mb-4">Product Image</h4>
+                    <div class="flex items-center gap-6">
+                        <div id="image-preview-container" class="hidden">
+                            <img id="image-preview" class="w-24 h-24 rounded-xl object-cover">
+                        </div>
+                        <div>
+                            <input type="file" id="image-upload" accept="image/*" class="hidden">
+                            <button type="button" onclick="document.getElementById('image-upload').click()" class="iphone-glass text-white px-4 py-2 rounded-xl flex items-center hover:bg-white/10 transition-all font-bold">
+                                <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Choose Image
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="image_url">
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex justify-end gap-4 pt-6 border-t border-white/10">
+                    <button type="button" onclick="closeProductModal()" class="px-6 py-3 rounded-xl text-gray-400 hover:text-white transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-3 rounded-xl bg-[#F26522] text-white font-bold hover:bg-[#d45a1e] transition-all">
+                        Save Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Actions Modal -->
+    <div id="bulk-actions-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="iphone-glass rounded-[2rem] p-8 w-full max-w-md border border-white/10 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black tracking-tight text-white uppercase">Bulk Actions</h3>
+                <button onclick="closeBulkActionsModal()" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-white mb-2 text-sm font-bold">Action</label>
+                    <select id="bulk-action-type" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                        <option value="">Select action</option>
+                        <option value="status">Update Status</option>
+                        <option value="category">Update Category</option>
+                        <option value="price">Update Price</option>
+                        <option value="stock">Update Stock</option>
+                        <option value="delete">Delete Products</option>
+                    </select>
+                </div>
+                <div id="bulk-action-value-container">
+                    <label class="block text-white mb-2 text-sm font-bold">Value</label>
+                    <input type="text" id="bulk-action-value" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button onclick="closeBulkActionsModal()" class="px-6 py-3 rounded-xl text-gray-400 hover:text-white transition-all">
+                        Cancel
+                    </button>
+                    <button onclick="executeBulkAction()" class="px-6 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all">
+                        Execute Action
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Turf - System Settings</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="admin-layout.js" defer></script>
+    <script src="system-settings.js" defer></script>
+</head>
+
+<body data-3d-enabled="true" class="text-white font-sans antialiased overflow-hidden">
+    <!-- 3D Background -->
+    <div id="three-container" class="fixed inset-0 -z-50"></div>
+
+    <div id="app-container" class="flex h-screen overflow-hidden relative z-10">
+        <aside id="sidebar-container" class="w-64 iphone-glass border-r border-white/5 hidden md:flex flex-col"></aside>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header id="topbar-container" class="h-16 iphone-glass border-b border-white/5 flex items-center justify-between px-6"></header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <!-- Header -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h1 class="text-2xl font-black tracking-tight">System Settings</h1>
+                            <p class="text-gray-400 text-sm mt-1">Configure system-wide settings and preferences</p>
+                        </div>
+                        <button onclick="saveAllSettings()" class="iphone-glass text-white px-6 py-2 rounded-xl flex items-center hover:bg-white/10 transition-all font-bold">
+                            <i data-lucide="save" class="w-4 h-4 mr-2"></i> Save All Settings
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings Sections -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- General Settings -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Email Configuration -->
+                        <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-black text-white">Email Configuration</h3>
+                                <i data-lucide="mail" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">SMTP Server</label>
+                                    <input type="text" id="smtp-server" placeholder="smtp.gmail.com" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">SMTP Port</label>
+                                    <input type="number" id="smtp-port" placeholder="587" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">Email Username</label>
+                                    <input type="email" id="email-username" placeholder="admin@techturf.com" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">Email Password</label>
+                                    <input type="password" id="email-password" placeholder="Enter password" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-white mb-2 text-sm font-bold">From Email</label>
+                                    <input type="email" id="from-email" placeholder="noreply@techturf.com" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button onclick="testEmailConfig()" class="iphone-glass text-blue-400 px-4 py-2 rounded-xl flex items-center hover:bg-white/10 transition-all font-bold">
+                                    <i data-lucide="send" class="w-4 h-4 mr-2"></i> Test Email Configuration
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Backup Settings -->
+                        <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-black text-white">Backup Settings</h3>
+                                <i data-lucide="database" class="w-5 h-5 text-green-500"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-white">Automatic Backups</p>
+                                        <p class="text-xs text-gray-400">Enable automatic database backups</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="auto-backup" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">Backup Frequency</label>
+                                    <select id="backup-frequency" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">Backup Retention (days)</label>
+                                    <input type="number" id="backup-retention" placeholder="30" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">Backup Location</label>
+                                    <input type="text" id="backup-location" placeholder="/backups" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API Configuration -->
+                        <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-black text-white">API Configuration</h3>
+                                <i data-lucide="key" class="w-5 h-5 text-purple-500"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">API Rate Limit (requests/hour)</label>
+                                    <input type="number" id="api-rate-limit" placeholder="1000" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">JWT Secret</label>
+                                    <input type="password" id="jwt-secret" placeholder="Enter JWT secret" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-white">Enable API Key Authentication</p>
+                                        <p class="text-xs text-gray-400">Allow API key based authentication</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="api-key-auth" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">CORS Origins</label>
+                                    <textarea id="cors-origins" rows="3" placeholder="http://localhost:3000, https://techturf.com" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Settings -->
+                        <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-black text-white">Security Settings</h3>
+                                <i data-lucide="shield" class="w-5 h-5 text-red-500"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-white">Two-Factor Authentication</p>
+                                        <p class="text-xs text-gray-400">Require 2FA for admin accounts</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="require-2fa" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">Password Policy</label>
+                                    <select id="password-policy" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                                        <option value="basic">Basic (6+ characters)</option>
+                                        <option value="medium">Medium (8+ chars, 1 number)</option>
+                                        <option value="strong">Strong (8+ chars, 1 number, 1 symbol)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">Session Timeout (minutes)</label>
+                                    <input type="number" id="session-timeout" placeholder="30" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">Allowed IP Addresses</label>
+                                    <textarea id="allowed-ips" rows="3" placeholder="192.168.1.1, 10.0.0.1" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Status -->
+                    <div class="space-y-6">
+                        <!-- System Health -->
+                        <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-black text-white">System Health</h3>
+                                <i data-lucide="activity" class="w-5 h-5 text-green-500"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-white">Server Status</span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-500/10 text-green-500">Online</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-white">Database</span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-500/10 text-green-500">Connected</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-white">API Endpoints</span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-500/10 text-green-500">Active</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-white">Storage</span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500/10 text-yellow-500">65% Used</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-white">Memory</span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-500/10 text-green-500">42% Used</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-black text-white">Quick Actions</h3>
+                                <i data-lucide="zap" class="w-5 h-5 text-orange-500"></i>
+                            </div>
+                            <div class="space-y-3">
+                                <button onclick="createBackup()" class="w-full iphone-glass text-white px-4 py-3 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all font-bold">
+                                    <i data-lucide="download" class="w-4 h-4 mr-2"></i> Create Backup
+                                </button>
+                                <button onclick="clearCache()" class="w-full iphone-glass text-white px-4 py-3 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all font-bold">
+                                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Clear Cache
+                                </button>
+                                <button onclick="restartSystem()" class="w-full iphone-glass text-white px-4 py-3 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all font-bold">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Restart System
+                                </button>
+                                <button onclick="exportLogs()" class="w-full iphone-glass text-white px-4 py-3 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all font-bold">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Logs
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CRM Integration -->
+                        <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-black text-white">CRM Integration</h3>
+                                <i data-lucide="briefcase" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-white">CRM Status</p>
+                                        <p class="text-xs text-gray-400">Business CRM integration</p>
+                                    </div>
+                                    <span id="crm-status" class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-500/10 text-gray-500">Checking...</span>
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">CRM URL</label>
+                                    <input type="url" id="crm-url" placeholder="http://localhost:3100" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 text-sm font-bold">API Key</label>
+                                    <input type="password" id="crm-api-key" placeholder="Enter CRM API key" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white placeholder-gray-500 focus:bg-white/10">
+                                </div>
+                                <button onclick="testCRMConnection()" class="w-full iphone-glass text-blue-400 px-4 py-2 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all font-bold">
+                                    <i data-lucide="link" class="w-4 h-4 mr-2"></i> Test CRM Connection
+                                </button>
+                                <button onclick="openCRM()" class="w-full iphone-glass text-green-400 px-4 py-2 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all font-bold">
+                                    <i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Open CRM
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

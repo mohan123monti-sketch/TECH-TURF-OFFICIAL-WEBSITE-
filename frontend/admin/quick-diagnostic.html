@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel Quick Diagnostic</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .pass { background: #10b981; }
+        .fail { background: #ef4444; }
+        .info { background: #3b82f6; }
+        .warning { background: #f59e0b; }
+        button { padding: 10px 20px; margin: 5px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel Diagnostic Tool</h1>
+    <div id="results"></div>
+    
+    <div style="margin-top: 20px;">
+        <button onclick="checkFiles()">Check Files</button>
+        <button onclick="checkNavigation()">Check Navigation</button>
+        <button onclick="forceUpdate()">Force Update</button>
+        <button onclick="clearCache()">Clear Cache & Reload</button>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            results.innerHTML = '';
+        }
+        
+        async function checkFiles() {
+            clearResults();
+            log('Checking admin files...', 'info');
+            
+            const files = [
+                'admin-layout.js',
+                'enhanced-dashboard.js',
+                'enhanced-products.html',
+                'advanced-analytics.html',
+                'branches.html',
+                'user-groups.html',
+                'reports.html'
+            ];
+            
+            for (const file of files) {
+                try {
+                    const response = await fetch(file, { method: 'HEAD' });
+                    if (response.ok) {
+                        log(`Found: ${file}`, 'pass');
+                    } else {
+                        log(`Missing: ${file} (${response.status})`, 'fail');
+                    }
+                } catch (error) {
+                    log(`Error checking ${file}: ${error.message}`, 'fail');
+                }
+            }
+        }
+        
+        async function checkNavigation() {
+            clearResults();
+            log('Checking navigation...', 'info');
+            
+            try {
+                const response = await fetch('admin-layout.js');
+                const content = await response.text();
+                
+                const requiredItems = [
+                    'Advanced Analytics',
+                    'Enhanced Products',
+                    'Branch Management',
+                    'User Groups',
+                    'Reports',
+                    'System Settings'
+                ];
+                
+                let found = 0;
+                requiredItems.forEach(item => {
+                    if (content.includes(item)) {
+                        found++;
+                        log(`Found: ${item}`, 'pass');
+                    } else {
+                        log(`Missing: ${item}`, 'fail');
+                    }
+                });
+                
+                log(`Navigation: ${found}/${requiredItems.length} items found`, found === requiredItems.length ? 'pass' : 'warning');
+                
+            } catch (error) {
+                log(`Error checking navigation: ${error.message}`, 'fail');
+            }
+        }
+        
+        function forceUpdate() {
+            clearResults();
+            log('Forcing UI update...', 'info');
+            
+            // Add cache-busting parameter
+            const scripts = [
+                'admin-layout.js',
+                'enhanced-dashboard.js'
+            ];
+            
+            scripts.forEach(script => {
+                const scriptElement = document.createElement('script');
+                scriptElement.src = `${script}?t=${Date.now()}`;
+                scriptElement.onload = () => log(`Loaded: ${script}`, 'pass');
+                scriptElement.onerror = () => log(`Failed: ${script}`, 'fail');
+                document.head.appendChild(scriptElement);
+            });
+            
+            setTimeout(() => {
+                log('Update complete! Refresh the main admin page.', 'pass');
+            }, 2000);
+        }
+        
+        function clearCache() {
+            clearResults();
+            log('Clearing cache...', 'info');
+            
+            // Clear localStorage (except auth)
+            const token = localStorage.getItem('tt_token');
+            localStorage.clear();
+            if (token) localStorage.setItem('tt_token', token);
+            
+            // Clear caches
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            
+            log('Cache cleared! Reloading...', 'pass');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        }
+        
+        // Auto-check on load
+        window.onload = () => {
+            log('Diagnostic tool loaded', 'info');
+            checkFiles();
+        };
+    </script>
+</body>
+</html>

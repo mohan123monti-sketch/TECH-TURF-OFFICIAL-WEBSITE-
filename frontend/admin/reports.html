@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Turf - Reports & Analytics</title>
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="admin-layout.js" defer></script>
+    <script src="reports.js" defer></script>
+</head>
+
+<body data-3d-enabled="true" class="text-white font-sans antialiased overflow-hidden">
+    <!-- 3D Background -->
+    <div id="three-container" class="fixed inset-0 -z-50"></div>
+
+    <div id="app-container" class="flex h-screen overflow-hidden relative z-10">
+        <aside id="sidebar-container" class="w-64 iphone-glass border-r border-white/5 hidden md:flex flex-col"></aside>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header id="topbar-container" class="h-16 iphone-glass border-b border-white/5 flex items-center justify-between px-6"></header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <!-- Header -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h1 class="text-2xl font-black tracking-tight">Reports & Analytics</h1>
+                            <p class="text-gray-400 text-sm mt-1">Comprehensive business reports and analytics</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <select id="report-period" onchange="loadReports()" class="iphone-glass border border-white/10 rounded-xl px-4 py-2 text-sm bg-white/5 text-white">
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d" selected>Last 30 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                                <option value="1y">Last Year</option>
+                            </select>
+                            <button onclick="generateReport()" class="iphone-glass text-white px-4 py-2 rounded-xl flex items-center hover:bg-white/10 transition-all font-bold">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="iphone-glass rounded-2xl p-4 border border-white/5">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Total Revenue</h3>
+                            <i data-lucide="trending-up" class="w-4 h-4 text-green-500"></i>
+                        </div>
+                        <p class="text-2xl font-black text-white" id="stat-revenue">INR 0</p>
+                    </div>
+                    <div class="iphone-glass rounded-2xl p-4 border border-white/5">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Total Orders</h3>
+                            <i data-lucide="shopping-cart" class="w-4 h-4 text-blue-500"></i>
+                        </div>
+                        <p class="text-2xl font-black text-white" id="stat-orders">0</p>
+                    </div>
+                    <div class="iphone-glass rounded-2xl p-4 border border-white/5">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Avg Order Value</h3>
+                            <i data-lucide="calculator" class="w-4 h-4 text-purple-500"></i>
+                        </div>
+                        <p class="text-2xl font-black text-white" id="stat-avg-order">INR 0</p>
+                    </div>
+                    <div class="iphone-glass rounded-2xl p-4 border border-white/5">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Conversion Rate</h3>
+                            <i data-lucide="target" class="w-4 h-4 text-orange-500"></i>
+                        </div>
+                        <p class="text-2xl font-black text-white" id="stat-conversion">0%</p>
+                    </div>
+                </div>
+
+                <!-- Report Sections -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Sales Report -->
+                    <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-black text-white">Sales Report</h3>
+                            <button onclick="exportReport('sales')" class="text-blue-400 hover:text-blue-300 text-sm">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="sales-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Report -->
+                    <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-black text-white">Inventory Report</h3>
+                            <button onclick="exportReport('inventory')" class="text-blue-400 hover:text-blue-300 text-sm">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="inventory-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- User Activity Report -->
+                    <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-black text-white">User Activity</h3>
+                            <button onclick="exportReport('users')" class="text-blue-400 hover:text-blue-300 text-sm">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="users-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Financial Report -->
+                    <div class="iphone-glass rounded-[2rem] p-6 border border-white/5">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-black text-white">Financial Report</h3>
+                            <button onclick="exportReport('financial')" class="text-blue-400 hover:text-blue-300 text-sm">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="financial-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Reports Table -->
+                <div class="iphone-glass rounded-[2rem] border border-white/5 overflow-hidden">
+                    <div class="p-6 border-b border-white/5">
+                        <h2 class="text-xl font-black text-white">Recent Reports</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="iphone-glass text-white/50 text-[10px] uppercase tracking-[0.2em]">
+                                    <th class="p-4 font-bold">Report Name</th>
+                                    <th class="p-4 font-bold">Type</th>
+                                    <th class="p-4 font-bold">Period</th>
+                                    <th class="p-4 font-bold">Generated</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                    <th class="p-4 font-bold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reports-tbody" class="divide-y divide-white/5 text-sm">
+                                <!-- Reports will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Generate Report Modal -->
+    <div id="report-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="iphone-glass rounded-[2rem] p-8 w-full max-w-md border border-white/10 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black tracking-tight text-white uppercase">Generate Report</h3>
+                <button onclick="closeReportModal()" class="w-10 h-10 iphone-glass rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <form id="report-form" class="space-y-4">
+                <div>
+                    <label class="block text-white mb-2 text-sm font-bold">Report Type</label>
+                    <select id="report-type" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                        <option value="comprehensive">Comprehensive Report</option>
+                        <option value="sales">Sales Report</option>
+                        <option value="inventory">Inventory Report</option>
+                        <option value="users">User Activity Report</option>
+                        <option value="financial">Financial Report</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-white mb-2 text-sm font-bold">Format</label>
+                    <select id="report-format" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                        <option value="csv">CSV</option>
+                        <option value="xlsx">Excel</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-white mb-2 text-sm font-bold">Date Range</label>
+                    <select id="report-date-range" class="w-full iphone-glass border border-white/10 rounded-xl px-4 py-3 text-sm bg-white/5 text-white">
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d">Last 30 Days</option>
+                        <option value="90d">Last 90 Days</option>
+                        <option value="1y">Last Year</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" onclick="closeReportModal()" class="px-6 py-3 rounded-xl text-gray-400 hover:text-white transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-3 rounded-xl bg-[#F26522] text-white font-bold hover:bg-[#d45a1e] transition-all">
+                        Generate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

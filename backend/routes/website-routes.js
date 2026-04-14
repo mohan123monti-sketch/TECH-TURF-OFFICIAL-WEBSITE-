@@ -623,6 +623,153 @@ router.post('/newsletter/subscribe', async (req, res) => {
     }
 });
 
+// Translations
+router.get('/translations/:lang', async (req, res) => {
+    try {
+        const lang = String(req.params.lang || 'en').toLowerCase().replace(/[^a-z]/g, '');
+        if (!lang || lang.length > 5) {
+            return res.status(400).json({ message: 'Invalid language code' });
+        }
+
+        // Default translations for common languages
+        const defaultTranslations = {
+            en: {
+                welcome: 'Welcome',
+                home: 'Home',
+                about: 'About',
+                contact: 'Contact',
+                products: 'Products',
+                services: 'Services',
+                login: 'Login',
+                register: 'Register',
+                cart: 'Cart',
+                search: 'Search',
+                price: 'Price',
+                quantity: 'Quantity',
+                add_to_cart: 'Add to Cart',
+                checkout: 'Checkout',
+                total: 'Total',
+                submit: 'Submit',
+                cancel: 'Cancel',
+                save: 'Save',
+                delete: 'Delete',
+                edit: 'Edit',
+                loading: 'Loading...',
+                error: 'Error',
+                success: 'Success',
+                warning: 'Warning',
+                info: 'Information'
+            },
+            es: {
+                welcome: 'Bienvenido',
+                home: 'Inicio',
+                about: 'Acerca de',
+                contact: 'Contacto',
+                products: 'Productos',
+                services: 'Servicios',
+                login: 'Iniciar sesión',
+                register: 'Registrarse',
+                cart: 'Carrito',
+                search: 'Buscar',
+                price: 'Precio',
+                quantity: 'Cantidad',
+                add_to_cart: 'Agregar al carrito',
+                checkout: 'Pagar',
+                total: 'Total',
+                submit: 'Enviar',
+                cancel: 'Cancelar',
+                save: 'Guardar',
+                delete: 'Eliminar',
+                edit: 'Editar',
+                loading: 'Cargando...',
+                error: 'Error',
+                success: 'Éxito',
+                warning: 'Advertencia',
+                info: 'Información'
+            },
+            fr: {
+                welcome: 'Bienvenue',
+                home: 'Accueil',
+                about: 'À propos',
+                contact: 'Contact',
+                products: 'Produits',
+                services: 'Services',
+                login: 'Connexion',
+                register: 'S\'inscrire',
+                cart: 'Panier',
+                search: 'Rechercher',
+                price: 'Prix',
+                quantity: 'Quantité',
+                add_to_cart: 'Ajouter au panier',
+                checkout: 'Payer',
+                total: 'Total',
+                submit: 'Soumettre',
+                cancel: 'Annuler',
+                save: 'Enregistrer',
+                delete: 'Supprimer',
+                edit: 'Modifier',
+                loading: 'Chargement...',
+                error: 'Erreur',
+                success: 'Succès',
+                warning: 'Avertissement',
+                info: 'Information'
+            },
+            de: {
+                welcome: 'Willkommen',
+                home: 'Startseite',
+                about: 'Über uns',
+                contact: 'Kontakt',
+                products: 'Produkte',
+                services: 'Dienstleistungen',
+                login: 'Anmelden',
+                register: 'Registrieren',
+                cart: 'Warenkorb',
+                search: 'Suchen',
+                price: 'Preis',
+                quantity: 'Menge',
+                add_to_cart: 'In den Warenkorb',
+                checkout: 'Kasse',
+                total: 'Gesamt',
+                submit: 'Absenden',
+                cancel: 'Abbrechen',
+                save: 'Speichern',
+                delete: 'Löschen',
+                edit: 'Bearbeiten',
+                loading: 'Laden...',
+                error: 'Fehler',
+                success: 'Erfolg',
+                warning: 'Warnung',
+                info: 'Information'
+            }
+        };
+
+        // Check if translations exist in database first
+        let translations = null;
+        try {
+            const dbTranslation = await req.db.get(
+                'SELECT translations FROM translations WHERE language_code = ?',
+                [lang]
+            );
+            if (dbTranslation) {
+                translations = JSON.parse(dbTranslation.translations);
+            }
+        } catch (dbError) {
+            console.warn('Database translations not available, using defaults:', dbError.message);
+        }
+
+        // Use database translations or fall back to defaults
+        const responseTranslations = translations || defaultTranslations[lang] || defaultTranslations.en;
+
+        res.json({
+            language: lang,
+            translations: responseTranslations,
+            source: translations ? 'database' : 'default'
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Reviews
 router.get('/reviews/product/:productId', async (req, res) => {
     try {
