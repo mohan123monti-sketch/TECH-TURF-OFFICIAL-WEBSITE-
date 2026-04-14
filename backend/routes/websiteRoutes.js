@@ -7,9 +7,19 @@ import { getAllProducts, createProduct, updateProduct, deleteProduct } from '../
 import { getAllOrders, getMyOrders, getOrderById, createOrder, updateOrderStatus, deleteOrder } from '../controllers/orderController.js';
 import { getAllPromos, createPromo, updatePromo, deletePromo, validatePromo } from '../controllers/promoController.js';
 import { getAllAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement } from '../controllers/announcementController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+const parseJSONSafe = (value, fallback) => {
+    if (value == null) return fallback;
+    if (typeof value === 'object') return value;
+    try {
+        return JSON.parse(value);
+    } catch {
+        return fallback;
+    }
+};
 
 // Multer Config for Media
 const storage = multer.diskStorage({
@@ -33,28 +43,28 @@ router.put('/products/:id', protect, updateProduct);
 router.delete('/products/:id', protect, deleteProduct);
 
 // Orders
-router.get('/orders', getAllOrders);
+router.get('/orders', protect, adminOnly, getAllOrders);
 router.get('/orders/myorders', protect, getMyOrders);
-router.get('/orders/:id', getOrderById);
+router.get('/orders/:id', protect, getOrderById);
 router.post('/orders', protect, createOrder);
-router.put('/orders/:id/status', updateOrderStatus);
-router.delete('/orders/:id', deleteOrder);
+router.put('/orders/:id/status', protect, adminOnly, updateOrderStatus);
+router.delete('/orders/:id', protect, adminOnly, deleteOrder);
 
 // Promos
 router.get('/promos', getAllPromos);
-router.post('/promos', createPromo);
-router.put('/promos/:id', updatePromo);
-router.delete('/promos/:id', deletePromo);
+router.post('/promos', protect, adminOnly, createPromo);
+router.put('/promos/:id', protect, adminOnly, updatePromo);
+router.delete('/promos/:id', protect, adminOnly, deletePromo);
 router.post('/promos/validate', validatePromo);
 
 // Announcements
 router.get('/announcements', getAllAnnouncements);
-router.post('/announcements', createAnnouncement);
-router.put('/announcements/:id', updateAnnouncement);
-router.delete('/announcements/:id', deleteAnnouncement);
+router.post('/announcements', protect, adminOnly, createAnnouncement);
+router.put('/announcements/:id', protect, adminOnly, updateAnnouncement);
+router.delete('/announcements/:id', protect, adminOnly, deleteAnnouncement);
 
 // Media
-router.get('/media', async (req, res) => {
+router.get('/media', protect, async (req, res) => {
     try {
         const media = await req.db.all('SELECT * FROM media ORDER BY created_at DESC');
         res.json(media);
@@ -63,7 +73,7 @@ router.get('/media', async (req, res) => {
     }
 });
 
-router.post('/media/upload', upload.single('file'), async (req, res) => {
+router.post('/media/upload', protect, upload.single('file'), async (req, res) => {
     try {
         const { filename, path: filepath, mimetype, size } = req.file;
         const result = await req.db.run(
@@ -76,7 +86,7 @@ router.post('/media/upload', upload.single('file'), async (req, res) => {
     }
 });
 
-router.delete('/media/:id', async (req, res) => {
+router.delete('/media/:id', protect, async (req, res) => {
     try {
         const item = await req.db.get('SELECT * FROM media WHERE id = ?', [req.params.id]);
         if (item && fs.existsSync(item.filepath)) {
@@ -91,7 +101,7 @@ router.delete('/media/:id', async (req, res) => {
 
 // Multi-file upload (returns array of imageUrls)
 const multiUpload = multer({ storage }).array('files', 10);
-router.post('/upload/multi', (req, res) => {
+router.post('/upload/multi', protect, (req, res) => {
     multiUpload(req, res, async (err) => {
         if (err) return res.status(400).json({ message: err.message });
         try {
@@ -124,7 +134,7 @@ router.get('/blog/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.post('/blog', async (req, res) => {
+router.post('/blog', protect, async (req, res) => {
     const { title, content, category, tags, imageUrl, status } = req.body;
     if (!title || !content) return res.status(400).json({ message: 'Title and content are required' });
     try {
@@ -138,7 +148,7 @@ router.post('/blog', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.put('/blog/:id', async (req, res) => {
+router.put('/blog/:id', protect, async (req, res) => {
     const { title, content, category, tags, imageUrl, status } = req.body;
     try {
         await req.db.run(
@@ -151,7 +161,7 @@ router.put('/blog/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.delete('/blog/:id', async (req, res) => {
+router.delete('/blog/:id', protect, async (req, res) => {
     try {
         await req.db.run('DELETE FROM blog_posts WHERE id = ?', [req.params.id]);
         res.json({ message: 'Post deleted' });
@@ -169,7 +179,7 @@ router.get('/launches', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.post('/launches', async (req, res) => {
+router.post('/launches', protect, async (req, res) => {
     const { missionName, rocketName, launchDate, status, missionSummary, telemetryData, launchSite, payloadDescription } = req.body;
     if (!missionName) return res.status(400).json({ message: 'Mission name is required' });
     try {
@@ -183,7 +193,7 @@ router.post('/launches', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.put('/launches/:id', async (req, res) => {
+router.put('/launches/:id', protect, async (req, res) => {
     const { missionName, rocketName, launchDate, status, missionSummary, telemetryData, launchSite, payloadDescription } = req.body;
     try {
         await req.db.run(
@@ -196,7 +206,7 @@ router.put('/launches/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.delete('/launches/:id', async (req, res) => {
+router.delete('/launches/:id', protect, async (req, res) => {
     try {
         await req.db.run('DELETE FROM launches WHERE id = ?', [req.params.id]);
         res.json({ message: 'Launch deleted' });
@@ -206,7 +216,7 @@ router.delete('/launches/:id', async (req, res) => {
 });
 
 // Support Tickets
-router.get('/tickets', async (req, res) => {
+router.get('/tickets', protect, async (req, res) => {
     try {
         const tickets = await req.db.all('SELECT * FROM tickets ORDER BY created_at DESC');
         res.json(tickets);
@@ -214,7 +224,7 @@ router.get('/tickets', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.post('/tickets', async (req, res) => {
+router.post('/tickets', protect, async (req, res) => {
     const { subject, message, priority, userEmail } = req.body;
     if (!subject) return res.status(400).json({ message: 'Subject is required' });
     try {
@@ -228,7 +238,7 @@ router.post('/tickets', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.put('/tickets/:id', async (req, res) => {
+router.put('/tickets/:id', protect, async (req, res) => {
     const { status, priority, subject, message } = req.body;
     try {
         await req.db.run(
@@ -241,7 +251,7 @@ router.put('/tickets/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.delete('/tickets/:id', async (req, res) => {
+router.delete('/tickets/:id', protect, async (req, res) => {
     try {
         await req.db.run('DELETE FROM tickets WHERE id = ?', [req.params.id]);
         res.json({ message: 'Ticket deleted' });
@@ -274,6 +284,306 @@ router.post('/forms/submit', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+});
+
+// Search
+router.get('/search', async (req, res) => {
+    try {
+        const {
+            q = '',
+            category = '',
+            branch = '',
+            minPrice = '',
+            maxPrice = '',
+            inStock = '',
+            sort = 'newest',
+            page = '1'
+        } = req.query;
+
+        const whereClauses = [];
+        const params = [];
+
+        if (q) {
+            whereClauses.push('(name LIKE ? OR description LIKE ? OR category LIKE ?)');
+            const qLike = `%${q}%`;
+            params.push(qLike, qLike, qLike);
+        }
+        if (category) {
+            whereClauses.push('category = ?');
+            params.push(category);
+        }
+        if (branch) {
+            whereClauses.push('category = ?');
+            params.push(branch);
+        }
+        if (minPrice) {
+            whereClauses.push('price >= ?');
+            params.push(Number(minPrice));
+        }
+        if (maxPrice) {
+            whereClauses.push('price <= ?');
+            params.push(Number(maxPrice));
+        }
+        if (String(inStock).toLowerCase() === 'true') {
+            whereClauses.push('stock > 0');
+        }
+
+        const where = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+        let orderBy = 'created_at DESC';
+        if (sort === 'price_asc') orderBy = 'price ASC';
+        else if (sort === 'price_desc') orderBy = 'price DESC';
+        else if (sort === 'name_asc') orderBy = 'name ASC';
+        else if (sort === 'name_desc') orderBy = 'name DESC';
+
+        const pageNum = Math.max(1, Number(page) || 1);
+        const limit = 12;
+        const offset = (pageNum - 1) * limit;
+
+        const totalRow = await req.db.get(`SELECT COUNT(*) as count FROM products ${where}`, params);
+        const products = await req.db.all(
+            `SELECT * FROM products ${where} ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
+            [...params, limit, offset]
+        );
+
+        const categories = await req.db.all('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != "" ORDER BY category ASC');
+
+        const normalized = products.map((product) => ({
+            ...product,
+            _id: String(product.id),
+            imageUrl: product.image_url,
+            images: product.image_url ? [product.image_url] : []
+        }));
+
+        const total = totalRow?.count || 0;
+        res.json({
+            products: normalized,
+            pagination: {
+                page: pageNum,
+                pages: Math.max(1, Math.ceil(total / limit)),
+                total,
+                limit
+            },
+            filters: {
+                categories: categories.map((c) => c.category).filter(Boolean),
+                branches: ['Tech Turf', 'Quinta', 'Trend Hive', 'Click Sphere']
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get('/search/suggestions', async (req, res) => {
+    try {
+        const q = String(req.query.q || '').trim();
+        if (q.length < 2) return res.json({ suggestions: [] });
+
+        const suggestions = await req.db.all(
+            'SELECT id, name, category FROM products WHERE name LIKE ? ORDER BY name ASC LIMIT 8',
+            [`%${q}%`]
+        );
+
+        res.json({ suggestions: suggestions.map((s) => ({ ...s, _id: String(s.id) })) });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Newsletter
+router.post('/newsletter/subscribe', async (req, res) => {
+    try {
+        const email = String(req.body?.email || '').trim().toLowerCase();
+        const preferences = req.body?.preferences || {};
+        if (!email) return res.status(400).json({ message: 'Email is required' });
+
+        await req.db.run(
+            `INSERT INTO newsletter_subscribers (email, preferences, status, updated_at)
+             VALUES (?, ?, 'active', CURRENT_TIMESTAMP)
+             ON CONFLICT(email) DO UPDATE SET preferences = excluded.preferences, status = 'active', updated_at = CURRENT_TIMESTAMP`,
+            [email, JSON.stringify(preferences)]
+        );
+
+        res.status(201).json({ success: true, message: 'Subscribed successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Reviews
+router.get('/reviews/product/:productId', async (req, res) => {
+    try {
+        const productId = Number(req.params.productId);
+        if (!productId) return res.status(400).json({ message: 'Invalid product id' });
+
+        const rows = await req.db.all(
+            `SELECT r.*, u.name as username
+             FROM product_reviews r
+             LEFT JOIN users u ON r.user_id = u.id
+             WHERE r.product_id = ?
+             ORDER BY r.created_at DESC`,
+            [productId]
+        );
+
+        const reviews = rows.map((row) => ({
+            _id: String(row.id),
+            id: row.id,
+            productId: row.product_id,
+            rating: row.rating,
+            comment: row.comment,
+            helpful: row.helpful || 0,
+            verified: !!row.verified,
+            createdAt: row.created_at,
+            user: {
+                username: row.username || 'Anonymous'
+            }
+        }));
+
+        const avg = reviews.length
+            ? reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviews.length
+            : 0;
+
+        res.json({ reviews, avgRating: Number(avg.toFixed(1)) });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.post('/reviews', protect, async (req, res) => {
+    try {
+        const { productId, rating, comment } = req.body || {};
+        const normalizedProductId = Number(productId);
+        const normalizedRating = Number(rating);
+        if (!normalizedProductId || normalizedRating < 1 || normalizedRating > 5) {
+            return res.status(400).json({ message: 'Valid productId and rating (1-5) are required' });
+        }
+
+        const product = await req.db.get('SELECT id FROM products WHERE id = ?', [normalizedProductId]);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        const existingOrder = await req.db.get(
+            'SELECT id FROM orders WHERE user_id = ? AND items LIKE ? LIMIT 1',
+            [req.user.id, `%"id":${normalizedProductId}%`]
+        );
+
+        const result = await req.db.run(
+            `INSERT INTO product_reviews (product_id, user_id, rating, comment, helpful, verified)
+             VALUES (?, ?, ?, ?, 0, ?)`,
+            [normalizedProductId, req.user.id, normalizedRating, comment || '', existingOrder ? 1 : 0]
+        );
+
+        const created = await req.db.get('SELECT * FROM product_reviews WHERE id = ?', [result.lastID]);
+        res.status(201).json({
+            _id: String(created.id),
+            id: created.id,
+            productId: created.product_id,
+            rating: created.rating,
+            comment: created.comment,
+            helpful: created.helpful,
+            verified: !!created.verified,
+            createdAt: created.created_at
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.put('/reviews/:id/helpful', async (req, res) => {
+    try {
+        await req.db.run(
+            'UPDATE product_reviews SET helpful = COALESCE(helpful, 0) + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [req.params.id]
+        );
+        const updated = await req.db.get('SELECT id, helpful FROM product_reviews WHERE id = ?', [req.params.id]);
+        if (!updated) return res.status(404).json({ message: 'Review not found' });
+        res.json({ _id: String(updated.id), helpful: updated.helpful });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Translations
+router.get('/translations/:lang', async (req, res) => {
+    const lang = String(req.params.lang || 'en').toLowerCase();
+    const translationMap = {
+        en: {
+            'nav.home': 'Home',
+            'nav.products': 'Products',
+            'nav.about': 'About',
+            'nav.contact': 'Contact',
+            'nav.cart': 'Cart',
+            'nav.login': 'Login',
+            'nav.register': 'Register',
+            'btn.addToCart': 'Add to Cart',
+            'btn.buyNow': 'Buy Now',
+            'cart.empty': 'Your cart is empty',
+            'cart.total': 'Total',
+            'checkout.title': 'Checkout',
+            'footer.copyright': '© 2026 Tech Turf. All rights reserved.'
+        },
+        es: {
+            'nav.home': 'Inicio',
+            'nav.products': 'Productos',
+            'nav.about': 'Acerca de',
+            'nav.contact': 'Contacto',
+            'nav.cart': 'Carrito',
+            'nav.login': 'Iniciar sesión',
+            'nav.register': 'Registrarse',
+            'btn.addToCart': 'Agregar al carrito',
+            'btn.buyNow': 'Comprar ahora',
+            'cart.empty': 'Tu carrito está vacío',
+            'cart.total': 'Total',
+            'checkout.title': 'Pagar',
+            'footer.copyright': '© 2026 Tech Turf. Todos los derechos reservados.'
+        },
+        fr: {
+            'nav.home': 'Accueil',
+            'nav.products': 'Produits',
+            'nav.about': 'À propos',
+            'nav.contact': 'Contact',
+            'nav.cart': 'Panier',
+            'nav.login': 'Connexion',
+            'nav.register': 'S\'inscrire',
+            'btn.addToCart': 'Ajouter au panier',
+            'btn.buyNow': 'Acheter maintenant',
+            'cart.empty': 'Votre panier est vide',
+            'cart.total': 'Total',
+            'checkout.title': 'Commander',
+            'footer.copyright': '© 2026 Tech Turf. Tous droits réservés.'
+        },
+        de: {
+            'nav.home': 'Startseite',
+            'nav.products': 'Produkte',
+            'nav.about': 'Über uns',
+            'nav.contact': 'Kontakt',
+            'nav.cart': 'Warenkorb',
+            'nav.login': 'Anmelden',
+            'nav.register': 'Registrieren',
+            'btn.addToCart': 'In den Warenkorb',
+            'btn.buyNow': 'Jetzt kaufen',
+            'cart.empty': 'Ihr Warenkorb ist leer',
+            'cart.total': 'Gesamt',
+            'checkout.title': 'Kasse',
+            'footer.copyright': '© 2026 Tech Turf. Alle Rechte vorbehalten.'
+        },
+        zh: {
+            'nav.home': '首页',
+            'nav.products': '产品',
+            'nav.about': '关于',
+            'nav.contact': '联系',
+            'nav.cart': '购物车',
+            'nav.login': '登录',
+            'nav.register': '注册',
+            'btn.addToCart': '加入购物车',
+            'btn.buyNow': '立即购买',
+            'cart.empty': '您的购物车是空的',
+            'cart.total': '总计',
+            'checkout.title': '结账',
+            'footer.copyright': '© 2026 Tech Turf. 版权所有。'
+        }
+    };
+
+    res.json(translationMap[lang] || translationMap.en);
 });
 
 export default router;

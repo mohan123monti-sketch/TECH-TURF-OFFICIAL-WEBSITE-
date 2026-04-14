@@ -42,6 +42,10 @@ const selectPrimaryPayment = async (db, userId) => {
     );
 };
 
+const selectUserCart = async (db, userId) => {
+    return db.get('SELECT * FROM user_carts WHERE user_id = ?', [userId]);
+};
+
 const generateToken = (id, role) => {
     return jwt.sign({ id, role }, JWT_SECRET, { expiresIn: '7d' });
 };
@@ -619,6 +623,38 @@ export const addUserAddress = async (req, res) => {
             createdAt: row.created_at,
             updatedAt: row.updated_at
         });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get saved shopping cart
+// @route   GET /api/users/cart
+export const getUserCart = async (req, res) => {
+    const db = req.db;
+    try {
+        const cartRow = await selectUserCart(db, req.user.id);
+        const cart = cartRow?.cart ? JSON.parse(cartRow.cart) : [];
+        res.json({ cart });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Save shopping cart
+// @route   PUT /api/users/cart
+export const saveUserCart = async (req, res) => {
+    const db = req.db;
+    try {
+        const cart = Array.isArray(req.body?.cart) ? req.body.cart : [];
+        await db.run(
+            `INSERT INTO user_carts (user_id, cart, updated_at)
+             VALUES (?, ?, CURRENT_TIMESTAMP)
+             ON CONFLICT(user_id) DO UPDATE SET cart = excluded.cart, updated_at = CURRENT_TIMESTAMP`,
+            [req.user.id, JSON.stringify(cart)]
+        );
+
+        res.json({ success: true, cart });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -53,6 +53,11 @@ export const getOrderById = async (req, res) => {
     try {
         const order = await req.db.get('SELECT * FROM orders WHERE id = ?', [req.params.id]);
         if (!order) return res.status(404).json({ message: 'Order not found' });
+
+        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin' && String(order.user_id) !== String(req.user?.id)) {
+            return res.status(403).json({ message: 'Not authorized to view this order' });
+        }
+
         res.json(normalizeOrder(order));
     } catch (error) {
         res.status(500).json({ message: error.message });

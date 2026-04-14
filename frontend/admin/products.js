@@ -11,12 +11,16 @@ async function loadProducts() {
         const response = await fetch(`${apiBase}/products`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed to load products (${response.status})`);
+        }
         const data = await response.json();
         products = Array.isArray(data) ? data : (data.products || data.items || []);
         renderProducts();
     } catch (error) {
         console.error('Error loading products:', error);
-        window.showToast('Failed to load products', 'error');
+        window.showToast(error.message || 'Failed to load products', 'error');
     }
 }
 
@@ -212,8 +216,10 @@ async function deleteProduct(id) {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
+            products = products.filter(product => String(product.id) !== String(id));
+            renderProducts();
             window.showToast('Product deleted successfully', 'success');
-            loadProducts();
+            loadProducts().catch(() => {});
         } else {
             // Improved Error Handling: Parse server response for specific message
             try {

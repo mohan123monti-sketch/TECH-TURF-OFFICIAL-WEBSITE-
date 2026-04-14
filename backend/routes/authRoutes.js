@@ -3,7 +3,8 @@ import {
     registerUser, loginUser, googleLogin, verifyTwoStep,
     forgotPassword, resetPassword, generateBackupCodes, getMe, getGoogleConfig,
     getAllUsers, deleteUser, updateUserRole, getPublicTeam,
-    getUserProfile, updateUserProfile, getUserAddresses, addUserAddress
+    getUserProfile, updateUserProfile, getUserAddresses, addUserAddress,
+    getUserCart, saveUserCart
 } from '../controllers/authController.js';
 import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
@@ -23,6 +24,8 @@ router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, updateUserProfile);
 router.get('/addresses', protect, getUserAddresses);
 router.post('/addresses', protect, addUserAddress);
+router.get('/cart', protect, getUserCart);
+router.put('/cart', protect, saveUserCart);
 
 // Admin Routes
 router.get('/', protect, adminOnly, getAllUsers);
