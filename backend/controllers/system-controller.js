@@ -1,3 +1,30 @@
+// --- Admin Panel URL Management ---
+const ADMIN_PANEL_URLS_PATH = path.join(process.cwd(), 'config', 'adminPanelUrls.json');
+
+export const getAdminPanelUrls = async (req, res) => {
+    try {
+        const data = await fs.readFile(ADMIN_PANEL_URLS_PATH, 'utf8');
+        res.json(JSON.parse(data));
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const updateAdminPanelUrl = async (req, res) => {
+    const { key, url } = req.body;
+    if (!key || typeof url !== 'string') {
+        return res.status(400).json({ message: 'Missing key or url.' });
+    }
+    try {
+        const data = await fs.readFile(ADMIN_PANEL_URLS_PATH, 'utf8');
+        const urls = JSON.parse(data);
+        urls[key] = url;
+        await fs.writeFile(ADMIN_PANEL_URLS_PATH, JSON.stringify(urls, null, 2));
+        res.json({ message: 'Admin panel URL updated.', urls });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 // SYSTEM CONTROLLER
 import os from 'os';
 import osUtils from 'os-utils';

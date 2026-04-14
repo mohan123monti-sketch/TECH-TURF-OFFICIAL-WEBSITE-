@@ -50,7 +50,61 @@ const el = {
     refreshMasterHealth: document.getElementById('refreshMasterHealth'),
     quickActions: document.getElementById('masterQuickActions'),
     output: document.getElementById('masterOutput'),
-    clearLog: document.getElementById('clearMasterLog')
+    clearLog: document.getElementById('clearMasterLog'),
+    adminPanelUrlForm: document.getElementById('adminPanelUrlForm')
+};
+// --- Admin Panel URL Management ---
+let adminPanelUrls = {};
+
+const fetchAdminPanelUrls = async () => {
+    try {
+        const res = await fetch(`${window.API_BASE_URL}/system/admin-panel-urls`, { headers: authHeaders() });
+        if (!res.ok) throw new Error('Failed to fetch admin panel URLs');
+        adminPanelUrls = await res.json();
+    } catch (e) {
+        adminPanelUrls = {};
+    }
+};
+
+const saveAdminPanelUrl = async (key, url) => {
+    try {
+        const res = await fetch(`${window.API_BASE_URL}/system/admin-panel-urls`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ key, url })
+        });
+        if (!res.ok) throw new Error('Failed to save URL');
+        appendLog(`Admin panel URL updated for ${key}`);
+        await fetchAdminPanelUrls();
+        renderAdminPanelUrlForm();
+    } catch (e) {
+        appendLog(`Failed to update admin panel URL for ${key}`);
+    }
+};
+
+const renderAdminPanelUrlForm = () => {
+    if (!el.adminPanelUrlForm) return;
+    el.adminPanelUrlForm.innerHTML = websites.map(site => {
+        const value = adminPanelUrls[site.key] || '';
+        return `
+        <div class="flex items-center gap-2">
+            <label class="w-40 font-bold text-white/80" for="admin-url-${site.key}">${site.name}</label>
+            <input id="admin-url-${site.key}" type="url" value="${value}" placeholder="https://..." class="flex-1 rounded px-2 py-1 text-black" />
+            <button data-save-admin-url="${site.key}" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-xs font-bold">Save</button>
+        </div>
+        `;
+    }).join('');
+
+    el.adminPanelUrlForm.querySelectorAll('button[data-save-admin-url]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const key = btn.getAttribute('data-save-admin-url');
+            const input = el.adminPanelUrlForm.querySelector(`#admin-url-${key}`);
+            if (input && input.value) {
+                saveAdminPanelUrl(key, input.value);
+            }
+        });
+    });
 };
 
 const parseJwtPayload = (jwtToken) => {
@@ -84,6 +138,7 @@ const renderGrid = (healthMap = {}) => {
             ? 'bg-green-500/15 text-green-400 border-green-500/30'
             : 'bg-red-500/15 text-red-400 border-red-500/30';
         const badgeText = online ? `Online${health?.statusCode ? ` (${health.statusCode})` : ''}` : 'Offline';
+        const adminPanelUrl = adminPanelUrls[site.key] || '';
 
         return `
             <article class="iphone-glass rounded-2xl border border-white/10 p-5">
@@ -91,6 +146,7 @@ const renderGrid = (healthMap = {}) => {
                     <div>
                         <h3 class="text-lg font-black tracking-tight">${site.name}</h3>
                         <p class="text-xs text-white/50 mt-1">${site.url}</p>
+                        ${adminPanelUrl ? `<a href="${adminPanelUrl}" target="_blank" class="text-blue-400 underline text-xs">Open Admin Panel</a>` : '<span class="text-xs text-yellow-400">No admin panel URL set</span>'}
                     </div>
                     <span class="px-2.5 py-1 text-xs rounded-full border ${badgeClass}">${badgeText}</span>
                 </div>
@@ -193,6 +249,8 @@ const initMasterAdmin = async () => {
         appendLog('Signed in as non-admin: access links are available, command controls are locked.');
     }
 
+    await fetchAdminPanelUrls();
+    renderAdminPanelUrlForm();
     renderGrid({});
     wireQuickActions();
     el.refreshMasterHealth.addEventListener('click', loadHealth);

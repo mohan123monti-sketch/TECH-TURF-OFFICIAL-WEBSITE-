@@ -1,3 +1,7 @@
+import { getAdminPanelUrls, updateAdminPanelUrl } from '../controllers/system-controller.js';
+// Admin Panel URL management
+router.get('/admin-panel-urls', protect, getAdminPanelUrls);
+router.post('/admin-panel-urls', protect, adminOnly, updateAdminPanelUrl);
 import express from 'express';
 import { 
     getMetrics, addMetric, getEvents, addEvent, getStats,
