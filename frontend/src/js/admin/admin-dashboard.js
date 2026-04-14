@@ -279,17 +279,19 @@ async function loadInventory() {
         grid.innerHTML = '';
         
         products.forEach(product => {
+            const productId = product.id || product._id;
+            const imageSrc = product.image_url || product.imageUrl || product.image || '/public/images/space-bg.png';
             const card = document.createElement('div');
             card.className = 'bg-white rounded-lg p-4 shadow hover:shadow-lg';
             card.innerHTML = `
-                <img src="${product.imageUrl || '/public/images/space-bg.png'}" alt="${product.name}" class="w-full h-40 object-cover rounded mb-3">
+                <img src="${imageSrc}" alt="${product.name}" class="w-full h-40 object-cover rounded mb-3">
                 <h4 class="font-semibold text-sm">${product.name}</h4>
                 <p class="text-gray-600 text-xs">INR ${product.price}</p>
                 <div class="mt-2 flex justify-between items-center">
                     <span class="text-xs ${product.stock > 5 ? 'text-green-600' : 'text-red-600'}">Stock: ${product.stock}</span>
                     <div class="flex items-center gap-3">
-                        <button onclick="editProduct('${product._id}')" class="text-orange-600 text-xs hover:underline">Edit</button>
-                        <button onclick="deleteProduct('${product._id}')" class="text-red-600 text-xs hover:underline">Delete</button>
+                        <button onclick="editProduct('${productId}')" class="text-orange-600 text-xs hover:underline">Edit</button>
+                        <button onclick="deleteProduct('${productId}')" class="text-red-600 text-xs hover:underline">Delete</button>
                     </div>
                 </div>
             `;
