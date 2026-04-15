@@ -79,7 +79,7 @@ const SocialLogin = {
                 <div class="mt-6 flex justify-center">
                     <div id="google-btn-container" class="w-full h-[50px] overflow-hidden rounded-2xl flex justify-center">
                         <!-- Google button will render here -->
-                        ${!clientId ? '<div class="text-[10px] text-orange-500/70 text-center mt-3 font-black uppercase tracking-widest animate-pulse">Connection Link Offline</div>' : ''}
+                        ${!clientId ? '<div class="text-[10px] text-orange-500/70 text-center mt-3 font-black uppercase tracking-widest">Connection Link Offline</div>' : ''}
                     </div>
                 </div>
             </div>

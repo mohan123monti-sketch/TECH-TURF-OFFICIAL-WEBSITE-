@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `
             <div class="iphone-glass p-12 text-center reveal-hidden rounded-[3rem] border border-white/5 shadow-2xl" style="transition-delay: ${Math.min(index, 5) * 0.1}s;">
                 <div class="relative w-40 h-40 mx-auto mb-10 group">
-                    <div class="absolute inset-0 bg-white/20 rounded-[2.5rem] blur-2xl group-hover:bg-white/40 transition-all duration-700"></div>
                     <img class="relative w-full h-full rounded-[2.5rem] border border-white/10 p-1 bg-white/5 object-cover" src="${avatar}" alt="${safeName}">
                 </div>
                 <h3 class="text-3xl font-black mb-2 text-white tracking-tighter leading-none uppercase">${safeName}</h3>

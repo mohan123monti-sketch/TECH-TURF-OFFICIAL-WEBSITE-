@@ -1,16 +1,18 @@
-import { getAdminPanelUrls, updateAdminPanelUrl } from '../controllers/system-controller.js';
-// Admin Panel URL management
-router.get('/admin-panel-urls', protect, getAdminPanelUrls);
-router.post('/admin-panel-urls', protect, adminOnly, updateAdminPanelUrl);
+
 import express from 'express';
 import { 
     getMetrics, addMetric, getEvents, addEvent, getStats,
     getRealtimeStats, executeCommand, getPm2List, getLogData,
-    getServiceHealth, getPresetCommands, runPresetCommand
+    getServiceHealth, getPresetCommands, runPresetCommand,
+    getAdminPanelUrls, updateAdminPanelUrl
 } from '../controllers/system-controller.js';
 import { adminOnly, protect } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
+
+// Admin Panel URL management
+router.get('/admin-panel-urls', protect, getAdminPanelUrls);
+router.post('/admin-panel-urls', protect, adminOnly, updateAdminPanelUrl);
 
 // Existing routes
 router.get('/metrics', protect, getMetrics);

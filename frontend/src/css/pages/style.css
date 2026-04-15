@@ -1,3 +1,122 @@
+/* --- Enhanced UI/UX Upgrades (2026) --- */
+
+/* 1. Inputs & Buttons: Glow on Hover/Focus */
+input:not([type=checkbox]):not([type=radio]):not([type=range]),
+textarea,
+select.glass-input {
+    transition: box-shadow 0.3s, border-color 0.3s;
+    border-radius: 1.25rem;
+}
+input:focus,
+textarea:focus,
+select.glass-input:focus {
+    box-shadow: 0 0 0 3px #d2670e55, 0 2px 12px 0 #d2670e22;
+    border-color: #d2670e;
+    outline: none;
+}
+button,
+.magnetic-btn {
+    transition: box-shadow 0.25s, background 0.25s, border-color 0.25s;
+    border-radius: 1.25rem;
+}
+button:hover,
+.magnetic-btn:hover {
+    box-shadow: 0 0 0 3px #f26522bb, 0 8px 32px -4px #f2652233;
+    background: linear-gradient(90deg, #f26522 0%, #d2670e 100%);
+    border-color: #f26522;
+    color: #fff;
+}
+
+/* 2. Section/Card Separation: Drop Shadows & Borders */
+.liquid-card,
+.spotlight-group,
+.bg-white\/5,
+.section-dark,
+.iphone-glass {
+    box-shadow: 0 6px 32px -8px #000a, 0 1.5px 8px 0 #f2652212;
+    border-radius: 2.5rem;
+    border: 1.5px solid rgba(255,255,255,0.07);
+}
+
+/* 3. Consistent Rounded Corners */
+input,
+textarea,
+select,
+button,
+.magnetic-btn,
+.liquid-card,
+.spotlight-group,
+.bg-white\/5,
+.section-dark,
+.iphone-glass {
+    border-radius: 1.25rem !important;
+}
+
+/* 4. Reveal Animations (Fade/Slide Up) */
+.reveal-hidden {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 5. Button Gradient/Glow for CTAs */
+.cta-btn,
+button.cta-btn,
+.magnetic-btn.cta-btn {
+    background: linear-gradient(90deg, #f26522 0%, #d2670e 100%);
+    color: #fff;
+    box-shadow: 0 0 0 3px #f26522bb, 0 8px 32px -4px #f2652233;
+    border: none;
+    border-radius: 1.5rem;
+    font-weight: 700;
+    transition: box-shadow 0.25s, background 0.25s;
+}
+.cta-btn:hover {
+    box-shadow: 0 0 0 6px #f26522cc, 0 16px 48px -8px #f2652255;
+    background: linear-gradient(90deg, #d2670e 0%, #f26522 100%);
+}
+
+/* 6. Custom Scrollbar for Dark Theme */
+::-webkit-scrollbar {
+    width: 10px;
+    background: #10131a;
+}
+::-webkit-scrollbar-thumb {
+    background: #23272f;
+    border-radius: 8px;
+    border: 2px solid #181c23;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #f26522;
+}
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #23272f #10131a;
+}
+/* --- Custom Select Dropdown Styling for Dark Mode --- */
+select,
+select.glass-input {
+    background-color: #181c23 !important;
+    color: #f3f4f6 !important;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.18);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+select:focus {
+    border-color: #d2670e;
+    outline: none;
+    box-shadow: 0 0 0 2px #d2670e44;
+}
+select option {
+    background: #181c23;
+    color: #f3f4f6;
+}
 /* ========================================================================
    Tech Turf - Phase 8: Ultra-High-End iPhone Glass UI
    ======================================================================== */

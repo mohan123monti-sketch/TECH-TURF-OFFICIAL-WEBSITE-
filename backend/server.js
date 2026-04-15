@@ -27,6 +27,7 @@ import websiteRoutes from './routes/website-routes.js';
 import enhancedAdminRoutes from './routes/enhanced-admin-routes.js';
 import systemSettingsRoutes from './routes/system-settings-routes.js';
 import adminIntegrationRoutes from './routes/admin-integration-routes.js';
+import announcementRoutes from './routes/announcement-routes.js';
 
 dotenv.config();
 
@@ -108,6 +109,7 @@ app.use('/api', websiteRoutes); // Products, Orders, Promos, Announcements, Medi
 app.use('/api/admin', enhancedAdminRoutes); // Enhanced Admin Features
 app.use('/api/admin/system-settings', systemSettingsRoutes); // System Settings
 app.use('/api/admin/integration', adminIntegrationRoutes); // Admin Integration & Testing
+app.use('/api/announcements', announcementRoutes); // Announcements
 app.use('/uploads', express.static('uploads'));
 
 if (SHOULD_SERVE_FRONTEND) {

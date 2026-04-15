@@ -449,8 +449,10 @@ window.handleLogout = handleLogout;
 function generateHeader() {
     const currentPageFile = window.location.pathname.split('/').pop();
 
+
     const divisions = [
         { name: 'Tech Turf', href: '/index.html' },
+        { name: 'About', href: '/pages/about.html' },
         { name: 'Quinta', href: '/pages/quinta.html' },
         { name: 'Trend Hive', href: '/pages/trend-hive.html' },
         { name: 'Click Sphere', href: '/pages/click-sphere.html' },
