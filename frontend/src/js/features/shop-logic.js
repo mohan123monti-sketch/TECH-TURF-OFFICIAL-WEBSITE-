@@ -37,9 +37,17 @@ const state = {
 
 // --- API Interactions ---
 
-async function fetchProducts() {
+async function fetchProducts(search = '', category = 'all') {
     try {
-        const response = await fetch(`${window.API_BASE_URL}/products`);
+        let url = `${window.API_BASE_URL}/products`;
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (category && category !== 'all') params.append('category', category);
+        
+        const queryString = params.toString();
+        if (queryString) url += `?${queryString}`;
+
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch products');
         const products = await response.json();
         const normalizedProducts = Array.isArray(products)

@@ -12,182 +12,188 @@
     <link rel="stylesheet" href="/src/css/pages/style.css">
     <link rel="stylesheet" href="/src/css/pages/shop-styles.css">
     <style>
-        /* --- Advanced Features Dropdown Styles --- */
+        /* --- Advanced Filter Categories Dropdown Styles --- */
         .features-dropdown-menu {
             position: absolute;
             top: calc(100% + 12px);
-            left: 0;
-            width: 340px;
-            max-height: 480px;
-            background: rgba(11, 21, 55, 0.95);
-            backdrop-filter: blur(32px);
-            -webkit-backdrop-filter: blur(32px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            z-index: 150;
+            right: 0;
+            width: 650px;
+            max-height: 600px;
+            background: rgba(8, 14, 38, 0.98);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            z-index: 1000; /* Extremely high to stay on top */
             overflow-y: auto;
-            padding: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 24px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(210, 103, 14, 0.1);
             opacity: 0;
             visibility: hidden;
-            transform: translateY(10px);
+            transform: translateY(20px) scale(0.98);
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
         }
 
         .features-dropdown-menu.active {
             opacity: 1;
             visibility: visible;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
         }
 
-        .features-category-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
+        .category-accordion {
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 16px;
         }
 
-        .features-category-header {
-            padding: 12px 14px;
+        .category-accordion:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-trigger {
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: background 0.3s;
+            padding: 8px 0;
+            width: 100%;
+            background: none;
+            border: none;
+            outline: none;
         }
 
-        .features-category-header:hover {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .features-category-title {
-            font-size: 10px;
+        .accordion-trigger h2 {
+            font-size: 14px;
             font-weight: 800;
+            color: #fb923c;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #ffffff;
+            letter-spacing: 2px;
+            margin: 0;
         }
 
-        .features-category-content {
-            padding: 0 14px 14px;
+        .accordion-content {
             display: none;
-            animation: tt-fade-in 0.3s ease;
+            padding-top: 16px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
         }
 
-        .features-category-content.active {
-            display: block;
+        .accordion-content.active {
+            display: grid;
         }
 
-        .features-subcategory {
-            margin-top: 14px;
+        .subcategory-group {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
         }
 
-        .features-subcategory-title {
-            font-size: 9px;
-            font-weight: 800;
-            color: #64748b;
-            margin-bottom: 8px;
+        .subcategory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+        }
+
+        .subcategory-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.5);
             text-transform: uppercase;
             letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 4px;
         }
 
-        .features-options-list {
+        .select-all-btn {
+            font-size: 10px;
+            color: #d2670e;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .select-all-btn:hover {
+            opacity: 1;
+        }
+
+        .options-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 4px;
+            gap: 6px;
         }
 
-        .features-option-item {
+        .option-label {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 6px 8px;
-            border-radius: 8px;
+            padding: 6px 10px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
             font-size: 12px;
             color: rgba(255, 255, 255, 0.7);
+            border: 1px solid transparent;
         }
 
-        .features-option-item:hover {
+        .option-label:hover {
             background: rgba(210, 103, 14, 0.1);
             color: white;
+            border-color: rgba(210, 103, 14, 0.2);
         }
 
-        .features-option-item input {
+        .option-label input {
             accent-color: #d2670e;
-            width: 14px;
-            height: 14px;
-            cursor: pointer;
+            width: 15px;
+            height: 15px;
         }
 
-        .features-search-box {
+        .dropdown-footer {
             position: sticky;
-            top: 0;
-            z-index: 20;
-            background: rgba(11, 21, 55, 0.98);
-            margin: -16px -16px 16px;
-            padding: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            bottom: -24px;
+            margin: 24px -24px -24px;
+            padding: 24px;
+            background: rgba(10, 15, 30, 0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .features-search-container {
+            position: sticky;
+            top: -24px;
+            margin: -24px -24px 20px;
+            padding: 24px;
+            background: rgba(8, 14, 38, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 50;
         }
 
         .features-search-input {
             width: 100%;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 10px 14px;
-            font-size: 12px;
+            border-radius: 14px;
+            padding: 12px 16px;
             color: white;
+            font-size: 13px;
             outline: none;
             transition: all 0.3s;
         }
 
         .features-search-input:focus {
-            border-color: rgba(210, 103, 14, 0.4);
             background: rgba(255, 255, 255, 0.08);
-        }
-
-        .features-chips-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .feature-tag {
-            background: rgba(210, 103, 14, 0.15);
-            border: 1px solid rgba(210, 103, 14, 0.3);
-            color: #fb923c;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            animation: tt-scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .feature-tag:hover {
-            background: rgba(210, 103, 14, 0.25);
-            transform: translateY(-1px);
-        }
-
-        @keyframes tt-fade-in {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes tt-scale-in {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+            border-color: #d2670e;
+            box-shadow: 0 0 15px rgba(210, 103, 14, 0.15);
         }
 
         .features-dropdown-trigger {
@@ -197,47 +203,48 @@
             width: 100%;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
+            border-radius: 1.25rem;
+            padding: 0 1.5rem;
             color: white;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 10;
+            outline: none;
+            font-size: 0.875rem;
+            font-weight: 600;
         }
 
         .features-dropdown-trigger:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(210, 103, 14, 0.3);
+            box-shadow: 0 0 20px rgba(210, 103, 14, 0.1);
         }
 
-        .features-dropdown-trigger i {
-            transition: transform 0.3s;
+        .features-dropdown-trigger.active {
+            background: rgba(210, 103, 14, 0.15);
+            border-color: #d2670e;
         }
 
-        .features-dropdown-trigger.active i {
-            transform: rotate(180deg);
-        }
-
-        .features-select-all {
-            font-size: 9px;
-            color: #d2670e;
-            font-weight: 800;
-            text-transform: uppercase;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .features-select-all:hover {
-            opacity: 1;
-        }
-
-        /* Responsive Dropdown */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .features-dropdown-menu {
-                width: calc(100vw - 36px);
-                max-height: 400px;
+                width: 500px;
             }
         }
+
+        @media (max-width: 768px) {
+            .features-dropdown-menu {
+                width: calc(100vw - 32px);
+                left: 0;
+                right: 0;
+                margin: auto;
+                max-height: 80vh;
+            }
+            .accordion-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
     <script src="/src/js/features/shop-logic.js"></script>
     <script src="/src/js/core/layout.js" defer></script>
@@ -250,118 +257,43 @@
     <section class="product-section">
         <div class="shop-container">
 
-            <div class="filters-shell mb-8">
-                <div class="mb-8 grid grid-cols-1 lg:grid-cols-4 gap-4">
-                <div class="lg:col-span-2">
-                    <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Search</label>
-                    <input id="search-input" type="text" placeholder="Search products"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:bg-white/10 transition-all outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Sort</label>
-                    <select id="sort-select"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:bg-white/10 transition-all outline-none">
-                        <option value="featured">Featured</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                        <option value="newest">Newest</option>
-                        <option value="name-asc">Name: A to Z</option>
-                    </select>
-                </div>
-                <div class="relative">
-                    <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Features</label>
-                    <div id="features-dropdown" class="features-dropdown-trigger">
-                        <span id="features-label">Select Features</span>
-                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            <div class="filters-shell mb-12">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
+                    <div class="lg:col-span-3">
+                        <label class="block text-xs text-gray-400 uppercase tracking-widest mb-3">Search Products</label>
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                            <input id="search-input" type="text" placeholder="What are you looking for?"
+                                class="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white focus:bg-white/10 focus:border-orange-500/50 transition-all outline-none text-base">
+                        </div>
                     </div>
-                    <div id="features-menu" class="features-dropdown-menu">
-                        <div class="features-search-box">
-                            <input type="text" id="features-search" placeholder="Search features..." class="features-search-input">
-                        </div>
-                        <div id="features-list">
-                            <!-- Categories will be injected here -->
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-white/10">
-                            <button id="clear-features-btn" class="px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-500/20 transition-all">
-                                Clear Features
-                            </button>
+                    <div class="relative">
+                        <label class="block text-xs text-gray-400 uppercase tracking-widest mb-3">All Categories</label>
+                        <button id="features-dropdown" class="features-dropdown-trigger h-[60px]" type="button">
+                            <span id="features-label">Explore All</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="features-menu" class="features-dropdown-menu">
+                            <div class="features-search-container">
+                                <input type="text" id="features-search" placeholder="Search features..." class="features-search-input">
+                            </div>
+                            <div id="features-list">
+                                <!-- Categories will be injected here -->
+                            </div>
+                            <div class="dropdown-footer">
+                                <button id="apply-features-btn" class="w-full py-3 bg-orange-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-900/20">
+                                    Apply Category Filter
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                </div>
 
-                <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Price Range</label>
-                    <div class="flex gap-2">
-                        <input id="price-min" type="number" min="0" placeholder="Min"
-                            class="w-1/2 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:bg-white/10 transition-all outline-none">
-                        <input id="price-max" type="number" min="0" placeholder="Max"
-                            class="w-1/2 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:bg-white/10 transition-all outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Brand</label>
-                    <select id="brand-select"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:bg-white/10 transition-all outline-none">
-                        <option value="all">All Brands</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Min Rating</label>
-                    <select id="rating-min"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:bg-white/10 transition-all outline-none">
-                        <option value="0">All Ratings</option>
-                        <option value="4">4+ Stars</option>
-                        <option value="3">3+ Stars</option>
-                        <option value="2">2+ Stars</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 uppercase tracking-widest mb-2">Delivery (Days)</label>
-                    <select id="delivery-max"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:bg-white/10 transition-all outline-none">
-                        <option value="0">Any</option>
-                        <option value="1">1 Day</option>
-                        <option value="2">2 Days</option>
-                        <option value="3">3 Days</option>
-                        <option value="5">5 Days</option>
-                    </select>
-                </div>
-                </div>
-
-
-                <div class="mb-4 flex flex-wrap items-center gap-6">
-                    <label class="inline-flex items-center gap-2 text-xs text-gray-400 uppercase tracking-widest cursor-pointer group">
-                        <input id="in-stock-only" type="checkbox" class="accent-orange-500 w-4 h-4 rounded border-white/10 bg-white/5">
-                        <span class="group-hover:text-white transition-colors">In stock only</span>
-                    </label>
-                    <label class="inline-flex items-center gap-2 text-xs text-gray-400 uppercase tracking-widest cursor-pointer group">
-                        <input id="wishlist-only" type="checkbox" class="accent-orange-500 w-4 h-4 rounded border-white/10 bg-white/5">
-                        <span class="group-hover:text-white transition-colors">Wishlist only</span>
-                    </label>
-                </div>
-
-                <div id="selected-features-chips" class="features-chips-container mb-6"></div>
-
-
-                <div class="mb-2 flex flex-wrap items-center gap-4 justify-between">
-                    <div class="flex flex-wrap items-center gap-4">
-                <label class="inline-flex items-center gap-2 text-xs text-gray-400 uppercase tracking-widest">
-                    <input id="wishlist-only" type="checkbox" class="accent-orange-500">
-                    Wishlist only
-                </label>
-                <button id="clear-filters"
-                    class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 uppercase tracking-widest hover:bg-white/10 transition-all">
-                    Clear Filters
-                </button>
-                    </div>
-                    <span class="text-xs text-white/40 uppercase tracking-widest">Live Product Feed</span>
-                </div>
+                <div id="selected-features-chips" class="features-chips-container mt-6"></div>
+            </div>
             </div>
 
             <div id="products-grid" class="product-grid"></div>
-            <div id="pagination" class="mt-10 flex items-center justify-between text-xs text-white/60 uppercase tracking-widest"></div>
 
             <section id="recent-section" class="mt-16 hidden">
                 <div class="section-head mb-8">
@@ -387,19 +319,6 @@
             const productsGrid = document.getElementById('products-grid');
             const productCount = document.getElementById('product-count');
             const searchInput = document.getElementById('search-input');
-            const sortSelect = document.getElementById('sort-select');
-            const priceMinInput = document.getElementById('price-min');
-            const priceMaxInput = document.getElementById('price-max');
-            const brandSelect = document.getElementById('brand-select');
-            const ratingMinSelect = document.getElementById('rating-min');
-            const deliveryMaxSelect = document.getElementById('delivery-max');
-            const inStockOnlyInput = document.getElementById('in-stock-only');
-            const wishlistOnlyInput = document.getElementById('wishlist-only');
-            const clearFiltersBtn = document.getElementById('clear-filters');
-            const pagination = document.getElementById('pagination');
-            const compareBar = document.getElementById('compare-bar');
-            const compareCount = document.getElementById('compare-count');
-            const compareGo = document.getElementById('compare-go');
             const recentSection = document.getElementById('recent-section');
             const recentGrid = document.getElementById('recent-grid');
             let recentProductsCache = [];
@@ -408,29 +327,13 @@
 
             if (productCount) productCount.textContent = 'Loading Inventory...';
 
-            const allProducts = await window.fetchProducts();
-
-            if (productCount) productCount.textContent = `${allProducts.length} Units Available`;
-            if (allProducts.length === 0) {
-                productsGrid.innerHTML = '<p class="text-white text-center col-span-full">No products found.</p>';
-                return;
-            }
-
             const state = {
-                products: allProducts,
-                filtered: allProducts,
+                products: [],
+                filtered: [],
                 currentPage: 1,
-                itemsPerPage: 12,
+                itemsPerPage: 100, // Show all products since pagination is removed
                 search: '',
-                sort: 'featured',
-                priceMin: null,
-                priceMax: null,
                 category: 'all',
-                brand: 'all',
-                ratingMin: 0,
-                deliveryMax: 0,
-                inStockOnly: false,
-                wishlistOnly: false,
                 selectedFeatures: new Set(),
                 wishlist: new Set((window.getWishlistIds ? window.getWishlistIds() : []).map(String)),
                 compare: new Set((window.getCompareIds ? window.getCompareIds() : []).map(String)),
@@ -478,72 +381,123 @@
             const featuresSearch = document.getElementById('features-search');
             const selectedFeaturesChips = document.getElementById('selected-features-chips');
             const featuresLabel = document.getElementById('features-label');
-            const clearFeaturesBtn = document.getElementById('clear-features-btn');
+            const applyFeaturesBtn = document.getElementById('apply-features-btn');
+
+            console.log('Filter system initializing...');
 
             const initFeaturesDropdown = () => {
-                featuresList.innerHTML = Object.entries(featureData).map(([section, categories]) => `
-                    <div class="mb-6">
-                        <h2 class="text-sm font-black mb-3 text-orange-500 uppercase tracking-tighter">
-                            ${section}
-                        </h2>
-                        ${Object.entries(categories).map(([category, items]) => `
-                            <div class="mb-4">
-                                <p class="text-[10px] font-bold text-white/40 mb-2 uppercase tracking-widest">${category}</p>
-                                <div class="flex flex-wrap gap-2">
-                                    ${items.map(item => `
-                                        <label class="flex items-center gap-2 text-[11px] bg-white/5 border border-white/5 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-white/10 hover:border-white/10 transition-all">
-                                            <input type="checkbox" value="${item}" class="feature-checkbox accent-orange-500 w-3 h-3">
-                                            <span class="text-white/80">${item}</span>
-                                        </label>
-                                    `).join('')}
+                if (!featuresList) {
+                    console.error('featuresList element not found!');
+                    return;
+                }
+                
+                featuresList.innerHTML = Object.entries(featureData).map(([section, categories], sectionIdx) => `
+                    <div class="category-accordion" data-section="${section}">
+                        <button type="button" class="accordion-trigger">
+                            <h2>${section}</h2>
+                            <i data-lucide="chevron-down" class="chevron w-4 h-4 text-orange-500 transition-transform"></i>
+                        </button>
+                        <div class="accordion-content ${sectionIdx === 0 ? 'active' : ''}">
+                            ${Object.entries(categories).map(([category, items]) => `
+                                <div class="subcategory-group">
+                                    <div class="subcategory-header">
+                                        <span class="subcategory-title">${category}</span>
+                                        <span class="select-all-btn" data-category="${category}">Select All</span>
+                                    </div>
+                                    <div class="options-grid">
+                                        ${items.map(item => `
+                                            <label class="option-label" data-item-text="${item.toLowerCase()}">
+                                                <input type="checkbox" value="${item}" class="feature-checkbox" ${state.selectedFeatures.has(item) ? 'checked' : ''}>
+                                                <span>${item}</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        </div>
                     </div>
                 `).join('');
 
                 if (window.lucide) lucide.createIcons();
+
+                // Event Delegation for Accordions and Select All
+                featuresList.addEventListener('click', (e) => {
+                    const trigger = e.target.closest('.accordion-trigger');
+                    if (trigger) {
+                        const content = trigger.nextElementSibling;
+                        const isActive = content.classList.toggle('active');
+                        const chevron = trigger.querySelector('.chevron');
+                        if (chevron) chevron.style.transform = isActive ? 'rotate(180deg)' : 'rotate(0deg)';
+                        return;
+                    }
+
+                    const selectAllBtn = e.target.closest('.select-all-btn');
+                    if (selectAllBtn) {
+                        const group = selectAllBtn.closest('.subcategory-group');
+                        const checkboxes = group.querySelectorAll('.feature-checkbox');
+                        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                        
+                        checkboxes.forEach(cb => {
+                            cb.checked = !allChecked;
+                            handleFeatureToggle(cb.value, cb.checked);
+                        });
+                        renderFeatureChips();
+                    }
+                });
 
                 // Checkbox change
                 featuresList.addEventListener('change', (e) => {
                     if (e.target.classList.contains('feature-checkbox')) {
                         handleFeatureToggle(e.target.value, e.target.checked);
                         renderFeatureChips();
-                        handleFilterChange();
                     }
                 });
 
                 // Search logic
                 featuresSearch.addEventListener('input', () => {
                     const term = featuresSearch.value.toLowerCase();
-                    featuresList.querySelectorAll('label').forEach(item => {
-                        const text = item.textContent.toLowerCase();
-                        item.style.display = text.includes(term) ? 'flex' : 'none';
+                    const groups = featuresList.querySelectorAll('.subcategory-group');
+                    
+                    groups.forEach(group => {
+                        let hasVisibleItems = false;
+                        const labels = group.querySelectorAll('.option-label');
+                        labels.forEach(label => {
+                            const isVisible = label.dataset.itemText.includes(term);
+                            label.style.display = isVisible ? 'flex' : 'none';
+                            if (isVisible) hasVisibleItems = true;
+                        });
+                        group.style.display = hasVisibleItems ? 'block' : 'none';
+                    });
+
+                    featuresList.querySelectorAll('.category-accordion').forEach(accordion => {
+                        const visibleGroups = accordion.querySelectorAll('.subcategory-group:not([style*="display: none"])');
+                        accordion.style.display = visibleGroups.length > 0 ? 'block' : 'none';
                     });
                 });
                 
-                clearFeaturesBtn.addEventListener('click', () => {
-                    state.selectedFeatures.clear();
-                    featuresList.querySelectorAll('.feature-checkbox').forEach(cb => cb.checked = false);
-                    renderFeatureChips();
+                // clearFeaturesBtn was removed from UI
+
+                applyFeaturesBtn.addEventListener('click', () => {
                     handleFilterChange();
+                    featuresDropdown.classList.remove('active');
+                    featuresMenu.classList.remove('active');
                 });
+
+                console.log('Filter system initialized successfully.');
             };
 
             const handleFeatureToggle = (feature, isChecked) => {
                 if (isChecked) state.selectedFeatures.add(feature);
                 else state.selectedFeatures.delete(feature);
-                
-                // Keep checkboxes in sync
                 featuresList.querySelectorAll(`.feature-checkbox[value="${feature}"]`).forEach(cb => cb.checked = isChecked);
             };
 
             const renderFeatureChips = () => {
                 const count = state.selectedFeatures.size;
-                featuresLabel.textContent = count > 0 ? `${count} Features Selected` : 'Select Features';
+                featuresLabel.textContent = count > 0 ? `${count} Selected` : 'All Categories';
                 
                 selectedFeaturesChips.innerHTML = Array.from(state.selectedFeatures).map(feat => `
-                    <div class="feature-tag" data-feature="${feat}">
+                    <div class="feature-tag bg-orange-500/10 border border-orange-500/30 text-orange-400 px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-2 cursor-pointer hover:bg-orange-500/20 transition-all" data-feature="${feat}">
                         ${feat} <i data-lucide="x" class="w-3 h-3"></i>
                     </div>
                 `).join('');
@@ -561,14 +515,19 @@
             };
 
             // Dropdown Toggle
-            featuresDropdown.addEventListener('click', (e) => {
-                e.stopPropagation();
-                featuresDropdown.classList.toggle('active');
-                featuresMenu.classList.toggle('active');
-            });
+            if (featuresDropdown) {
+                featuresDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    console.log('Dropdown trigger clicked');
+                    const isActive = featuresDropdown.classList.toggle('active');
+                    featuresMenu.classList.toggle('active', isActive);
+                });
+            } else {
+                console.error('featuresDropdown trigger not found!');
+            }
 
             document.addEventListener('click', (e) => {
-                if (!featuresDropdown.contains(e.target) && !featuresMenu.contains(e.target)) {
+                if (featuresDropdown && featuresMenu && !featuresDropdown.contains(e.target) && !featuresMenu.contains(e.target)) {
                     featuresDropdown.classList.remove('active');
                     featuresMenu.classList.remove('active');
                 }
@@ -576,12 +535,26 @@
 
             initFeaturesDropdown();
 
-
             const productMap = new Map();
-            allProducts.forEach((product) => {
-                const productId = product._id || product.id;
-                if (productId) productMap.set(String(productId), product);
-            });
+
+            const fetchAndInitializeProducts = async () => {
+                const allProducts = await window.fetchProducts();
+                state.products = allProducts;
+                state.filtered = allProducts;
+                
+                if (productCount) productCount.textContent = `${allProducts.length} Units Available`;
+                
+                allProducts.forEach((product) => {
+                    const productId = product._id || product.id;
+                    if (productId) productMap.set(String(productId), product);
+                });
+
+                // Brand Select was removed from UI
+
+                render();
+            };
+
+            fetchAndInitializeProducts();
 
             const getStock = (product) => Number(product.stock || product.countInStock || 0);
 
@@ -659,27 +632,7 @@
             };
 
             const renderPagination = () => {
-                const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.itemsPerPage));
-                if (state.currentPage > totalPages) state.currentPage = totalPages;
-
-                const pageLabel = `Page ${state.currentPage} of ${totalPages}`;
-                const canPrev = state.currentPage > 1;
-                const canNext = state.currentPage < totalPages;
-
-                pagination.innerHTML = `
-                    <button id="page-prev" class="px-4 py-2 rounded-xl border border-white/10 ${canPrev ? 'text-white hover:bg-white/10' : 'text-white/30 cursor-not-allowed'}" ${canPrev ? '' : 'disabled'}>
-                        Previous
-                    </button>
-                    <span>${pageLabel}</span>
-                    <button id="page-next" class="px-4 py-2 rounded-xl border border-white/10 ${canNext ? 'text-white hover:bg-white/10' : 'text-white/30 cursor-not-allowed'}" ${canNext ? '' : 'disabled'}>
-                        Next
-                    </button>
-                `;
-
-                const prevBtn = document.getElementById('page-prev');
-                const nextBtn = document.getElementById('page-next');
-                if (prevBtn) prevBtn.addEventListener('click', () => { state.currentPage -= 1; render(); });
-                if (nextBtn) nextBtn.addEventListener('click', () => { state.currentPage += 1; render(); });
+                // Pagination removed as per UI simplification
             };
 
             const updateCompareBar = () => {
@@ -705,24 +658,6 @@
                     const category = product.branch || product.category || 'Tech Turf';
                     const matchesCategory = state.category === 'all' || category === state.category;
 
-                    const price = Number(product.price || 0);
-                    const minOk = state.priceMin === null || price >= state.priceMin;
-                    const maxOk = state.priceMax === null || price <= state.priceMax;
-
-                    const productId = product._id || product.id;
-                    const matchesWishlist = !state.wishlistOnly || (productId && state.wishlist.has(String(productId)));
-
-                    const brand = product.brand || 'Tech Turf';
-                    const matchesBrand = state.brand === 'all' || brand === state.brand;
-
-                    const rating = Number(product.ratingAvg || 0);
-                    const matchesRating = rating >= state.ratingMin;
-
-                    const deliveryDays = Number(product.deliveryEtaDays || 3);
-                    const matchesDelivery = state.deliveryMax === 0 || deliveryDays <= state.deliveryMax;
-
-                    const matchesStock = !state.inStockOnly || getStock(product) > 0;
-
                     const matchesFeatures = state.selectedFeatures.size === 0 || Array.from(state.selectedFeatures).every(feat => {
                         const productFeatures = product.features || [];
                         const productSpecs = product.specifications || {};
@@ -732,19 +667,8 @@
                                searchString.includes(feat.toLowerCase());
                     });
 
-                    return matchesSearch && matchesCategory && minOk && maxOk && matchesWishlist && matchesBrand && matchesRating && matchesDelivery && matchesStock && matchesFeatures;
+                    return matchesSearch && matchesCategory && matchesFeatures;
                 });
-
-
-                if (state.sort === 'price-asc') {
-                    state.filtered.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
-                } else if (state.sort === 'price-desc') {
-                    state.filtered.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
-                } else if (state.sort === 'newest') {
-                    state.filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-                } else if (state.sort === 'name-asc') {
-                    state.filtered.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
-                }
             };
 
             const renderRecent = () => {
@@ -886,29 +810,28 @@
                 }
             });
 
-            const handleFilterChange = () => {
+            const debounce = (func, delay) => {
+                let timeout;
+                return (...args) => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), delay);
+                };
+            };
+
+            const handleFilterChange = async () => {
                 state.search = searchInput.value || '';
-                state.sort = sortSelect.value || 'featured';
-                state.priceMin = priceMinInput.value ? Number(priceMinInput.value) : null;
-                state.priceMax = priceMaxInput.value ? Number(priceMaxInput.value) : null;
-                state.brand = brandSelect.value || 'all';
-                state.ratingMin = Number(ratingMinSelect.value || 0);
-                state.deliveryMax = Number(deliveryMaxSelect.value || 0);
-                state.inStockOnly = inStockOnlyInput.checked;
-                state.wishlistOnly = wishlistOnlyInput.checked;
                 state.currentPage = 1;
+                
+                // Optional: Re-fetch from server if you want server-side filtering
+                // const products = await window.fetchProducts(state.search, state.category);
+                // state.products = products;
+                
                 render();
             };
 
-            searchInput.addEventListener('input', handleFilterChange);
-            sortSelect.addEventListener('change', handleFilterChange);
-            priceMinInput.addEventListener('input', handleFilterChange);
-            priceMaxInput.addEventListener('input', handleFilterChange);
-            brandSelect.addEventListener('change', handleFilterChange);
-            ratingMinSelect.addEventListener('change', handleFilterChange);
-            deliveryMaxSelect.addEventListener('change', handleFilterChange);
-            inStockOnlyInput.addEventListener('change', handleFilterChange);
-            wishlistOnlyInput.addEventListener('change', handleFilterChange);
+            const debouncedFilterChange = debounce(handleFilterChange, 300);
+
+            searchInput.addEventListener('input', debouncedFilterChange);
 
             if (window.addEventListener) {
                 window.addEventListener('wishlistUpdated', () => {
@@ -922,25 +845,7 @@
                 });
             }
 
-            clearFiltersBtn.addEventListener('click', () => {
-                searchInput.value = '';
-                sortSelect.value = 'featured';
-                priceMinInput.value = '';
-                priceMaxInput.value = '';
-                brandSelect.value = 'all';
-                ratingMinSelect.value = '0';
-                deliveryMaxSelect.value = '0';
-                inStockOnlyInput.checked = false;
-                wishlistOnlyInput.checked = false;
-                state.category = 'all';
-                state.selectedFeatures.clear();
-                featuresList.querySelectorAll('.feature-checkbox').forEach(cb => cb.checked = false);
-                renderFeatureChips();
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                const allCategoryBtn = document.querySelector('.category-btn[data-category="all"]');
-                if (allCategoryBtn) allCategoryBtn.classList.add('active');
-                handleFilterChange();
-            });
+            // clearFiltersBtn removed from UI
 
 
             document.querySelectorAll('.category-btn').forEach(btn => {
@@ -962,13 +867,7 @@
                 window.location.href = `compare.html?ids=${ids.join(',')}`;
             });
 
-            const brands = Array.from(new Set(allProducts.map(p => p.brand || 'Tech Turf'))).sort();
-            brands.forEach((brand) => {
-                const option = document.createElement('option');
-                option.value = brand;
-                option.textContent = brand;
-                brandSelect.appendChild(option);
-            });
+            // Initial brand rendering moved to fetchAndInitializeProducts
 
             render();
         });
