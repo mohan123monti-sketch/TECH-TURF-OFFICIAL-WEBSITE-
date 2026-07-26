@@ -7,7 +7,7 @@ const resolveApiBaseUrl = () => {
     const currentBase = window.API_BASE_URL;
     if (currentBase && !/^\/api\/?$/.test(currentBase)) return currentBase;
 
-    return 'http://localhost:5000/api';
+    return 'http://localhost:5001/api';
 };
 
 window.API_BASE_URL = resolveApiBaseUrl();

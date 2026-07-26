@@ -1,6 +1,6 @@
 // Admin Layout Logic
 const isFile = window.location.protocol === 'file:';
-const API_BASE_URL = isFile ? 'http://localhost:5000/api' : 'http://localhost:5000/api';
+const API_BASE_URL = isFile ? 'http://localhost:5001/api' : 'http://localhost:5001/api';
 
 // --- Toast Notification System (Made global for module scripts) ---
 window.showToast = function (message, type = 'info') {

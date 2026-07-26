@@ -2,7 +2,7 @@ import axios from 'axios';
 
 async function testEndpoint() {
     try {
-        const loginRes = await axios.post('http://localhost:5000/api/auth/login', {
+        const loginRes = await axios.post('http://localhost:5001/api/auth/login', {
             email: 'admin@techturf.com',
             password: 'admin123'
         });
@@ -10,7 +10,7 @@ async function testEndpoint() {
         const token = loginRes.data.token;
         console.log('Login successful');
 
-        const brandRes = await axios.get('http://localhost:5000/api/brandpilot/brand', {
+        const brandRes = await axios.get('http://localhost:5001/api/brandpilot/brand', {
             headers: { Authorization: `Bearer ${token}` }
         });
 

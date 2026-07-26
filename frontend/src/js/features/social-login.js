@@ -22,7 +22,7 @@ const SocialLogin = {
     async fetchGoogleConfig() {
         try {
             // Priority: Global var > Placeholder ID Check > Fallback direct URL
-            const baseUrl = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+            const baseUrl = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5001/api';
             console.log('Social Login: Fetching config from', baseUrl);
             
             const res = await fetch(`${baseUrl}/auth/google/config`, {
@@ -140,7 +140,7 @@ const SocialLogin = {
 
     async handleGoogleResponse(response) {
         try {
-            const baseUrl = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+            const baseUrl = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5001/api';
             const res = await fetch(`${baseUrl}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

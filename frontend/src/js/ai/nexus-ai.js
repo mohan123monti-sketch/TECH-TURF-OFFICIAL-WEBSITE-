@@ -250,9 +250,6 @@ class NexusAI {
             return `Trend Hive is our Digital Marketing Division, focused on viral content creation, branding, and social growth strategies. We help businesses grow their online presence.`;
         }
 
-        if (lowerMessage.includes('click sphere') || lowerMessage.includes('software') || lowerMessage.includes('development')) {
-            return `Click Sphere is our IT & Software Division, offering full-stack development, cloud architecture, and custom software solutions. We build innovative digital products.`;
-        }
 
         if (lowerMessage.includes('product') || lowerMessage.includes('shop') || lowerMessage.includes('buy')) {
             return `You can browse our products in the Shopping section. We offer a range of innovative tech products across our divisions. Would you like me to guide you there?`;
@@ -268,7 +265,6 @@ class NexusAI {
 Here's what we offer:
 • **Quinta** - Aerospace & Space Division
 • **Trend Hive** - Digital Marketing Division  
-• **Click Sphere** - IT & Software Division
 
 You can also visit our Products, Projects, or Contact pages. What would you like to explore?
 

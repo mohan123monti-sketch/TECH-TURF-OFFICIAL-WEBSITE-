@@ -28,6 +28,7 @@ import enhancedAdminRoutes from './routes/enhanced-admin-routes.js';
 import systemSettingsRoutes from './routes/system-settings-routes.js';
 import adminIntegrationRoutes from './routes/admin-integration-routes.js';
 import announcementRoutes from './routes/announcement-routes.js';
+import contentRoutes from './routes/content-routes.js';
 
 dotenv.config();
 
@@ -35,7 +36,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3601';
 const SHOULD_SERVE_FRONTEND =
     process.env.SERVE_FRONTEND === 'true' ||
@@ -110,6 +111,7 @@ app.use('/api/admin', enhancedAdminRoutes); // Enhanced Admin Features
 app.use('/api/admin/system-settings', systemSettingsRoutes); // System Settings
 app.use('/api/admin/integration', adminIntegrationRoutes); // Admin Integration & Testing
 app.use('/api/announcements', announcementRoutes); // Announcements
+app.use('/api/content', contentRoutes); // CMS content routes
 app.use('/uploads', express.static('uploads'));
 
 if (SHOULD_SERVE_FRONTEND) {

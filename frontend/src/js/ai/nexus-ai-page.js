@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!chatForm || !userInput || !chatWindow) return;
 
-    const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
+    const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5001/api';
 
     const addMessage = (text, sender) => {
         const div = document.createElement('div');

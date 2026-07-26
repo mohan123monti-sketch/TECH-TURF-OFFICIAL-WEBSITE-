@@ -11,7 +11,7 @@
 const apiOverride = localStorage.getItem('tt_api_base');
 window.API_BASE_URL = (window.API_BASE_URL && !/^\/api\/?$/.test(window.API_BASE_URL))
     ? window.API_BASE_URL
-    : apiOverride || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+    : apiOverride || window.__TECHTURF_API_BASE__ || 'http://localhost:5001/api';
 
 // --- Real-time Order Updates (Socket.io) ---
 function initOrderSocket() {
@@ -40,6 +40,15 @@ function ensureSocketIo() {
 }
 
 ensureSocketIo();
+
+// Initialize Dynamic CMS Content Fetcher
+function ensureDynamicContent() {
+    const script = document.createElement('script');
+    script.src = '/src/js/core/dynamic-content.js';
+    script.defer = true;
+    document.head.appendChild(script);
+}
+ensureDynamicContent();
 
 // --- 1. Global Message Handler (Toast) ---
 function showMessage(type, message) {
@@ -455,7 +464,6 @@ function generateHeader() {
         { name: 'About', href: '/pages/about.html' },
         { name: 'Quinta', href: '/pages/quinta.html' },
         { name: 'Trend Hive', href: '/pages/trend-hive.html' },
-        { name: 'Click Sphere', href: '/pages/click-sphere.html' },
         { name: 'Shop', href: '/pages/shopping.html' }
     ];
 
@@ -489,9 +497,6 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
         if (pageFile === 'trend-hive.html') {
             return 'background: rgba(242, 101, 34, 0.28); border: 1px solid rgba(251, 146, 60, 0.45); color: #fff2e8;';
         }
-        if (pageFile === 'click-sphere.html') {
-            return 'background: rgba(34, 197, 94, 0.24); border: 1px solid rgba(74, 222, 128, 0.45); color: #eafff0;';
-        }
         if (pageFile === 'shopping.html') {
             return 'background: rgba(242, 101, 34, 0.22); border: 1px solid rgba(251, 146, 60, 0.4); color: #fff2e8;';
         }
@@ -499,10 +504,7 @@ function renderNavHTML(isUserLoggedIn, divisions, currentPageFile) {
         return 'background: rgba(37, 99, 235, 0.28); border: 1px solid rgba(96, 165, 250, 0.45); color: #e8f1ff;';
     };
 
-    if (currentPageFile === 'click-sphere.html') {
-        logoSrc = '/assets/logos/click-sphere.png';
-        brandName = 'Click Sphere';
-    } else if (currentPageFile === 'quinta.html') {
+    if (currentPageFile === 'quinta.html') {
         logoSrc = '/assets/logos/quinta.png';
         brandName = 'Quinta';
     } else if (currentPageFile === 'trend-hive.html') {
@@ -596,7 +598,6 @@ window.updateAuthUI = function (user) {
         { name: 'Tech Turf', href: '/index.html' },
         { name: 'Quinta', href: '/pages/quinta.html' },
         { name: 'Trend Hive', href: '/pages/trend-hive.html' },
-        { name: 'Click Sphere', href: '/pages/click-sphere.html' },
         { name: 'Shop', href: '/pages/shopping.html' }
     ];
     const currentPageFile = window.location.pathname.split('/').pop();
@@ -611,14 +612,14 @@ function generateFooter() {
                    <div class="col-span-2 md:col-span-1">
                        <a href="/index.html" class="flex items-center transition-link">
                            <img src="/assets/logos/tech-turf.png" alt="Tech Turf Logo" class="w-8 h-8 object-contain mr-2">
-                           <span class="text-xl font-bold tracking-wider text-white">TECH TURF</span>
+                           <span class="text-xl font-bold tracking-wider text-white" data-content-key="logo_text">TECH TURF</span>
                        </a>
-                       <p class="mt-4 text-gray-400 text-sm max-w-xs">
+                       <p class="mt-4 text-gray-400 text-sm max-w-xs" data-content-key="tagline">
                            Innovate • Inspire • Ignite. Building the future, one project at a time.
                        </p>
                    </div>
                    <div>
-                       <h3 class="text-lg font-semibold text-white mb-4">Company</h3>
+                       <h3 class="text-lg font-semibold text-white mb-4" data-content-key="footer_text">Company</h3>
                        <ul class="space-y-3 text-sm">
                            <li><a href="/pages/about.html" class="text-gray-400 hover:text-orange-400 transition-link">About Us</a></li>
                            <li><a href="/pages/projects.html" class="text-gray-400 hover:text-orange-400 transition-link">Projects</a></li>
@@ -630,7 +631,6 @@ function generateFooter() {
                        <ul class="space-y-3 text-sm">
                            <li><a href="/pages/quinta.html" class="text-gray-400 hover:text-orange-400 transition-link">Quinta</a></li>
                            <li><a href="/pages/trend-hive.html" class="text-gray-400 hover:text-orange-400 transition-link">Trend Hive</a></li>
-                           <li><a href="/pages/click-sphere.html" class="text-gray-400 hover:text-orange-400 transition-link">Click Sphere</a></li>
                            <li><a href="/pages/shopping.html" class="text-gray-400 hover:text-orange-400 transition-link">Shop</a></li>
                        </ul>
                    </div>
@@ -732,6 +732,8 @@ function initCustomCursor() {
     document.addEventListener('mousemove', (e) => {
         cursor.style.left = `${e.clientX}px`;
         cursor.style.top = `${e.clientY}px`;
+        layoutMouseX = (e.clientX - windowHalfX) * 0.001;
+        layoutMouseY = (e.clientY - windowHalfY) * 0.001;
     });
 
     const hoverElements = document.querySelectorAll('a, button, .cursor-hover');
@@ -924,7 +926,7 @@ let scene, camera, renderer;
 let earthMesh, cloudMesh, starMesh;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
-let mouseX = 0, mouseY = 0;
+let layoutMouseX = 0, layoutMouseY = 0;
 let targetX = 0, targetY = 0;
 
 function initThreeJS() {
@@ -1001,13 +1003,13 @@ function initThreeJS() {
     starMesh = new THREE.Points(starGeo, starMat);
     scene.add(starMesh);
 
-    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('resize', onLayoutWindowResize, false);
     // REMOVED: Cursor-dependent mousemove listener for 3D Earth
     // document.addEventListener('mousemove', onDocumentMouseMove, false);
-    animate();
+    animateLayout3D();
 }
 
-function onWindowResize() {
+function onLayoutWindowResize() {
     if (!camera || !renderer) return;
     windowHalfX = window.innerWidth / 2;
     windowHalfY = window.innerHeight / 2;
@@ -1016,8 +1018,8 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function animate() {
-    requestAnimationFrame(animate);
+function animateLayout3D() {
+    requestAnimationFrame(animateLayout3D);
 
     // Autonomous rotation based on time, NO mouse dependency
     const time = performance.now() * 0.0005;

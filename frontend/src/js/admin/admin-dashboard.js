@@ -1,5 +1,5 @@
 // Admin Dashboard JavaScript
-const API_BASE = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+const API_BASE = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5001/api';
 const API_ORIGIN = new URL(API_BASE).origin;
 
 let currentTab = 'dashboard';
@@ -1585,13 +1585,16 @@ async function savePageContent() {
             body: JSON.stringify({ sections })
         });
         
-        if (!res.ok) throw new Error('Failed to save content');
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || 'Failed to save content');
+        }
         
         alert('Content saved successfully!');
         closeContentEditor();
     } catch (err) {
         console.error('Save content error:', err);
-        alert('Failed to save content');
+        alert('Error: ' + err.message);
     }
 }
 

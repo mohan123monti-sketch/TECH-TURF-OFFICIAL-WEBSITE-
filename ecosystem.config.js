@@ -4,7 +4,7 @@ module.exports = {
       name: 'TT-Backend',
       script: 'server.js',
       cwd: './backend',
-      env: { NODE_ENV: 'development', PORT: 5000 }
+      env: { NODE_ENV: 'development', PORT: 5001 }
     },
     {
       name: 'TT-Website',

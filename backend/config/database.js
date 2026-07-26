@@ -553,6 +553,13 @@ export async function initDatabase() {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
             FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS page_content (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            page_id TEXT UNIQUE NOT NULL,
+            content TEXT NOT NULL,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
     `;
 
     // Execute schema statements individually for better compatibility across SQLite builds.
