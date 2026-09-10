@@ -34,3 +34,4 @@ backend/*.txt
 
 .DS_Store
 Thumbs.db
+.vercel/

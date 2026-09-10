@@ -1,6 +1,10 @@
 // Admin Layout Logic
-const isFile = window.location.protocol === 'file:';
-const API_BASE_URL = isFile ? 'http://localhost:5000/api' : 'http://localhost:5000/api';
+const isFile = typeof window !== 'undefined' && window.location.protocol === 'file:';
+const defaultAdminApiBase = (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !isFile)
+    ? `${window.location.origin}/api`
+    : 'http://localhost:5000/api';
+const API_BASE_URL = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || defaultAdminApiBase;
+window.API_BASE_URL = API_BASE_URL;
 
 // --- Toast Notification System (Made global for module scripts) ---
 window.showToast = function (message, type = 'info') {

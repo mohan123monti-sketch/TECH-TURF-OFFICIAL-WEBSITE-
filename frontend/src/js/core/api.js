@@ -1,6 +1,10 @@
+const defaultApiBase = (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.protocol.startsWith('file'))
+    ? `${window.location.origin}/api`
+    : 'http://localhost:5000/api';
+
 const API_BASE = (typeof window !== 'undefined' && window.API_BASE_URL)
     ? window.API_BASE_URL
-    : 'http://localhost:5000/api';
+    : defaultApiBase;
 
 const apiRequest = async (endpoint, method = 'GET', body = null, token = null) => {
     const headers = {

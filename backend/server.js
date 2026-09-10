@@ -112,7 +112,7 @@ app.use('/api/admin/integration', adminIntegrationRoutes); // Admin Integration 
 app.use('/api/announcements', announcementRoutes); // Announcements
 app.use('/uploads', express.static('uploads'));
 
-if (SHOULD_SERVE_FRONTEND) {
+if (SHOULD_SERVE_FRONTEND && !process.env.VERCEL) {
     app.use(express.static(FRONTEND_ROOT));
 }
 
@@ -126,7 +126,7 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    if (SHOULD_SERVE_FRONTEND) {
+    if (SHOULD_SERVE_FRONTEND && !process.env.VERCEL) {
         return res.sendFile(path.join(FRONTEND_ROOT, 'index.html'));
     }
 
@@ -191,6 +191,11 @@ io.on('connection', (socket) => {
 // Attach io to app for use in controllers
 app.set('io', io);
 
-httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+    httpServer.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+export default app;
+export { app, httpServer };

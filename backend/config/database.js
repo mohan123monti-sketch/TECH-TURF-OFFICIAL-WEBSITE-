@@ -1,12 +1,32 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import path from 'path';
+import fs from 'fs';
+import os from 'os';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.resolve(__dirname, '../database/database.sqlite');
+function getDatabasePath() {
+    if (process.env.VERCEL || process.env.NOW_BUILD) {
+        const tmpDbPath = path.join(os.tmpdir(), 'database.sqlite');
+        const origDbPath = path.resolve(__dirname, '../database/database.sqlite');
+        if (!fs.existsSync(tmpDbPath)) {
+            if (fs.existsSync(origDbPath)) {
+                try {
+                    fs.copyFileSync(origDbPath, tmpDbPath);
+                } catch (e) {
+                    console.warn('Failed to copy database template to /tmp:', e);
+                }
+            }
+        }
+        return tmpDbPath;
+    }
+    return path.resolve(__dirname, '../database/database.sqlite');
+}
+
+const dbPath = getDatabasePath();
 
 export async function initDatabase() {
     const db = await open({

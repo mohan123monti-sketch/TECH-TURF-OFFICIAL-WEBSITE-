@@ -7,7 +7,9 @@ const resolveApiBaseUrl = () => {
     const currentBase = window.API_BASE_URL;
     if (currentBase && !/^\/api\/?$/.test(currentBase)) return currentBase;
 
-    return 'http://localhost:5000/api';
+    return (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.protocol.startsWith('file'))
+        ? `${window.location.origin}/api`
+        : 'http://localhost:5000/api';
 };
 
 window.API_BASE_URL = resolveApiBaseUrl();
@@ -17,7 +19,7 @@ function normalizeProductImageUrl(url) {
     const value = String(url).trim().replace(/\\/g, '/');
     if (!value) return '';
     if (/^data:image\//i.test(value) || /^https?:\/\//i.test(value) || value.startsWith('//')) return value;
-    const apiOrigin = new URL(window.API_BASE_URL).origin;
+    const apiOrigin = (window.API_BASE_URL && window.API_BASE_URL.startsWith('http')) ? new URL(window.API_BASE_URL).origin : window.location.origin;
     return value.startsWith('/') ? `${apiOrigin}${value}` : `${apiOrigin}/${value}`;
 }
 

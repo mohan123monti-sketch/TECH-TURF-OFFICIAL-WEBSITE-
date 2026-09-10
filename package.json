@@ -1,26 +1,46 @@
 {
   "name": "tech-turf-website",
   "version": "1.0.0",
-  "description": "",
-  "main": "layout.js",
+  "type": "module",
+  "description": "Tech Turf Official Website",
+  "main": "backend/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node scripts/validate-naming.js",
     "start": "npm start --prefix backend",
     "dev": "npm run dev --prefix backend",
-    "build": "npm install --prefix backend",
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "postinstall": "npm install --prefix backend && npm install --prefix frontend",
+    "build": "npm run build:frontend",
     "build:frontend": "npm run build --prefix frontend",
     "start:frontend": "npm start --prefix frontend",
     "start:prod": "npm start --prefix backend",
     "validate:naming": "node scripts/validate-naming.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "tech-turf",
+    "website",
+    "ecommerce"
+  ],
+  "author": "Tech Turf Team",
   "license": "ISC",
   "devDependencies": {
     "tailwindcss": "^3.4.19"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.18",
-    "mongodb": "^7.1.0"
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.6.8",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "google-auth-library": "^9.10.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.1.1",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^6.9.13",
+    "os-utils": "^0.0.14",
+    "socket.io": "^4.8.3",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   }
 }

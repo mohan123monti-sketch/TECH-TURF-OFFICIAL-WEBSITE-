@@ -372,8 +372,10 @@
             }
 
             // Safety Check for dependencies
-            if (typeof window.API_BASE_URL === 'undefined' || window.API_BASE_URL === '/api' || window.API_BASE_URL.includes('8080')) {
-                window.API_BASE_URL = 'http://localhost:5000/api';
+            if (typeof window.API_BASE_URL === 'undefined' || window.API_BASE_URL.includes('8080')) {
+                window.API_BASE_URL = (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.protocol.startsWith('file'))
+                    ? `${window.location.origin}/api`
+                    : 'http://localhost:5000/api';
             }
 
             const signinForm = document.getElementById('signin-form');
