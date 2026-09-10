@@ -6,7 +6,7 @@
     const defaults = {
         title: 'Tech Turf - Innovate, Inspire and Ignite',
         description: 'Tech Turf builds high-end digital ecosystems across aerospace, software, and growth marketing. Innovate, Inspire and Ignite.',
-        keywords: 'Tech Turf, Quinta, Click Sphere, Trend Hive, Nexus AI, aerospace, software, marketing, ecommerce, innovation, digital ecosystem',
+        keywords: 'Tech Turf, Quinta, Trend Hive, Nexus AI, aerospace, marketing, ecommerce, innovation, digital ecosystem',
         type: 'website'
     };
 
@@ -62,11 +62,7 @@
             description: 'Quinta is the Tech Turf aerospace division focused on propulsion, avionics, and flight systems.',
             keywords: 'Quinta, aerospace, propulsion, avionics, Tech Turf'
         },
-        'click-sphere.html': {
-            title: 'Click Sphere - Software Division',
-            description: 'Click Sphere delivers full-stack software, digital products, and engineering services.',
-            keywords: 'Click Sphere, software, full-stack, Tech Turf'
-        },
+
         'trend-hive.html': {
             title: 'Trend Hive - Growth Division',
             description: 'Trend Hive drives branding, marketing, and high-velocity growth systems.',

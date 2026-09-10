@@ -1,6 +1,6 @@
 let allAnnouncements = [];
 let editingAnnouncementId = null;
-const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5001/api';
 
 async function loadAnnouncements() {
     const token = window.getAuthToken?.() || localStorage.getItem('tt_token') || localStorage.getItem('token');

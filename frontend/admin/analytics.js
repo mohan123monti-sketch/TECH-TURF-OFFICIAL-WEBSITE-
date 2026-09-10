@@ -1,6 +1,6 @@
 let revenueChart, ordersChart, segmentsChart;
 
-const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5000/api';
+const apiBase = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || 'http://localhost:5001/api';
 
 async function loadAnalytics() {
     const token = window.getAuthToken?.();

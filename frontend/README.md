@@ -374,7 +374,7 @@ Modify CSS variables in `/src/css/base.css`:
 
 ### Advanced Features
 - 🤖 **Nexus AI** - Intelligent chatbot assistant
-- 🎨 **3D Visualizations** - Click Sphere, Quinta Orbital, Trend Hive
+- 🎨 **3D Visualizations** - Quinta Orbital, Trend Hive
 - 🌍 **Multi-language** - India localization support (INR, regional languages)
 - 🔍 **Advanced Search** - Filters, sorting, live suggestions
 - ⭐ **Reviews & Ratings** - Product feedback system

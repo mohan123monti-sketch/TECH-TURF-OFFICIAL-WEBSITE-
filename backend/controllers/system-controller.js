@@ -42,8 +42,8 @@ const startInNewWindowCommand = (title, cwd, startCommand) => `cd /d "${cwd}" & 
 const PRESET_COMMANDS = {
     restart_unified_backend: {
         label: 'Restart Unified Backend',
-        description: 'Stops process on port 5000 and restarts backend dev server.',
-        command: `${killPortCommand(5000)} & ${startInNewWindowCommand('Unified Backend :5000', 'C:\\HOSTING\\Final Version\\TECH TURF-O.1\\backend', 'set PORT=5000 && set FRONTEND_BASE_URL=http://localhost:3601 && npm run dev')}`
+        description: 'Stops process on port 5001 and restarts backend dev server.',
+        command: `${killPortCommand(5000)} & ${startInNewWindowCommand('Unified Backend :5000', 'C:\\HOSTING\\Final Version\\TECH TURF-O.1\\backend', 'set PORT=5001 && set FRONTEND_BASE_URL=http://localhost:3601 && npm run dev')}`
     },
     restart_brand_pilot: {
         label: 'Restart Brand Pilot',
@@ -81,8 +81,8 @@ const PRESET_COMMANDS = {
         command: 'cd /d "C:\\HOSTING\\Final Version" & start "Full Stack Stopper" cmd /c "STOP_ALL_WEBSITES.bat"'
     },
     free_port_5000: {
-        label: 'Free Port 5000',
-        description: 'Kills any process currently listening on port 5000.',
+        label: 'Free port 5001',
+        description: 'Kills any process currently listening on port 5001.',
         command: killPortCommand(5000)
     },
     free_port_3200: {
@@ -108,7 +108,7 @@ const PRESET_COMMANDS = {
 };
 
 const HEALTH_TARGETS = [
-    { key: 'backend', name: 'Unified Backend', url: 'http://localhost:5000/', restartCommandId: 'restart_unified_backend' },
+    { key: 'backend', name: 'Unified Backend', url: 'http://localhost:5001/', restartCommandId: 'restart_unified_backend' },
     { key: 'brand', name: 'Brand Pilot', url: 'http://localhost:3200/', restartCommandId: 'restart_brand_pilot' },
     { key: 'calander', name: 'CALANDER', url: 'http://localhost:5190/', restartCommandId: 'restart_calander' },
     { key: 'crm', name: 'CRM Frontend', url: 'http://localhost:3100/', restartCommandId: 'restart_crm_frontend' },

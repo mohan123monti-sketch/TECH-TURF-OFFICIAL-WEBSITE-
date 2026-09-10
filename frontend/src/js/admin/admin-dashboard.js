@@ -1,6 +1,7 @@
+// Admin Dashboard JavaScript
 const defaultDashboardApiBase = (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.protocol.startsWith('file'))
     ? `${window.location.origin}/api`
-    : 'http://localhost:5000/api';
+    : (window.location.port === '5001' ? 'http://localhost:5001/api' : 'http://localhost:5000/api');
 const API_BASE = window.API_BASE_URL || window.__TECHTURF_API_BASE__ || defaultDashboardApiBase;
 const API_ORIGIN = (typeof window !== 'undefined' && API_BASE.startsWith('http')) ? new URL(API_BASE, window.location.origin).origin : window.location.origin;
 
@@ -1587,13 +1588,16 @@ async function savePageContent() {
             body: JSON.stringify({ sections })
         });
         
-        if (!res.ok) throw new Error('Failed to save content');
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || 'Failed to save content');
+        }
         
         alert('Content saved successfully!');
         closeContentEditor();
     } catch (err) {
         console.error('Save content error:', err);
-        alert('Failed to save content');
+        alert('Error: ' + err.message);
     }
 }
 

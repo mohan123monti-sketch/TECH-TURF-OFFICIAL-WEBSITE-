@@ -1,4 +1,6 @@
 /* --- Enhanced UI/UX Upgrades (2026) --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 
 /* 1. Inputs & Buttons: Glow on Hover/Focus */
 input:not([type=checkbox]):not([type=radio]):not([type=range]),
@@ -120,9 +122,6 @@ select option {
 /* ========================================================================
    Tech Turf - Phase 8: Ultra-High-End iPhone Glass UI
    ======================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 
 :root {
     --primary: #ffffff;

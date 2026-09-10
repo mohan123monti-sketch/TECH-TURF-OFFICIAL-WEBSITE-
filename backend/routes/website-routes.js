@@ -579,7 +579,7 @@ router.get('/search', async (req, res) => {
             },
             filters: {
                 categories: categories.map((c) => c.category).filter(Boolean),
-                branches: ['Tech Turf', 'Quinta', 'Trend Hive', 'Click Sphere']
+                branches: ['Tech Turf', 'Quinta', 'Trend Hive']
             }
         });
     } catch (error) {

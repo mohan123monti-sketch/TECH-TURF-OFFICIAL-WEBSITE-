@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Turf - Customized Website Builder</title>
+
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="/src/css/tailwind.generated.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Styles & Scripts -->
+    <link rel="stylesheet" href="/src/css/pages/style.css">
+    <link rel="stylesheet" href="/src/css/pages/custom-builder.css">
+    <script src="/src/js/core/layout.js" defer></script>
+</head>
+<body data-page="Custom Builder" class="shop-branding">
+
+    <div id="header-container"></div>
+
+    <main class="relative z-10 py-32 px-4 min-h-screen">
+        <div class="builder-container">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <span class="text-orange-500 font-mono tracking-widest text-xs uppercase block mb-4">Build Your Vision</span>
+                <h1 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter mb-4">Customized <span class="text-orange-500">Website Builder</span></h1>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg font-light">Select your required pages, frameworks, and features. We'll handle the rest.</p>
+            </div>
+
+            <!-- Wizard Steps Indicator -->
+            <div class="wizard-steps mb-16">
+                <div class="step-indicator active" id="step-indicator-1">
+                    <div class="step-circle">1</div>
+                    <span class="text-xs uppercase tracking-widest font-bold mt-2">Pages</span>
+                </div>
+                <div class="step-indicator" id="step-indicator-2">
+                    <div class="step-circle">2</div>
+                    <span class="text-xs uppercase tracking-widest font-bold mt-2">Features</span>
+                </div>
+                <div class="step-indicator" id="step-indicator-3">
+                    <div class="step-circle">3</div>
+                    <span class="text-xs uppercase tracking-widest font-bold mt-2">Checkout</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                
+                <!-- Main Builder Content -->
+                <div class="lg:col-span-2">
+                    
+                    <!-- STEP 1: Pages Needed -->
+                    <div id="step-1" class="fade-enter">
+                        <h2 class="text-2xl font-bold text-white mb-6 uppercase tracking-wider">Select Required Pages</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="pages-grid">
+                            <!-- Injected via JS -->
+                        </div>
+                        <div class="mt-8">
+                            <label class="block text-sm text-gray-400 uppercase tracking-widest mb-3">Custom Additional Pages</label>
+                            <input type="number" id="custom-pages-input" min="0" value="0" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-orange-500 outline-none transition-colors">
+                        </div>
+                        <div class="mt-10 flex justify-end">
+                            <button class="btn-primary" onclick="nextStep(2)">Continue to Features</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Features Needed -->
+                    <div id="step-2" class="hidden">
+                        <h2 class="text-2xl font-bold text-white mb-2 uppercase tracking-wider">Select Additional Features</h2>
+                        <p class="text-gray-400 text-sm mb-8">Choose the technologies and functionalities for your website.</p>
+                        
+                        <div id="features-container">
+                            <!-- Injected via JS from featureData -->
+                        </div>
+
+                        <div class="mt-10 flex justify-between">
+                            <button class="btn-outline" onclick="prevStep(1)">Back</button>
+                            <button class="btn-primary" onclick="nextStep(3)">Review & Checkout</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Review -->
+                    <div id="step-3" class="hidden">
+                        <h2 class="text-2xl font-bold text-white mb-6 uppercase tracking-wider">Review Your Build</h2>
+                        <div class="bg-white/5 border border-white/10 rounded-2xl p-8 mb-8">
+                            <div id="review-content" class="space-y-6">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+
+                        <div class="mt-10 flex justify-between">
+                            <button class="btn-outline" onclick="prevStep(2)">Back to Features</button>
+                            <button class="btn-primary flex items-center gap-3" onclick="addToCartAndCheckout()">
+                                <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                                Proceed to Checkout
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Sidebar: Live Summary -->
+                <div class="lg:col-span-1">
+                    <div class="summary-panel">
+                        <h3 class="text-lg font-bold text-white uppercase tracking-widest mb-6">Build Summary</h3>
+                        
+                        <div class="space-y-4 mb-6" id="summary-items">
+                            <div class="summary-item">
+                                <span class="text-gray-400 text-sm">Base Setup</span>
+                                <span class="text-white font-mono">₹5000</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="text-gray-400 text-sm">Standard Pages (<span id="summary-pages-count">0</span>)</span>
+                                <span class="text-white font-mono" id="summary-pages-price">₹0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="text-gray-400 text-sm">Custom Pages (<span id="summary-custom-count">0</span>)</span>
+                                <span class="text-white font-mono" id="summary-custom-price">₹0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="text-gray-400 text-sm">Features (<span id="summary-features-count">0</span>)</span>
+                                <span class="text-white font-mono" id="summary-features-price">₹0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-white/20 pt-6 mt-6">
+                            <div class="flex justify-between items-end">
+                                <span class="text-gray-300 uppercase tracking-widest text-sm font-bold">Estimated Total</span>
+                                <span class="text-orange-500 font-mono font-black text-3xl" id="summary-total">₹5000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        // Data Models
+        const BASE_PRICE = 5000;
+        const PRICE_PER_PAGE = 1500;
+        const PRICE_PER_CUSTOM_PAGE = 2500;
+        const PRICE_PER_FEATURE = 800; // Flat average rate per feature
+
+        const standardPages = [
+            "Home Page", "About Us", "Contact Us", "Services", "Blog/News", "Portfolio/Gallery", "FAQ", "Testimonials"
+        ];
+
+        const featureData = {
+            "Technical Parameters": {
+                "Frontend Framework": ["React.js", "Next.js", "Angular", "HTML/CSS/JS", "Tailwind CSS"],
+                "Backend Framework": ["Node.js", "Express.js", "Django", "Flask", "Spring Boot", "ASP.NET"],
+                "Programming Language": ["JavaScript", "TypeScript", "Python", "C++", "Java", "C#", "Go"],
+                "Database": ["MongoDB", "MySQL", "PostgreSQL", "Firebase", "SQLite", "Supabase", "MariaDB"],
+                "AI Features": ["Chatbot", "AI Search", "Recommendation Engine", "Content Generator", "Voice Assistant", "OCR Scanner", "Automation Bot"],
+                "Authentication": ["Email Login", "Google Login", "OTP Login", "Facebook Login", "Role Based Login", "Admin Login", "Two-Factor Auth"],
+                "Hosting": ["Vercel", "Netlify", "AWS", "DigitalOcean", "Hostinger", "Shared Hosting", "VPS Hosting"]
+            },
+            "Non-Technical Parameters": {
+                "Theme Style": ["Minimal", "Corporate", "Luxury", "Dark Mode", "Modern Startup", "Creative", "Elegant"],
+                "Color Preference": ["Blue", "Black", "White", "Gradient", "Green", "Purple", "Custom Brand Color"],
+                "Fonts": ["Poppins", "Inter", "Roboto", "Montserrat", "Open Sans", "Lato", "Playfair Display"],
+                "Animation Type": ["Fade In", "Hover Effects", "Scroll Reveal", "Parallax", "Smooth Transition", "Zoom Effect", "3D Motion"],
+                "Layout Style": ["Grid Layout", "Full Width", "Boxed Layout", "Split Screen", "One Page Scroll", "Masonry Layout", "Card Based"],
+                "Navigation Style": ["Top Navbar", "Sidebar", "Hamburger Menu", "Sticky Navbar", "Mega Menu", "Floating Menu", "Bottom Navigation"],
+                "Image Style": ["Real Photos", "Illustrations", "3D Graphics", "Icons Only", "Video Background", "Abstract Art", "Minimal Visuals"]
+            },
+            "Business Parameters": {
+                "Website Type": ["Business Website", "Portfolio Website", "E-commerce Store", "SaaS Website", "Blog Website", "Landing Page", "Booking Website"],
+                "Industry Type": ["Healthcare", "Education", "Finance", "Restaurant", "Real Estate", "Travel", "Startup"],
+                "Goal": ["Lead Generation", "Online Sales", "Branding", "Booking System", "Community Building", "Product Showcase", "Information Portal"]
+            },
+            "Features Required": {
+                "Top Features": [
+                "Admin Panel", "Payment Gateway", "SEO Setup", "Mobile Responsive",
+                "User Login / Signup", "Contact Form", "Live Chat",
+                "Analytics Dashboard", "Blog Module", "Search Bar",
+                "Booking System", "Customer Reviews & Ratings",
+                "WhatsApp Integration", "Multi-language Support",
+                "Security (SSL + Authentication)", "API Integration"
+                ]
+            }
+        };
+
+        // State
+        const state = {
+            step: 1,
+            selectedPages: new Set(),
+            customPagesCount: 0,
+            selectedFeatures: {} // { "Category": Set(["Feature 1"]) }
+        };
+
+        // Initialize State for Features
+        for (const mainCat in featureData) {
+            for (const subCat in featureData[mainCat]) {
+                state.selectedFeatures[`${mainCat} - ${subCat}`] = new Set();
+            }
+        }
+
+        // DOM Elements
+        const steps = [
+            document.getElementById('step-1'),
+            document.getElementById('step-2'),
+            document.getElementById('step-3')
+        ];
+        const indicators = [
+            document.getElementById('step-indicator-1'),
+            document.getElementById('step-indicator-2'),
+            document.getElementById('step-indicator-3')
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPages();
+            renderFeatures();
+            updateSummary();
+            
+            document.getElementById('custom-pages-input').addEventListener('input', (e) => {
+                state.customPagesCount = parseInt(e.target.value) || 0;
+                updateSummary();
+            });
+
+            if (window.lucide) lucide.createIcons();
+        });
+
+        // Navigation
+        window.nextStep = (step) => {
+            if (step > 3) return;
+            
+            // Exit animations
+            steps[state.step - 1].classList.remove('fade-enter');
+            steps[state.step - 1].classList.add('fade-exit');
+            
+            setTimeout(() => {
+                steps[state.step - 1].classList.add('hidden');
+                
+                // Update state
+                state.step = step;
+                
+                // Update indicators
+                indicators.forEach((ind, idx) => {
+                    if (idx < state.step - 1) {
+                        ind.classList.add('completed');
+                        ind.classList.remove('active');
+                    } else if (idx === state.step - 1) {
+                        ind.classList.add('active');
+                        ind.classList.remove('completed');
+                    } else {
+                        ind.classList.remove('active', 'completed');
+                    }
+                });
+
+                if (step === 3) renderReview();
+
+                // Enter animations
+                steps[state.step - 1].classList.remove('hidden', 'fade-exit');
+                steps[state.step - 1].classList.add('fade-enter');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        };
+
+        window.prevStep = (step) => {
+            if (step < 1) return;
+            
+            steps[state.step - 1].classList.remove('fade-enter');
+            steps[state.step - 1].classList.add('fade-exit');
+            
+            setTimeout(() => {
+                steps[state.step - 1].classList.add('hidden');
+                
+                state.step = step;
+                
+                indicators.forEach((ind, idx) => {
+                    if (idx < state.step - 1) {
+                        ind.classList.add('completed');
+                        ind.classList.remove('active');
+                    } else if (idx === state.step - 1) {
+                        ind.classList.add('active');
+                        ind.classList.remove('completed');
+                    } else {
+                        ind.classList.remove('active', 'completed');
+                    }
+                });
+
+                steps[state.step - 1].classList.remove('hidden', 'fade-exit');
+                steps[state.step - 1].classList.add('fade-enter');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        };
+
+        // Render Functions
+        function renderPages() {
+            const grid = document.getElementById('pages-grid');
+            grid.innerHTML = standardPages.map(page => `
+                <div class="selection-card page-card" data-page="${page}" onclick="togglePage('${page}')">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-sm tracking-wide">${page}</span>
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-gray-500 check-icon"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFeatures() {
+            const container = document.getElementById('features-container');
+            let html = '';
+
+            for (const mainCat in featureData) {
+                html += `<div class="feature-category-header"><h3 class="text-white font-black uppercase tracking-widest text-sm">${mainCat}</h3></div>`;
+                
+                for (const subCat in featureData[mainCat]) {
+                    html += `<div class="mb-6">
+                        <h4 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 pl-2">${subCat}</h4>
+                        <div class="flex flex-wrap gap-3 pl-2">`;
+                    
+                    featureData[mainCat][subCat].forEach(feature => {
+                        const key = `${mainCat} - ${subCat}`;
+                        html += `
+                            <button class="feature-chip px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm transition-all hover:bg-white/10 text-gray-300"
+                                onclick="toggleFeature(this, '${key}', '${feature}')">
+                                ${feature}
+                            </button>
+                        `;
+                    });
+                    
+                    html += `</div></div>`;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        window.togglePage = (pageName) => {
+            const card = document.querySelector(`.page-card[data-page="${pageName}"]`);
+            const icon = card.querySelector('.check-icon');
+            
+            if (state.selectedPages.has(pageName)) {
+                state.selectedPages.delete(pageName);
+                card.classList.remove('selected');
+                icon.classList.remove('text-orange-500');
+                icon.classList.add('text-gray-500');
+            } else {
+                state.selectedPages.add(pageName);
+                card.classList.add('selected');
+                icon.classList.remove('text-gray-500');
+                icon.classList.add('text-orange-500');
+            }
+            updateSummary();
+        };
+
+        window.toggleFeature = (btn, key, feature) => {
+            if (state.selectedFeatures[key].has(feature)) {
+                state.selectedFeatures[key].delete(feature);
+                btn.classList.remove('bg-orange-500/20', 'border-orange-500', 'text-orange-500');
+                btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-300');
+            } else {
+                state.selectedFeatures[key].add(feature);
+                btn.classList.add('bg-orange-500/20', 'border-orange-500', 'text-orange-500');
+                btn.classList.remove('bg-white/5', 'border-white/10', 'text-gray-300');
+            }
+            updateSummary();
+        };
+
+        function calculateTotal() {
+            let totalFeatures = 0;
+            for (const key in state.selectedFeatures) {
+                totalFeatures += state.selectedFeatures[key].size;
+            }
+
+            const pagesTotal = state.selectedPages.size * PRICE_PER_PAGE;
+            const customPagesTotal = state.customPagesCount * PRICE_PER_CUSTOM_PAGE;
+            const featuresTotal = totalFeatures * PRICE_PER_FEATURE;
+
+            return {
+                pagesTotal,
+                customPagesTotal,
+                featuresTotal,
+                totalFeatures,
+                grandTotal: BASE_PRICE + pagesTotal + customPagesTotal + featuresTotal
+            };
+        }
+
+        function updateSummary() {
+            const totals = calculateTotal();
+            
+            document.getElementById('summary-pages-count').textContent = state.selectedPages.size;
+            document.getElementById('summary-pages-price').textContent = `₹${totals.pagesTotal}`;
+            
+            document.getElementById('summary-custom-count').textContent = state.customPagesCount;
+            document.getElementById('summary-custom-price').textContent = `₹${totals.customPagesTotal}`;
+            
+            document.getElementById('summary-features-count').textContent = totals.totalFeatures;
+            document.getElementById('summary-features-price').textContent = `₹${totals.featuresTotal}`;
+            
+            document.getElementById('summary-total').textContent = `₹${totals.grandTotal}`;
+        }
+
+        function renderReview() {
+            const container = document.getElementById('review-content');
+            const totals = calculateTotal();
+
+            let pagesHtml = Array.from(state.selectedPages).map(p => `<span class="inline-block bg-white/10 px-2 py-1 rounded text-xs">${p}</span>`).join(' ');
+            if (pagesHtml === '') pagesHtml = '<span class="text-gray-500 italic text-sm">No standard pages selected.</span>';
+
+            let featuresHtml = '';
+            for (const key in state.selectedFeatures) {
+                if (state.selectedFeatures[key].size > 0) {
+                    featuresHtml += `<div class="mb-2"><strong class="text-xs text-orange-400 uppercase tracking-widest block mb-1">${key.split(' - ')[1] || key}</strong>`;
+                    featuresHtml += Array.from(state.selectedFeatures[key]).map(f => `<span class="inline-block bg-white/10 px-2 py-1 rounded text-xs mr-2 mb-2">${f}</span>`).join('');
+                    featuresHtml += `</div>`;
+                }
+            }
+            if (featuresHtml === '') featuresHtml = '<span class="text-gray-500 italic text-sm">No additional features selected.</span>';
+
+            container.innerHTML = `
+                <div>
+                    <h4 class="text-sm text-gray-400 uppercase tracking-widest mb-2 border-b border-white/10 pb-2">Selected Pages</h4>
+                    <div class="flex flex-wrap gap-2 mt-3">${pagesHtml}</div>
+                    <div class="mt-3 text-sm"><span class="text-orange-500 font-bold">${state.customPagesCount}</span> Custom Pages</div>
+                </div>
+                <div>
+                    <h4 class="text-sm text-gray-400 uppercase tracking-widest mb-2 border-b border-white/10 pb-2">Selected Features & Tech Stack</h4>
+                    <div class="mt-3">${featuresHtml}</div>
+                </div>
+                <div class="bg-black/50 p-4 rounded-xl border border-white/10 mt-6 flex justify-between items-center">
+                    <span class="font-bold uppercase tracking-widest text-gray-300">Total Build Cost</span>
+                    <span class="text-2xl font-black text-orange-500 font-mono">₹${totals.grandTotal}</span>
+                </div>
+            `;
+        }
+
+        window.addToCartAndCheckout = () => {
+            const totals = calculateTotal();
+            
+            // Build the dynamic product object
+            const customProduct = {
+                id: "custom-website-" + Date.now(),
+                name: "Custom Website Build",
+                price: totals.grandTotal,
+                image: "/public/images/space-bg.png",
+                category: "Services",
+                description: `A custom-built website with ${state.selectedPages.size} standard pages, ${state.customPagesCount} custom pages, and ${totals.totalFeatures} specialized features.`,
+                customization: {
+                    pages: Array.from(state.selectedPages),
+                    customPagesCount: state.customPagesCount,
+                    features: Object.fromEntries(
+                        Object.entries(state.selectedFeatures).map(([k, v]) => [k, Array.from(v)])
+                    )
+                }
+            };
+
+            // Use the global addToCart function from layout.js
+            if (window.addToCart) {
+                window.addToCart(customProduct);
+                window.location.href = 'cart.html';
+            } else {
+                console.error("Cart functionality not loaded");
+                alert("An error occurred. Please try again later.");
+            }
+        };
+    </script>
+</body>
+</html>

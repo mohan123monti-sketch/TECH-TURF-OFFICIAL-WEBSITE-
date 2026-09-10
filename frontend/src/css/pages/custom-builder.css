@@ -1,0 +1,204 @@
+/* --- TECH TURF CUSTOM BUILDER WIZARD STYLES --- */
+
+body {
+    background-color: #05080f;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+}
+
+.builder-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Wizard Steps Indicator */
+.wizard-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.wizard-steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 0;
+    transform: translateY(-50%);
+}
+
+.step-indicator {
+    position: relative;
+    z-index: 1;
+    background: #05080f;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.step-indicator.active {
+    color: #d2670e;
+}
+
+.step-indicator.completed {
+    color: #10b981;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.step-indicator.active .step-circle {
+    background: rgba(210, 103, 14, 0.2);
+    border-color: #d2670e;
+    box-shadow: 0 0 20px rgba(210, 103, 14, 0.3);
+}
+
+.step-indicator.completed .step-circle {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10b981;
+}
+
+/* Selection Cards */
+.selection-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.selection-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.selection-card.selected {
+    background: rgba(210, 103, 14, 0.1);
+    border-color: #d2670e;
+}
+
+.selection-card.selected::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 40px 40px 0;
+    border-color: transparent #d2670e transparent transparent;
+}
+
+/* Feature Category Header */
+.feature-category-header {
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+    border-left: 4px solid #d2670e;
+    padding: 1rem 1.5rem;
+    margin: 2rem 0 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+/* Summary Panel */
+.summary-panel {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 2rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #d2670e 0%, #b0550b 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 9999px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(210, 103, 14, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(210, 103, 14, 0.4);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-outline {
+    background: transparent;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 9999px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Animations */
+.fade-enter {
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.fade-exit {
+    animation: fadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}

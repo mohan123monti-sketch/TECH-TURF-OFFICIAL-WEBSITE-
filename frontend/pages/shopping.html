@@ -254,44 +254,30 @@
 <body data-page="Shop" class="shop-branding">
     <div id="header-container"></div>
 
-    <section class="product-section">
-        <div class="shop-container">
+    <!-- Hero Section -->
+    <section class="shop-hero py-16 lg:py-24 relative overflow-hidden bg-[#05080f]">
+        <div class="absolute inset-0 bg-gradient-to-b from-orange-500/10 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 relative z-10 text-center">
+            <span class="text-orange-500 font-mono tracking-widest text-xs uppercase block mb-4">Discover the Future</span>
+            <h1 class="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6">Tech Turf <span class="text-orange-500">Marketplace</span></h1>
+            <p class="text-gray-400 max-w-2xl mx-auto text-lg font-light mb-8">Explore high-end digital modules, aerospace components, and viral growth systems engineered for excellence.</p>
+            
+            <!-- Custom Website Builder CTA -->
+            <a href="custom-website-builder.html" class="inline-flex items-center justify-center gap-3 bg-gradient-to-r from-orange-600 to-orange-400 hover:from-orange-500 hover:to-orange-300 text-white px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm transition-all shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-1">
+                <i data-lucide="layout-template" class="w-5 h-5"></i>
+                Custom Website Builder
+            </a>
+        </div>
+    </section>
 
-            <div class="filters-shell mb-12">
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
-                    <div class="lg:col-span-3">
-                        <label class="block text-xs text-gray-400 uppercase tracking-widest mb-3">Search Products</label>
-                        <div class="relative">
-                            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                            <input id="search-input" type="text" placeholder="What are you looking for?"
-                                class="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white focus:bg-white/10 focus:border-orange-500/50 transition-all outline-none text-base">
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <label class="block text-xs text-gray-400 uppercase tracking-widest mb-3">All Categories</label>
-                        <button id="features-dropdown" class="features-dropdown-trigger h-[60px]" type="button">
-                            <span id="features-label">Explore All</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                        </button>
-                        <div id="features-menu" class="features-dropdown-menu">
-                            <div class="features-search-container">
-                                <input type="text" id="features-search" placeholder="Search features..." class="features-search-input">
-                            </div>
-                            <div id="features-list">
-                                <!-- Categories will be injected here -->
-                            </div>
-                            <div class="dropdown-footer">
-                                <button id="apply-features-btn" class="w-full py-3 bg-orange-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-900/20">
-                                    Apply Category Filter
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+    <section class="product-section py-8 relative z-10">
+        <div class="shop-container max-w-[1600px] mx-auto px-4 flex flex-col lg:flex-row gap-10">
+            
+            <!-- Main Content -->
+            <main class="flex-1 min-w-0">
+                <div class="mb-10">
+                    <div id="selected-features-chips" class="features-chips-container mt-6 flex flex-wrap gap-3"></div>
                 </div>
-
-                <div id="selected-features-chips" class="features-chips-container mt-6"></div>
-            </div>
-            </div>
 
             <div id="products-grid" class="product-grid"></div>
 
@@ -304,18 +290,24 @@
                 </div>
                 <div id="recent-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
+            </main>
         </div>
     </section>
 
-    <div id="compare-bar" class="hidden fixed bottom-24 right-6 z-[120] bg-black/70 border border-white/15 rounded-2xl px-4 py-3 backdrop-blur-xl flex items-center gap-3">
-        <span id="compare-count" class="text-xs text-white/80 uppercase tracking-widest">Compare (0)</span>
-        <button id="compare-go" class="px-3 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold uppercase tracking-wide disabled:opacity-40">Open Compare</button>
+    <div id="compare-bar" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[120] bg-black/60 border border-white/20 rounded-full px-4 py-3 backdrop-blur-2xl flex items-center gap-4 shadow-2xl shadow-orange-500/20 transform transition-all hover:scale-105">
+        <div class="flex items-center gap-3">
+            <div id="compare-thumbnails" class="flex -space-x-3"></div>
+            <span id="compare-count" class="text-xs text-white uppercase tracking-widest font-bold ml-2">Compare (0)</span>
+        </div>
+        <div class="h-6 w-px bg-white/20"></div>
+        <button id="compare-go" class="px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-black uppercase tracking-widest disabled:opacity-50 disabled:from-gray-600 disabled:to-gray-700 transition-all shadow-lg hover:shadow-orange-500/50">Compare Now</button>
     </div>
 
     <div id="footer-container"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+
             const productsGrid = document.getElementById('products-grid');
             const productCount = document.getElementById('product-count');
             const searchInput = document.getElementById('search-input');
@@ -327,6 +319,28 @@
 
             if (productCount) productCount.textContent = 'Loading Inventory...';
 
+            // Skeleton loaders
+            const renderSkeletons = () => {
+                if (!productsGrid) return;
+                productsGrid.innerHTML = Array(6).fill(0).map(() => `
+                    <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden animate-pulse">
+                        <div class="aspect-square bg-white/5"></div>
+                        <div class="p-5">
+                            <div class="h-4 bg-white/10 rounded w-1/3 mb-4"></div>
+                            <div class="h-6 bg-white/10 rounded w-3/4 mb-3"></div>
+                            <div class="h-3 bg-white/10 rounded w-full mb-2"></div>
+                            <div class="h-3 bg-white/10 rounded w-5/6 mb-6"></div>
+                            <div class="flex justify-between">
+                                <div class="h-8 bg-white/10 rounded w-1/3"></div>
+                                <div class="h-8 bg-white/10 rounded w-1/4"></div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            };
+            renderSkeletons();
+
+
             const state = {
                 products: [],
                 filtered: [],
@@ -334,206 +348,11 @@
                 itemsPerPage: 100, // Show all products since pagination is removed
                 search: '',
                 category: 'all',
-                selectedFeatures: new Set(),
                 wishlist: new Set((window.getWishlistIds ? window.getWishlistIds() : []).map(String)),
                 compare: new Set((window.getCompareIds ? window.getCompareIds() : []).map(String)),
             };
 
-            const featureData = {
-                "Technical Parameters": {
-                    "Frontend Framework": ["React.js", "Next.js", "Angular", "HTML/CSS/JS", "Tailwind CSS"],
-                    "Backend Framework": ["Node.js", "Express.js", "Django", "Flask", "Spring Boot", "ASP.NET"],
-                    "Programming Language": ["JavaScript", "TypeScript", "Python", "C++", "Java", "C#", "Go"],
-                    "Database": ["MongoDB", "MySQL", "PostgreSQL", "Firebase", "SQLite", "Supabase", "MariaDB"],
-                    "AI Features": ["Chatbot", "AI Search", "Recommendation Engine", "Content Generator", "Voice Assistant", "OCR Scanner", "Automation Bot"],
-                    "Authentication": ["Email Login", "Google Login", "OTP Login", "Facebook Login", "Role Based Login", "Admin Login", "Two-Factor Auth"],
-                    "Hosting": ["Vercel", "Netlify", "AWS", "DigitalOcean", "Hostinger", "Shared Hosting", "VPS Hosting"]
-                },
-                "Non-Technical Parameters": {
-                    "Theme Style": ["Minimal", "Corporate", "Luxury", "Dark Mode", "Modern Startup", "Creative", "Elegant"],
-                    "Color Preference": ["Blue", "Black", "White", "Gradient", "Green", "Purple", "Custom Brand Color"],
-                    "Fonts": ["Poppins", "Inter", "Roboto", "Montserrat", "Open Sans", "Lato", "Playfair Display"],
-                    "Animation Type": ["Fade In", "Hover Effects", "Scroll Reveal", "Parallax", "Smooth Transition", "Zoom Effect", "3D Motion"],
-                    "Layout Style": ["Grid Layout", "Full Width", "Boxed Layout", "Split Screen", "One Page Scroll", "Masonry Layout", "Card Based"],
-                    "Navigation Style": ["Top Navbar", "Sidebar", "Hamburger Menu", "Sticky Navbar", "Mega Menu", "Floating Menu", "Bottom Navigation"],
-                    "Image Style": ["Real Photos", "Illustrations", "3D Graphics", "Icons Only", "Video Background", "Abstract Art", "Minimal Visuals"]
-                },
-                "Business Parameters": {
-                    "Website Type": ["Business Website", "Portfolio Website", "E-commerce Store", "SaaS Website", "Blog Website", "Landing Page", "Booking Website"],
-                    "Industry Type": ["Healthcare", "Education", "Finance", "Restaurant", "Real Estate", "Travel", "Startup"],
-                    "Goal": ["Lead Generation", "Online Sales", "Branding", "Booking System", "Community Building", "Product Showcase", "Information Portal"]
-                },
-                "Features Required": {
-                    "Top Features": [
-                    "Admin Panel", "Payment Gateway", "SEO Setup", "Mobile Responsive",
-                    "User Login / Signup", "Contact Form", "Live Chat",
-                    "Analytics Dashboard", "Blog Module", "Search Bar",
-                    "Booking System", "Customer Reviews & Ratings",
-                    "WhatsApp Integration", "Multi-language Support",
-                    "Security (SSL + Authentication)", "API Integration"
-                    ]
-                }
-            };
 
-            const featuresDropdown = document.getElementById('features-dropdown');
-            const featuresMenu = document.getElementById('features-menu');
-            const featuresList = document.getElementById('features-list');
-            const featuresSearch = document.getElementById('features-search');
-            const selectedFeaturesChips = document.getElementById('selected-features-chips');
-            const featuresLabel = document.getElementById('features-label');
-            const applyFeaturesBtn = document.getElementById('apply-features-btn');
-
-            console.log('Filter system initializing...');
-
-            const initFeaturesDropdown = () => {
-                if (!featuresList) {
-                    console.error('featuresList element not found!');
-                    return;
-                }
-                
-                featuresList.innerHTML = Object.entries(featureData).map(([section, categories], sectionIdx) => `
-                    <div class="category-accordion" data-section="${section}">
-                        <button type="button" class="accordion-trigger">
-                            <h2>${section}</h2>
-                            <i data-lucide="chevron-down" class="chevron w-4 h-4 text-orange-500 transition-transform"></i>
-                        </button>
-                        <div class="accordion-content ${sectionIdx === 0 ? 'active' : ''}">
-                            ${Object.entries(categories).map(([category, items]) => `
-                                <div class="subcategory-group">
-                                    <div class="subcategory-header">
-                                        <span class="subcategory-title">${category}</span>
-                                        <span class="select-all-btn" data-category="${category}">Select All</span>
-                                    </div>
-                                    <div class="options-grid">
-                                        ${items.map(item => `
-                                            <label class="option-label" data-item-text="${item.toLowerCase()}">
-                                                <input type="checkbox" value="${item}" class="feature-checkbox" ${state.selectedFeatures.has(item) ? 'checked' : ''}>
-                                                <span>${item}</span>
-                                            </label>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('');
-
-                if (window.lucide) lucide.createIcons();
-
-                // Event Delegation for Accordions and Select All
-                featuresList.addEventListener('click', (e) => {
-                    const trigger = e.target.closest('.accordion-trigger');
-                    if (trigger) {
-                        const content = trigger.nextElementSibling;
-                        const isActive = content.classList.toggle('active');
-                        const chevron = trigger.querySelector('.chevron');
-                        if (chevron) chevron.style.transform = isActive ? 'rotate(180deg)' : 'rotate(0deg)';
-                        return;
-                    }
-
-                    const selectAllBtn = e.target.closest('.select-all-btn');
-                    if (selectAllBtn) {
-                        const group = selectAllBtn.closest('.subcategory-group');
-                        const checkboxes = group.querySelectorAll('.feature-checkbox');
-                        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-                        
-                        checkboxes.forEach(cb => {
-                            cb.checked = !allChecked;
-                            handleFeatureToggle(cb.value, cb.checked);
-                        });
-                        renderFeatureChips();
-                    }
-                });
-
-                // Checkbox change
-                featuresList.addEventListener('change', (e) => {
-                    if (e.target.classList.contains('feature-checkbox')) {
-                        handleFeatureToggle(e.target.value, e.target.checked);
-                        renderFeatureChips();
-                    }
-                });
-
-                // Search logic
-                featuresSearch.addEventListener('input', () => {
-                    const term = featuresSearch.value.toLowerCase();
-                    const groups = featuresList.querySelectorAll('.subcategory-group');
-                    
-                    groups.forEach(group => {
-                        let hasVisibleItems = false;
-                        const labels = group.querySelectorAll('.option-label');
-                        labels.forEach(label => {
-                            const isVisible = label.dataset.itemText.includes(term);
-                            label.style.display = isVisible ? 'flex' : 'none';
-                            if (isVisible) hasVisibleItems = true;
-                        });
-                        group.style.display = hasVisibleItems ? 'block' : 'none';
-                    });
-
-                    featuresList.querySelectorAll('.category-accordion').forEach(accordion => {
-                        const visibleGroups = accordion.querySelectorAll('.subcategory-group:not([style*="display: none"])');
-                        accordion.style.display = visibleGroups.length > 0 ? 'block' : 'none';
-                    });
-                });
-                
-                // clearFeaturesBtn was removed from UI
-
-                applyFeaturesBtn.addEventListener('click', () => {
-                    handleFilterChange();
-                    featuresDropdown.classList.remove('active');
-                    featuresMenu.classList.remove('active');
-                });
-
-                console.log('Filter system initialized successfully.');
-            };
-
-            const handleFeatureToggle = (feature, isChecked) => {
-                if (isChecked) state.selectedFeatures.add(feature);
-                else state.selectedFeatures.delete(feature);
-                featuresList.querySelectorAll(`.feature-checkbox[value="${feature}"]`).forEach(cb => cb.checked = isChecked);
-            };
-
-            const renderFeatureChips = () => {
-                const count = state.selectedFeatures.size;
-                featuresLabel.textContent = count > 0 ? `${count} Selected` : 'All Categories';
-                
-                selectedFeaturesChips.innerHTML = Array.from(state.selectedFeatures).map(feat => `
-                    <div class="feature-tag bg-orange-500/10 border border-orange-500/30 text-orange-400 px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-2 cursor-pointer hover:bg-orange-500/20 transition-all" data-feature="${feat}">
-                        ${feat} <i data-lucide="x" class="w-3 h-3"></i>
-                    </div>
-                `).join('');
-                
-                if (window.lucide) lucide.createIcons();
-
-                selectedFeaturesChips.querySelectorAll('.feature-tag').forEach(tag => {
-                    tag.addEventListener('click', () => {
-                        const feat = tag.dataset.feature;
-                        handleFeatureToggle(feat, false);
-                        renderFeatureChips();
-                        handleFilterChange();
-                    });
-                });
-            };
-
-            // Dropdown Toggle
-            if (featuresDropdown) {
-                featuresDropdown.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    console.log('Dropdown trigger clicked');
-                    const isActive = featuresDropdown.classList.toggle('active');
-                    featuresMenu.classList.toggle('active', isActive);
-                });
-            } else {
-                console.error('featuresDropdown trigger not found!');
-            }
-
-            document.addEventListener('click', (e) => {
-                if (featuresDropdown && featuresMenu && !featuresDropdown.contains(e.target) && !featuresMenu.contains(e.target)) {
-                    featuresDropdown.classList.remove('active');
-                    featuresMenu.classList.remove('active');
-                }
-            });
-
-            initFeaturesDropdown();
 
             const productMap = new Map();
 
@@ -579,52 +398,52 @@
                     : (product.imageUrl || (product.images && product.images[0]) || product.image_url || product.image || '/public/images/space-bg.png');
 
                 return `
-                <div class="product-card group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-[#d2670e]/50 transition-all duration-300" data-category="${product.branch || product.category || 'Tech Turf'}" data-product-id="${productId || ''}">
-                    <div class="absolute top-3 right-3 flex gap-2">
-                        <button class="compare-btn w-10 h-10 rounded-full border ${compareClass} bg-black/40 backdrop-blur flex items-center justify-center transition-all" data-product-id="${productId || ''}" aria-label="Toggle compare">
-                            <i data-lucide="columns" class="w-4 h-4"></i>
-                        </button>
-                        <button class="wishlist-btn w-10 h-10 rounded-full border ${wishlistClass} bg-black/40 backdrop-blur flex items-center justify-center transition-all" data-product-id="${productId || ''}" aria-label="Toggle wishlist">
-                            <i data-lucide="heart" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                    <div class="aspect-square bg-black/20 relative overflow-hidden">
-                        <img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-6">
-                            <button
-                                ${stockCount > 0 ? '' : 'disabled'}
-                                class="add-to-cart-btn ${stockCount > 0 ? 'bg-[#d2670e] hover:bg-[#b0550b] cursor-pointer' : 'bg-white/10 text-white/40 cursor-not-allowed'} text-white px-6 py-3 rounded-full font-bold uppercase text-xs tracking-widest transition-colors w-full"
-                                data-product-id="${productId || ''}">
-                                ${stockCount > 0 ? 'Add to Cart' : 'Out of Stock'}
+                <div class="product-card group relative bg-black/40 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/20 hover:-translate-y-1 transition-all duration-300" data-category="${product.branch || product.category || 'Tech Turf'}" data-product-id="${productId || ''}">
+                    <!-- Card Background Glow -->
+                    <div class="absolute -inset-0.5 bg-gradient-to-br from-orange-500/0 via-transparent to-blue-500/0 group-hover:from-orange-500/20 group-hover:to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl z-0 pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="absolute top-3 right-3 flex flex-col gap-2 z-20 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                            <button class="wishlist-btn w-10 h-10 rounded-full border ${wishlistClass} bg-black/60 backdrop-blur-md flex items-center justify-center hover:bg-black/80 hover:scale-110 transition-all" data-product-id="${productId || ''}" aria-label="Toggle wishlist">
+                                <i data-lucide="heart" class="w-4 h-4"></i>
+                            </button>
+                            <button class="compare-btn w-10 h-10 rounded-full border ${compareClass} bg-black/60 backdrop-blur-md flex items-center justify-center hover:bg-black/80 hover:scale-110 transition-all" data-product-id="${productId || ''}" aria-label="Toggle compare">
+                                <i data-lucide="columns" class="w-4 h-4"></i>
                             </button>
                         </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-white font-bold text-lg leading-tight group-hover:text-[#d2670e] transition-colors">${product.name}</h3>
-                            <span class="text-[#d2670e] font-mono font-bold">₹${product.price}</span>
+                        <div class="aspect-square bg-black/40 relative overflow-hidden">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-transform duration-700 ease-out">
+                            
+                            <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black via-black/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+                                <button
+                                    ${stockCount > 0 ? '' : 'disabled'}
+                                    class="add-to-cart-btn ${stockCount > 0 ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white cursor-pointer shadow-lg shadow-orange-500/30' : 'bg-white/10 text-white/40 cursor-not-allowed'} w-full py-3 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all"
+                                    data-product-id="${productId || ''}">
+                                    ${stockCount > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                </button>
+                            </div>
                         </div>
-                        <p class="text-gray-400 text-sm line-clamp-2 mb-4">${product.description}</p>
-                        <div class="flex items-center gap-2 text-xs text-gray-500 font-mono mb-2">
-                            <span class="w-2 h-2 rounded-full ${stockCount > 0 ? 'bg-green-500' : 'bg-red-500'}"></span>
-                            ${stockCount > 0 ? `In Stock (${stockCount})` : 'Out of Stock'}
-                        </div>
-                        <div class="flex items-center justify-between text-xs text-white/50 uppercase tracking-widest mb-3">
-                            <span>ETA ${Number(product.deliveryEtaDays || 3)}d</span>
-                            <span>${product.brand || 'Tech Turf'}</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs mb-4">
-                            <span class="text-yellow-400">${renderStars(product.ratingAvg || 0)}</span>
-                            <span class="text-white/40">${Number(product.ratingCount || 0)} reviews</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <input type="number" min="1" value="1" ${stockCount > 0 ? '' : 'disabled'}
-                                class="qty-input w-20 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:bg-white/10 outline-none"
-                                data-product-id="${productId || ''}">
-                            <button class="quick-add-btn flex-1 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest ${stockCount > 0 ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-white/5 text-white/30 cursor-not-allowed'}"
-                                ${stockCount > 0 ? '' : 'disabled'} data-product-id="${productId || ''}">
-                                Quick Add
-                            </button>
+                        <div class="p-5">
+                            <div class="flex items-center justify-between text-[10px] text-white/50 uppercase tracking-widest mb-2">
+                                <span class="bg-white/10 px-2 py-1 rounded border border-white/5">${product.brand || 'Tech Turf'}</span>
+                                <span class="flex items-center gap-1 text-yellow-400"><i data-lucide="star" class="w-3 h-3 fill-current"></i> ${Number(product.ratingAvg || 0).toFixed(1)}</span>
+                            </div>
+                            <h3 class="text-white font-bold text-base leading-tight group-hover:text-orange-400 transition-colors mb-1 line-clamp-1" title="${product.name}">${product.name}</h3>
+                            <p class="text-gray-400 text-xs line-clamp-2 mb-4 min-h-[32px]">${product.description}</p>
+                            
+                            <div class="flex items-end justify-between mt-auto">
+                                <div>
+                                    <div class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Price</div>
+                                    <div class="text-white font-mono font-bold text-lg">₹${product.price}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="flex items-center justify-end gap-1.5 text-[10px] uppercase tracking-widest ${stockCount > 0 ? 'text-emerald-400' : 'text-red-400'} mb-1">
+                                        <div class="w-1.5 h-1.5 rounded-full ${stockCount > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}"></div>
+                                        ${stockCount > 0 ? 'In Stock' : 'Out of Stock'}
+                                    </div>
+                                    <div class="text-[9px] text-gray-500 uppercase tracking-widest">ETA ${Number(product.deliveryEtaDays || 3)} Days</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -637,14 +456,31 @@
 
             const updateCompareBar = () => {
                 const count = state.compare.size;
+                const compareBar = document.getElementById('compare-bar');
+                const compareCount = document.getElementById('compare-count');
+                const compareGo = document.getElementById('compare-go');
+                const compareThumbnails = document.getElementById('compare-thumbnails');
+
                 if (count === 0) {
                     compareBar.classList.add('hidden');
                 } else {
                     compareBar.classList.remove('hidden');
+                    
+                    // Render thumbnails
+                    compareThumbnails.innerHTML = Array.from(state.compare).slice(0, 3).map(id => {
+                        const product = productMap.get(id);
+                        if (!product) return '';
+                        const imageUrl = window.normalizeProductImageUrl
+                            ? window.normalizeProductImageUrl(product.imageUrl || (product.images && product.images[0]) || product.image_url || product.image)
+                            : (product.imageUrl || (product.images && product.images[0]) || product.image_url || product.image || '/public/images/space-bg.png');
+                        return `<img src="${imageUrl}" class="w-8 h-8 rounded-full border-2 border-black object-cover bg-black shadow-sm" alt="Compare item">`;
+                    }).join('') + (count > 3 ? `<div class="w-8 h-8 rounded-full border-2 border-black bg-gray-800 flex items-center justify-center text-[10px] text-white shadow-sm">+${count - 3}</div>` : '');
                 }
                 compareCount.textContent = `Compare (${count})`;
-                compareGo.disabled = count < 2;
-                compareGo.classList.toggle('cursor-not-allowed', count < 2);
+                if (compareGo) {
+                    compareGo.disabled = count < 2;
+                    compareGo.classList.toggle('cursor-not-allowed', count < 2);
+                }
             };
 
             const applyFilters = () => {
@@ -658,16 +494,7 @@
                     const category = product.branch || product.category || 'Tech Turf';
                     const matchesCategory = state.category === 'all' || category === state.category;
 
-                    const matchesFeatures = state.selectedFeatures.size === 0 || Array.from(state.selectedFeatures).every(feat => {
-                        const productFeatures = product.features || [];
-                        const productSpecs = product.specifications || {};
-                        const searchString = JSON.stringify(product).toLowerCase();
-                        return productFeatures.includes(feat) || 
-                               Object.values(productSpecs).includes(feat) || 
-                               searchString.includes(feat.toLowerCase());
-                    });
-
-                    return matchesSearch && matchesCategory && matchesFeatures;
+                    return matchesSearch && matchesCategory;
                 });
             };
 
@@ -819,7 +646,7 @@
             };
 
             const handleFilterChange = async () => {
-                state.search = searchInput.value || '';
+                state.search = searchInput ? searchInput.value || '' : '';
                 state.currentPage = 1;
                 
                 // Optional: Re-fetch from server if you want server-side filtering
@@ -831,7 +658,7 @@
 
             const debouncedFilterChange = debounce(handleFilterChange, 300);
 
-            searchInput.addEventListener('input', debouncedFilterChange);
+            if (searchInput) searchInput.addEventListener('input', debouncedFilterChange);
 
             if (window.addEventListener) {
                 window.addEventListener('wishlistUpdated', () => {

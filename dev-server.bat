@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
-set "BACKEND_PORT=5000"
+set "BACKEND_PORT=5001"
 set "FRONTEND_PORT=3601"
 set "ROOT=%~dp0"
 
@@ -40,7 +40,7 @@ echo Stopping Tech Turf services...
 set "FOUND="
 set "SEEN=;"
 
-REM Stop backend (port 5000)
+REM Stop backend (port 5001)
 for /f "tokens=5" %%P in ('netstat -ano ^| findstr /R /C:":%BACKEND_PORT% .*LISTENING"') do (
     if "!SEEN:;%%P;=!"=="!SEEN!" (
         set "SEEN=!SEEN!%%P;"

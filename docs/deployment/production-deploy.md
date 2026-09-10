@@ -68,9 +68,9 @@ From repo root:
   $env:NODE_ENV='production'; $env:SERVE_FRONTEND='true'; npm start --prefix backend
 
 3. Verify:
-- http://localhost:5000/ (frontend page)
-- http://localhost:5000/health
-- http://localhost:5000/api/blog
+- http://localhost:5001/ (frontend page)
+- http://localhost:5001/health
+- http://localhost:5001/api/blog
 
 ## PM2 Deployment (VPS)
 
